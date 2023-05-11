@@ -90,7 +90,7 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select unique_health_id,member_name from family_member_master M inner join family_master F on F.family_id=M.family_id  " + Pass + " group by unique_health_id,member_name";
+            cmd.CommandText = "select unique_health_id,member_name,gender,date_part('year',age(birth_date)) age,pds_smart_card_id,mobile_number from family_member_master M inner join family_master F on F.family_id=M.family_id  " + Pass + " group by unique_health_id,member_name,gender,age,pds_smart_card_id,mobile_number";
             con.Open();
             NpgsqlDataReader dr = cmd.ExecuteReader();
             while (dr.Read())
@@ -98,6 +98,12 @@ namespace PHRLockerAPI.Controllers
                 var SList = new SyncPHRIDModel();
                 SList.member_name = dr["member_name"].ToString();
                 SList.unique_health_id = dr["unique_health_id"].ToString();
+                SList.age = dr["age"].ToString();
+                SList.gender = dr["gender"].ToString();
+                SList.rationcard = dr["pds_smart_card_id"].ToString();
+                SList.mobilenumber = dr["mobile_number"].ToString();
+
+
                 RList.Add(SList);
             }
 
