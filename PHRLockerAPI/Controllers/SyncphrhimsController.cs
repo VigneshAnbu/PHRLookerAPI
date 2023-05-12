@@ -86,6 +86,10 @@ namespace PHRLockerAPI.Controllers
             {
                 Pass = "where (M.mobile_number='" + Param + "')";
             }
+            else if (Type == "P")
+            {
+                Pass = "where (M.unique_health_id='" + Param + "')";
+            }
 
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
