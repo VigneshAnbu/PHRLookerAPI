@@ -10,6 +10,8 @@
 
         public string dob { get; set; }
 
+        public string villagename { get; set; }
+
         public string street_name { get; set; }
 
         public string block_name { get; set; }

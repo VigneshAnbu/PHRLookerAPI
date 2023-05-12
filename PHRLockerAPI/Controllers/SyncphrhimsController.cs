@@ -199,7 +199,7 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdUpdate = new NpgsqlCommand();
             cmdUpdate.Connection = con;
             cmdUpdate.CommandType = CommandType.Text;
-            cmdUpdate.CommandText = "insert into family_member_tempnew(member_name,gender,mobile_number,dob,street_name,block_name,district_name,himsid)values('" + U.member_name + "','" + U.gender + "','" + U.mobile_number + "','" + U.dob + "','" + U.street_name + "','" + U.block_name + "','" + U.district_name + "','" + U.himsid + "')";
+            cmdUpdate.CommandText = "insert into family_member_tempnew(member_name,gender,mobile_number,dob,street_name,block_name,district_name,himsid,villagename)values('" + U.member_name + "','" + U.gender + "','" + U.mobile_number + "','" + U.dob + "','" + U.street_name + "','" + U.block_name + "','" + U.district_name + "','" + U.himsid + "','" + U.villagename + "')";
             NpgsqlDataReader drUpdate = cmdUpdate.ExecuteReader();
 
             con.Close();
@@ -374,6 +374,7 @@ namespace PHRLockerAPI.Controllers
                 SList.block_name = dr["block_name"].ToString();
                 SList.district_name = dr["district_name"].ToString();
                 SList.himsid = dr["himsid"].ToString();
+                SList.villagename = dr["villagename"].ToString();
 
                 RList.Add(SList);
             }
