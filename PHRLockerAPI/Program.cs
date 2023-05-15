@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using PHRLockerAPI;
+using PHRLockerAPI.DBContext;
 using PHRLockerAPI.Intfa;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,7 +19,7 @@ builder.Services.AddResponseCaching();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<Ismsgateway,quikeberry>();
-
+builder.Services.AddSingleton<DapperContext>();
 
 builder.Services.AddAuthentication(options =>
 {

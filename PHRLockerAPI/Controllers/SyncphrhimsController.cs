@@ -288,7 +288,7 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select screening_values->>'bmi' bmi,screening_values->>'breathe_difficulty' breathe_difficulty,screening_values->>'chestpain' chestpain,screening_values->>'dia_bp' dia_bp,screening_values->>'dim_vision' dim_vision,screening_values->>'dizziness' dizziness,screening_values->>'dm_risk_score' dm_risk_score,screening_values->>'dm_screening' dm_screening,screening_values->>'fatigue' fatigue,screening_values->>'freq_urine' freq_urine,screening_values->>'height' height,screening_values->>'hip_circumference' hip_circumference,screening_values->>'ht_screening' ht_screening,screening_values->>'nota_diabetes' nota_diabetes,screening_values->>'nota_htn' nota_htn,screening_values->>'palpitation' palpitation,screening_values->>'pulse_rate' pulse_rate,screening_values->>'rbs' rbs,screening_values->>'rbs_date' rbs_date,screening_values->>'rr' rr,screening_values->>'spo2' spo2,screening_values->>'sys_bp' sys_bp,screening_values->>'temp' tempr,screening_values->>'thirsty' thirsty,screening_values->>'waist_circumference' waist_circumference,screening_values->>'waist_hip_ratio' waist_hip_ratio,screening_values->>'weight' weight from health_Screening S inner join family_member_master M on M.member_id=S.member_id where M.unique_health_id='" + PHRID + "'";
+            cmd.CommandText = "select JSONB_ARRAY_ELEMENTS(S.UPDATE_REGISTER)->> 'timestamp' as date,screening_values->>'bmi' bmi,screening_values->>'breathe_difficulty' breathe_difficulty,screening_values->>'chestpain' chestpain,screening_values->>'dia_bp' dia_bp,screening_values->>'dim_vision' dim_vision,screening_values->>'dizziness' dizziness,screening_values->>'dm_risk_score' dm_risk_score,screening_values->>'dm_screening' dm_screening,screening_values->>'fatigue' fatigue,screening_values->>'freq_urine' freq_urine,screening_values->>'height' height,screening_values->>'hip_circumference' hip_circumference,screening_values->>'ht_screening' ht_screening,screening_values->>'nota_diabetes' nota_diabetes,screening_values->>'nota_htn' nota_htn,screening_values->>'palpitation' palpitation,screening_values->>'pulse_rate' pulse_rate,screening_values->>'rbs' rbs,screening_values->>'rbs_date' rbs_date,screening_values->>'rr' rr,screening_values->>'spo2' spo2,screening_values->>'sys_bp' sys_bp,screening_values->>'temp' tempr,screening_values->>'thirsty' thirsty,screening_values->>'waist_circumference' waist_circumference,screening_values->>'waist_hip_ratio' waist_hip_ratio,screening_values->>'weight' weight from health_Screening S inner join family_member_master M on M.member_id=S.member_id where M.unique_health_id='" + PHRID + "'";
 
             con.Open();
             NpgsqlDataReader dr = cmd.ExecuteReader();
@@ -326,6 +326,8 @@ namespace PHRLockerAPI.Controllers
                 SList.waist_circumference = dr["waist_circumference"].ToString();
                 SList.waist_hip_ratio = dr["waist_hip_ratio"].ToString();
                 SList.weight = dr["weight"].ToString();
+                SList.screeningdate= dr["date"].ToString();
+
 
                 RList.Add(SList);
             }
