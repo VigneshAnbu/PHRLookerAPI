@@ -326,7 +326,7 @@ namespace PHRLockerAPI.Controllers
                 SList.waist_circumference = dr["waist_circumference"].ToString();
                 SList.waist_hip_ratio = dr["waist_hip_ratio"].ToString();
                 SList.weight = dr["weight"].ToString();
-                SList.screeningdate= dr["date"].ToString();
+                SList.screeningdate = dr["date"].ToString();
 
 
                 RList.Add(SList);
@@ -341,18 +341,17 @@ namespace PHRLockerAPI.Controllers
         [Authorize]
         [HttpPost]
         [Route("SyncGetHIMSNewUserList")]
-        public List<NewUserModel> GetHIMSNewUserList()
+        public List<NewUserModel> GetHIMSNewUserList(string facility_id)
         {
             ResponseModel R = new ResponseModel();
 
             List<NewUserModel> RList = new List<NewUserModel>();
+            string Param = "";
 
-            //checkingipaddress();
-
-            //if (Check != 1)
-            //{
-            //    return RList;
-            //}
+            if (facility_id != null)
+            {
+                Param = "where facility_id='" + facility_id + "'";
+            }
 
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
@@ -360,7 +359,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select * from family_member_tempnew";
+            //cmd.CommandText = "select * from family_member_tempnew";
+
+            cmd.CommandText = "select F.member_temp_id,F.member_name,F.mobile_number,F.gender,F.mobile_number,F.dob,F.street_name,F.block_name,F.district_name,F.himsid,F.villagename from family_member_tempnew F inner join address_village_master V on V.village_name=F.villagename inner join address_block_master b on b.block_name=F.block_name inner join address_district_master d on d.district_name=F.district_name inner join address_street_master st on st.village_id=V.village_id  " + Param + "  group by F.member_temp_id,F.member_name,F.mobile_number,F.gender,F.mobile_number,F.dob,F.street_name,F.block_name,F.district_name,F.himsid,F.villagename";
 
             con.Open();
             NpgsqlDataReader dr = cmd.ExecuteReader();
