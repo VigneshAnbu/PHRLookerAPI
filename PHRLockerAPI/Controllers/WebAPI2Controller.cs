@@ -1,9 +1,11 @@
-﻿using Dapper;
+﻿//using Dapper;
+using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
 using PHRLockerAPI.DBContext;
+//using PHRLockerAPI.DBContext;
 using PHRLockerAPI.Intfa;
 using PHRLockerAPI.Models;
 using PHRLockerAPI.ViewModel;
@@ -39,9 +41,10 @@ namespace PHRLockerAPI.Controllers
         //    _ismsgateway = ismsgateway;
         //}
 
+
         [HttpGet]
-        [Route("FilterAll")]
-        public void Filterforall(FilterpayloadModel F)
+        [Route("FilterAlldapper")]
+        public void Filterforalldapper(FilterpayloadModel F)
         {
 
 
@@ -396,12 +399,369 @@ namespace PHRLockerAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("FilterAll")]
+        public void Filterforall(FilterpayloadModel F)
+        {
+
+
+            if (F.district_id != "")
+            {
+                string Disparam = "";
+
+                if (F.district_id.Contains(","))
+                {
+                    string[] DistrictValue = F.district_id.Split(",");
+
+                    int i = 0;
+
+                    foreach (var v in DistrictValue)
+                    {
+                        if (i == (DistrictValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.district_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.district_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and" + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.district_id = '" + F.district_id + "')";
+                }
+
+
+                CommunityParam = Disparam;
+
+            }
+            if (F.hud_id != "")
+            {
+
+
+                string Disparam = "";
+
+                if (F.hud_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] HudValue = F.hud_id.Split(",");
+
+                    foreach (var v in HudValue)
+                    {
+                        if (i == (HudValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.hud_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.hud_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.hud_id = '" + F.hud_id + "')";
+                }
+
+
+                CommunityParam = CommunityParam + Disparam;
+            }
+            if (F.block_id != "")
+            {
+                string Disparam = "";
+
+                if (F.block_id.Contains(","))
+                {
+                    int i = 0;
+                    string[] BlockValue = F.block_id.Split(",");
+
+                    foreach (var v in BlockValue)
+                    {
+                        if (i == (BlockValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.block_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.block_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.block_id = '" + F.block_id + "')";
+                }
+
+                CommunityParam = CommunityParam + Disparam;
+
+            }
+            if (F.facility_id != "")
+            {
+                string Disparam = "";
+
+                if (F.facility_id.Contains(","))
+                {
+
+                    int i = 0;
+
+                    string[] FacilityValue = F.facility_id.Split(",");
+
+                    foreach (var v in FacilityValue)
+                    {
+                        if (i == (FacilityValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.facility_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.facility_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.facility_id = '" + F.facility_id + "')";
+                }
+
+
+
+                CommunityParam = CommunityParam + Disparam;
+            }
+            if (F.indistrict_id != "")
+            {
+                string Disparam = "";
+
+                if (F.indistrict_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] indistrictValue = F.indistrict_id.Split(",");
+
+                    foreach (var v in indistrictValue)
+                    {
+                        if (i == (indistrictValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.district_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.district_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.district_id = '" + F.indistrict_id + "')";
+                }
+
+                InstitutionParam = Disparam;
+
+            }
+            if (F.inhud_id != "")
+            {
+
+                string Disparam = "";
+
+                if (F.inhud_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] inhudValue = F.inhud_id.Split(",");
+
+                    foreach (var v in inhudValue)
+                    {
+                        if (i == (inhudValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.hud_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.hud_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.hud_id = '" + F.inhud_id + "')";
+                }
+
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.inblock_id != "")
+            {
+                string Disparam = "";
+
+                if (F.inblock_id.Contains(","))
+                {
+
+                    int i = 0;
+
+                    string[] inblockValue = F.inblock_id.Split(",");
+
+                    foreach (var v in inblockValue)
+                    {
+                        if (i == (inblockValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.block_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.block_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.block_id = '" + F.inblock_id + "')";
+                }
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.infacility_id != "")
+            {
+                string Disparam = "";
+
+                if (F.infacility_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] infacilityValue = F.infacility_id.Split(",");
+
+                    foreach (var v in infacilityValue)
+                    {
+                        if (i == (infacilityValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.facility_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.facility_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.facility_id = '" + F.infacility_id + "')";
+                }
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.directorate_id != "")
+            {
+                string Disparam = "";
+
+                if (F.directorate_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] indirectorateValue = F.directorate_id.Split(",");
+
+                    foreach (var v in indirectorateValue)
+                    {
+                        if (i == (indirectorateValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.directorate_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.directorate_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.directorate_id = '" + F.directorate_id + "')";
+                }
+
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.role != "")
+            {
+
+                string Disparam = "";
+
+                if (F.role.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] inroleValue = F.role.Split(",");
+
+                    foreach (var v in inroleValue)
+                    {
+                        if (i == (inroleValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(UM.role = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(UM.role = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (UM.role = '" + F.role + "')";
+                }
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+        }
+
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
-        [Route("GetDrugdistrict")]
-        public async Task<IEnumerable<OdrugdistrictModel>> GetCompanies([FromQuery] FilterpayloadModel F)
+        [Route("GetDrugdistricttest")]
+        public async Task<IEnumerable<OdrugdistrictModel>> GetDrugdistricttest([FromQuery] FilterpayloadModel F)
         {
 
             Filterforall(F);
@@ -420,53 +780,53 @@ namespace PHRLockerAPI.Controllers
 
 
 
-        //[HttpGet]
+        [HttpGet]
         //[ResponseCache(Duration = 30 * 60)]
-        //[Route("GetDrugdistrict")]
-        //public VMCommunityTriage getdistrict([FromQuery] FilterpayloadModel F)
-        //{
+        [Route("GetDrugdistrict")]
+        public VMCommunityTriage getdistrict([FromQuery] FilterpayloadModel F)
+        {
 
-        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-        //    VMCommunityTriage VM = new VMCommunityTriage();
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            VMCommunityTriage VM = new VMCommunityTriage();
 
-        //    con.Open();
-        //    NpgsqlCommand cmd = new NpgsqlCommand();
-        //    cmd.Connection = con;
-        //    cmd.CommandType = CommandType.Text;
-        //    //cmd.CommandText = "select MS.district_name,MS.district_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_district_master as MS on M.district_id=MS.district_id where s.drugs!='null' group by MS.district_name,MS.district_gid";
-
-
-        //    Filterforall(F);
-
-        //    //cmd.CommandText = "select adm.district_gid,adm.district_name,count(screening_id) TotalCount from (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n screening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\n WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id,member_id) tbl\r\n inner join family_master fm on fm.family_id=tbl.family_id \r\n " + CommunityParam + "\r\n inner join address_district_master adm on adm.district_id=fm.district_id\r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text)  \r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + "  group by adm.district_name,adm.district_gid";
-
-        //    cmd.CommandText = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+            con.Open();
+            NpgsqlCommand cmd = new NpgsqlCommand();
+            cmd.Connection = con;
+            cmd.CommandType = CommandType.Text;
+            //cmd.CommandText = "select MS.district_name,MS.district_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_district_master as MS on M.district_id=MS.district_id where s.drugs!='null' group by MS.district_name,MS.district_gid";
 
 
-        //    NpgsqlDataReader dr = cmd.ExecuteReader();
-        //    List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
+            Filterforall(F);
 
-        //    while (dr.Read())
-        //    {
+            cmd.CommandText = "select adm.district_gid,adm.district_name,count(screening_id) TotalCount from (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n screening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\n WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id,member_id) tbl\r\n inner join family_master fm on fm.family_id=tbl.family_id \r\n " + CommunityParam + "\r\n inner join address_district_master adm on adm.district_id=fm.district_id\r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text)  \r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + "  group by adm.district_name,adm.district_gid";
 
-        //        var SList = new CommunityTriageModel();
+            //cmd.CommandText = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-        //        SList.district_name = dr["district_name"].ToString();
-        //        SList.district_gid = dr["district_gid"].ToString();
-        //        SList.TotalCount = dr["TotalCount"].ToString();
 
-        //        RList.Add(SList);
-        //    }
-        //    con.Close();
+            NpgsqlDataReader dr = cmd.ExecuteReader();
+            List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
 
-        //    VM.DistrictWise = RList;
+            while (dr.Read())
+            {
 
-        //    return VM;
-        //}
+                var SList = new CommunityTriageModel();
+
+                SList.district_name = dr["district_name"].ToString();
+                SList.district_gid = dr["district_gid"].ToString();
+                SList.TotalCount = dr["TotalCount"].ToString();
+
+                RList.Add(SList);
+            }
+            con.Close();
+
+            VM.DistrictWise = RList;
+
+            return VM;
+        }
 
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("GetDrugBlock")]
         public List<BlockModel> getBlock([FromQuery] FilterpayloadModel F)
         {
@@ -511,7 +871,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("GetmtmbenBlock")]
         public List<BlockModel> GetmtmbenBlock([FromQuery] FilterpayloadModel F)
         {
@@ -556,7 +916,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("GetDrugVillage")]
         public List<VillageModel> getVillage([FromQuery] FilterpayloadModel F)
         {
@@ -603,7 +963,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("GetDrughud")]
         public VMCommunityTriage gethud([FromQuery] FilterpayloadModel F)
         {
@@ -946,7 +1306,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("Getdistrictpopulation")]
         public VMCommunityTriage districtpopulation([FromQuery] FilterpayloadModel F)
         {
@@ -1104,7 +1464,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("GetHUDScreenPopulationAgeWise")]
         public VMCommunityTriage gethudscreeningAge([FromQuery] FilterpayloadModel F)
         {
@@ -1271,7 +1631,7 @@ namespace PHRLockerAPI.Controllers
         #region dashboard
         //Dashboard Count
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("gettotalpopulation")]
         public Object gettotalpopulation([FromQuery] FilterpayloadModel F)
         {
@@ -1494,7 +1854,7 @@ namespace PHRLockerAPI.Controllers
             return new { totalPopulation = TotalPopulation };
         }
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("gettotalscreening")]
         public Object gettotalscreening([FromQuery] FilterpayloadModel F)
         {
@@ -1524,7 +1884,7 @@ namespace PHRLockerAPI.Controllers
             return new { totalPopulation = TotalPopulation };
         }
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("gettotalindscreening")]
         public Object gettotalindscreening([FromQuery] FilterpayloadModel F)
         {
@@ -1553,7 +1913,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("gettotaldrug")]
         public Object gettotaldrug([FromQuery] FilterpayloadModel F)
         {
@@ -1582,7 +1942,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("gettotalinddrug")]
         public Object gettotalinddrug([FromQuery] FilterpayloadModel F)
         {
@@ -1647,7 +2007,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("gettotalmtmbenf")]
         public Object gettotalmtmbenf([FromQuery] FilterpayloadModel F)
         {
@@ -1676,7 +2036,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("getmtmdrugissues")]
         public Object getmtmdrugissues([FromQuery] FilterpayloadModel F)
         {
@@ -1705,7 +2065,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("rolewisescreening")]
         public List<RoleReport> rolewisescreening([FromQuery] FilterpayloadModel F)
         {
@@ -1757,7 +2117,7 @@ namespace PHRLockerAPI.Controllers
         #endregion
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
+        //[ResponseCache(Duration = 30 * 60)]
         [Route("getdistrictmtm")]
         public VMCommunityTriage getdistrictmtm([FromQuery] FilterpayloadModel F)
         {

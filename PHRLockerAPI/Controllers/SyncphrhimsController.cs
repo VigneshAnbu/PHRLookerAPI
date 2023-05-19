@@ -347,13 +347,10 @@ namespace PHRLockerAPI.Controllers
 
             List<NewUserModel> RList = new List<NewUserModel>();
             string Param = "";
-
             if (facility_id != null)
             {
                 Param = "where facility_id='" + facility_id + "'";
             }
-
-
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
             NpgsqlCommand cmd = new NpgsqlCommand();

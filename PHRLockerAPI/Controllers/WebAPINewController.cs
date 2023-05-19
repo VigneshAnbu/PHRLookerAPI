@@ -1178,11 +1178,11 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [Route("GetChart2")]
-        public List<AgeWiseModel> GetChartDetails2([FromQuery] FilterpayloadModel F)
+        public AgeWiseDisplayModel GetChartDetails2([FromQuery] FilterpayloadModel F)
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
+            AgeWiseDisplayModel VM = new AgeWiseDisplayModel();
 
 
             Filterforall(F);
@@ -1196,26 +1196,26 @@ namespace PHRLockerAPI.Controllers
             cmdAge.CommandText = "select tblFinal.Age,sum(tblFinal.totalcount) count from(SELECT\r\nS.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,CASE \r\nWHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\nWHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\nWHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\nEND Age,count(fm.member_id ) totalcount\r\nFROM public.family_member_master as fm \r\ninner join public.health_screening S ON S.member_id = fm.member_id \r\n " + CommunityParam + " \r\ngroup by ARRUSER\r\n,Age)tblFinal\r\nINNER JOIN USER_MASTER UM ON CAST(tblFinal.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by tblFinal.Age\r\norder by count desc limit 3";
 
             NpgsqlDataReader drAge = cmdAge.ExecuteReader();
-            List<AgeWiseModel> RListAge = new List<AgeWiseModel>();
+            List<AgeWiseDisplayModel> RListAge = new List<AgeWiseDisplayModel>();
 
             while (drAge.Read())
             {
 
-                var SList = new AgeWiseModel();
+                var SList = new AgeWiseDisplayModel();
 
                 if (drAge["age"].ToString() == "18 to 30")
                 {
-                    VM.Middle = drAge["count"].ToString();
+                    VM.middle = drAge["count"].ToString();
 
                 }
                 else if (drAge["age"].ToString() == "Below 18")
                 {
-                    VM.Below = drAge["count"].ToString();
+                    VM.below = drAge["count"].ToString();
 
                 }
                 else if (drAge["age"].ToString() == "Above 30")
                 {
-                    VM.Above = drAge["count"].ToString();
+                    VM.above = drAge["count"].ToString();
                 }
 
 
@@ -1224,10 +1224,10 @@ namespace PHRLockerAPI.Controllers
             }
 
             con.Close();
-            VM.AgeList = RListAge;
+            //VM.AgeList = RListAge;
             
 
-            return RListAge;
+            return VM;
 
         }
 
@@ -2808,7 +2808,7 @@ namespace PHRLockerAPI.Controllers
             int DI30 = 0;
 
 
-            int T_SyncedScreenings24 = 0;
+            double T_SyncedScreenings24 = 0;
             int T_SyncedScreenings48 = 0;
             int T_SyncedScreenings30 = 0;
 
@@ -2873,7 +2873,7 @@ namespace PHRLockerAPI.Controllers
                         {
                             RList[i].syncedscreening24 = drInner["count"].ToString();
 
-                            T_SyncedScreenings24 = Convert.ToInt32(T_SyncedScreenings24 + RList[i].syncedscreening24);
+                            T_SyncedScreenings24 = Convert.ToDouble(T_SyncedScreenings24 + double.Parse(RList[i].syncedscreening24));
 
                         }
 
@@ -2913,7 +2913,7 @@ namespace PHRLockerAPI.Controllers
                         {
                             RList[i].syncedscreening48 = drInner["count"].ToString();
 
-                            T_SyncedScreenings48 = Convert.ToInt32(T_SyncedScreenings48 + RList[i].syncedscreening48);
+                            T_SyncedScreenings48 = Convert.ToInt32(T_SyncedScreenings48 + Convert.ToInt32(RList[i].syncedscreening48));
 
                         }
 
@@ -2953,7 +2953,7 @@ namespace PHRLockerAPI.Controllers
                         {
                             RList[i].syncedscreening30 = drInner["count"].ToString();
 
-                            T_SyncedScreenings30 = Convert.ToInt16(T_SyncedScreenings30 + RList[i].syncedscreening30);
+                            T_SyncedScreenings30 = Convert.ToInt32(T_SyncedScreenings30 + Convert.ToInt32(RList[i].syncedscreening30));
                             RList[i].syncedAverage = (Convert.ToUInt32(T_SyncedScreenings30) / 30).ToString();
                         }
 
