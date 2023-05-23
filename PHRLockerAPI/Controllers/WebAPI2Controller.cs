@@ -400,7 +400,7 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [Route("FilterAll")]
+        [Route("FilterAlls")]
         public void Filterforall(FilterpayloadModel F)
         {
 
@@ -760,6 +760,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugdistricttest")]
         public async Task<IEnumerable<OdrugdistrictModel>> GetDrugdistricttest([FromQuery] FilterpayloadModel F)
         {
@@ -781,7 +782,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugdistrict")]
         public VMCommunityTriage getdistrict([FromQuery] FilterpayloadModel F)
         {
@@ -826,7 +828,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugBlock")]
         public List<BlockModel> getBlock([FromQuery] FilterpayloadModel F)
         {
@@ -871,7 +874,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetmtmbenBlock")]
         public List<BlockModel> GetmtmbenBlock([FromQuery] FilterpayloadModel F)
         {
@@ -916,7 +920,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugVillage")]
         public List<VillageModel> getVillage([FromQuery] FilterpayloadModel F)
         {
@@ -963,7 +968,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDrughud")]
         public VMCommunityTriage gethud([FromQuery] FilterpayloadModel F)
         {
@@ -1464,7 +1470,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetHUDScreenPopulationAgeWise")]
         public VMCommunityTriage gethudscreeningAge([FromQuery] FilterpayloadModel F)
         {
@@ -1631,7 +1638,8 @@ namespace PHRLockerAPI.Controllers
         #region dashboard
         //Dashboard Count
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration =30 * 60)]
         [Route("gettotalpopulation")]
         public Object gettotalpopulation([FromQuery] FilterpayloadModel F)
         {
@@ -1853,8 +1861,12 @@ namespace PHRLockerAPI.Controllers
             con.Close();
             return new { totalPopulation = TotalPopulation };
         }
+
+
+
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gettotalscreening")]
         public Object gettotalscreening([FromQuery] FilterpayloadModel F)
         {
@@ -1884,7 +1896,8 @@ namespace PHRLockerAPI.Controllers
             return new { totalPopulation = TotalPopulation };
         }
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gettotalindscreening")]
         public Object gettotalindscreening([FromQuery] FilterpayloadModel F)
         {
@@ -1913,7 +1926,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gettotaldrug")]
         public Object gettotaldrug([FromQuery] FilterpayloadModel F)
         {
@@ -1942,7 +1956,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gettotalinddrug")]
         public Object gettotalinddrug([FromQuery] FilterpayloadModel F)
         {
@@ -2007,7 +2022,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gettotalmtmbenf")]
         public Object gettotalmtmbenf([FromQuery] FilterpayloadModel F)
         {
@@ -2036,7 +2052,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getmtmdrugissues")]
         public Object getmtmdrugissues([FromQuery] FilterpayloadModel F)
         {
@@ -2065,7 +2082,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("rolewisescreening")]
         public List<RoleReport> rolewisescreening([FromQuery] FilterpayloadModel F)
         {
@@ -2117,7 +2135,8 @@ namespace PHRLockerAPI.Controllers
         #endregion
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getdistrictmtm")]
         public VMCommunityTriage getdistrictmtm([FromQuery] FilterpayloadModel F)
         {

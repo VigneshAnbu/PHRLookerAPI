@@ -1133,6 +1133,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart1")]
         public List<GenderWise> GetChartDetails1([FromQuery] FilterpayloadModel F)
         {
@@ -1177,6 +1178,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart2")]
         public AgeWiseDisplayModel GetChartDetails2([FromQuery] FilterpayloadModel F)
         {
@@ -1234,6 +1236,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart3")]
         public List<WeekModel> GetChartDetails3([FromQuery] FilterpayloadModel F)
         {
@@ -1279,6 +1282,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart4")]
         public VMMtmPerformance GetChartDetails4([FromQuery] FilterpayloadModel F)
         {
@@ -1338,6 +1342,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart5")]
         public List<BlockWiseModel> GetChartDetails5([FromQuery] FilterpayloadModel F)
         {
@@ -1382,6 +1387,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart6")]
         public List<WeekModel> GetChartDetails6([FromQuery] FilterpayloadModel F)
         {
@@ -1426,6 +1432,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart7")]
         public List<BlockWiseModel> GetChartDetails7([FromQuery] FilterpayloadModel F)
         {
@@ -1472,6 +1479,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart8")]
         public List<WeekModel> GetChartDetails8([FromQuery] FilterpayloadModel F)
         {
@@ -1516,6 +1524,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart9")]
         public List<DrugModel> GetChartDetails9([FromQuery] FilterpayloadModel F)
         {
@@ -1676,6 +1685,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetFacilityScreeningFilter")]
         public List<FacilityModel> GetFacilityWiseScreeningFilter([FromQuery] FilterpayloadModel F)
         {
@@ -2242,6 +2252,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetReferredFacility")]
         public List<FacilityModel> GetReferredFacility([FromQuery] FilterpayloadModel F)
         {

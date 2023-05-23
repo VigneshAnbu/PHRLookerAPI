@@ -8,6 +8,7 @@ using PHRLockerAPI.Intfa;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WebEssentials.AspNetCore.OutputCaching;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddResponseCaching();
+
+
+builder.Services.AddOutputCaching();
+
+//builder.Services.AddOutputCache(options =>
+//{
+//    options.AddBasePolicy(builder => builder.Cache());
+//    //options.AddPolicy("OutputCacheWithAuthPolicy", OutputCacheWithAuthPolicy.Instance);
+//});
+
+
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -48,6 +61,8 @@ var app = builder.Build();
 
 app.MapGet("/security/getMessage",
 () => "Hello World!").RequireAuthorization();
+
+
 
 
 app.MapPost("/security/createToken",
@@ -98,6 +113,8 @@ app.UseHttpsRedirection();
 app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseResponseCaching();
+
+app.UseOutputCaching();
 
 app.UseAuthentication();
 
