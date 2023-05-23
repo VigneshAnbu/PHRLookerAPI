@@ -1383,7 +1383,7 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select MS.district_name,MS.district_gid,MS.district_id from  public.address_district_master as MS ";
+            cmd.CommandText = "SELECT public.getmtmkidistrict() ";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
             List<mtmkpi> RList = new List<mtmkpi>();
