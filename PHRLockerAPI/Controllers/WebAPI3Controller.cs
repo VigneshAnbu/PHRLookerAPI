@@ -1390,7 +1390,6 @@ namespace PHRLockerAPI.Controllers
 
             while (dr.Read())
             {
-
                 var SList = new mtmkpi();
 
                 SList.district_name = dr["district_name"].ToString();
