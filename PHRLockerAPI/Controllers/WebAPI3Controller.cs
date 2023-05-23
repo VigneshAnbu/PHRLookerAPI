@@ -102,17 +102,17 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpGet]
         [Route("getblockmaster")]
-        public VMCommunityTriage getblockmaster()
+        public getblockmasterModel getblockmaster()
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
+            getblockmasterModel VM = new getblockmasterModel();
             ///*Hud Wise*/
             con.Open();
             NpgsqlCommand cmdHud = new NpgsqlCommand();
             cmdHud.Connection = con;
             cmdHud.CommandType = CommandType.Text;
-            cmdHud.CommandText = "select bm.*,hm.hud_gid,hud_name,district_gid,district_name from address_block_master bm inner join address_hud_master hm on bm.hud_id=hm.hud_id inner join address_district_master adm on adm.district_id=bm.district_id";
+            cmdHud.CommandText = "select * from public.getblockMaster()";
 
             NpgsqlDataReader drHud = cmdHud.ExecuteReader();
             List<BlockModel> RListHud = new List<BlockModel>();
@@ -1595,22 +1595,22 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("mtmkpiscreening")]
-        public List<mtmkpi> mtmkpiscreening()
+        public List<mtmkpiscreening> mtmkpiscreening()
         {
 
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<mtmkpiscreening> RList = new List<mtmkpiscreening>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
 
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select district_id,count(tbl.member_id) uniquescount,sum(userscreening) totalscreening from  ((select district_id,member_id,count(screening_id) userscreening from health_screening hs inner join family_master fm on  hs.family_id=fm.family_id group by district_id,member_id )) tbl group by district_id";
+            cmdInner.CommandText = "select * from public.mtmkpiscreening() ";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new mtmkpiscreening
                 {
                     district_id = drInner["district_id"].ToString(),
                     uniquescreening = double.Parse(drInner["uniquescount"].ToString()),

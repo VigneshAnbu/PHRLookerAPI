@@ -8,6 +8,7 @@ using PHRLockerAPI.DBContext;
 //using PHRLockerAPI.DBContext;
 using PHRLockerAPI.Intfa;
 using PHRLockerAPI.Models;
+using PHRLockerAPI.Models.MtmBenfModel;
 using PHRLockerAPI.ViewModel;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
@@ -27,9 +28,10 @@ namespace PHRLockerAPI.Controllers
 
         private readonly DapperContext context;
 
-        public WebAPI2Controller(DapperContext context)
+        public WebAPI2Controller(DapperContext context, IConfiguration configuration)
         {
             this.context = context;
+            _configuration = configuration;
         }
 
         string CommunityParam = "";
@@ -785,11 +787,13 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugdistrict")]
-        public VMCommunityTriage getdistrict([FromQuery] FilterpayloadModel F)
+        public getDrugListModelList getdistrict([FromQuery] FilterpayloadModel F)
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
+
+            //VMCommunityTriage VM = new VMCommunityTriage();
+            getDrugListModelList VM = new getDrugListModelList();
 
             con.Open();
             NpgsqlCommand cmd = new NpgsqlCommand();
@@ -800,18 +804,18 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            cmd.CommandText = "select adm.district_gid,adm.district_name,count(screening_id) TotalCount from (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n screening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\n WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id,member_id) tbl\r\n inner join family_master fm on fm.family_id=tbl.family_id \r\n " + CommunityParam + "\r\n inner join address_district_master adm on adm.district_id=fm.district_id\r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text)  \r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + "  group by adm.district_name,adm.district_gid";
+            cmd.CommandText = String.Format("select * from public.getdrugdistrict('"+ CommunityParam + "','"+ InstitutionParam + "')");
 
             //cmd.CommandText = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
+            List<GetDrugdistrictModel> RList = new List<GetDrugdistrictModel>();
 
             while (dr.Read())
             {
 
-                var SList = new CommunityTriageModel();
+                var SList = new GetDrugdistrictModel();
 
                 SList.district_name = dr["district_name"].ToString();
                 SList.district_gid = dr["district_gid"].ToString();
@@ -820,7 +824,6 @@ namespace PHRLockerAPI.Controllers
                 RList.Add(SList);
             }
             con.Close();
-
             VM.DistrictWise = RList;
 
             return VM;
@@ -2138,11 +2141,11 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("getdistrictmtm")]
-        public VMCommunityTriage getdistrictmtm([FromQuery] FilterpayloadModel F)
+        public getDrugListModelList getdistrictmtm([FromQuery] FilterpayloadModel F)
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
+            getDrugListModelList VM = new getDrugListModelList();
 
             con.Open();
             NpgsqlCommand cmd = new NpgsqlCommand();
@@ -2153,16 +2156,15 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            cmd.CommandText = "select fm.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n family_id,member_id,medical_history_id  FROM PUBLIC.health_history B\r\n WHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,member_id,medical_history_id) tbl\r\n inner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "  \r\n inner join address_district_master dm on fm.district_id=dm.district_id \r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + " group by fm.district_id,district_name,district_gid";
-
+            cmd.CommandText = String.Format("select * from public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')");
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
+            List<GetDrugdistrictModel> RList = new List<GetDrugdistrictModel>();
 
             while (dr.Read())
             {
 
-                var SList = new CommunityTriageModel();
+                var SList = new GetDrugdistrictModel();
 
                 SList.district_name = dr["district_name"].ToString();
                 SList.district_gid = dr["district_gid"].ToString();
@@ -2172,7 +2174,7 @@ namespace PHRLockerAPI.Controllers
             }
             con.Close();
 
-            VM.DistrictWise = RList;
+           VM.DistrictWise = RList;
 
             return VM;
         }
