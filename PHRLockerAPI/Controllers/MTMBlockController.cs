@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
 using PHRLockerAPI.Models;
+using PHRLockerAPI.Models.MtmBenfModel;
 using PHRLockerAPI.ViewModel;
 using System;
 using System.Data;
@@ -30,21 +31,21 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("gethtblock")]
-        public List<mtmkpi> getht()
+        public List<gethtblockModel> getht()
         {
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<gethtblockModel> RList = new List<gethtblockModel>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
 
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select block_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'hypertension' is not null  and b.mtm_beneficiary->>'diabetes_mellitus' is null group by block_id";
+            cmdInner.CommandText = "select * from public.gethtblock()";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new gethtblockModel
                 {
                     block_id = drInner["block_id"].ToString(),
                     ht = double.Parse(drInner["TotalCount"].ToString()),
@@ -56,21 +57,21 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpGet]
         [Route("getdtblock")]
-        public List<mtmkpi> getdt()
+        public List<getdtblockModel> getdt()
         {
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<getdtblockModel> RList = new List<getdtblockModel>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
 
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select block_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'diabetes_mellitus' is not null and b.mtm_beneficiary->>'hypertension' is null group by block_id";
+            cmdInner.CommandText = "select * from public.getdtblock()";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new getdtblockModel
                 {
                     block_id = drInner["block_id"].ToString(),
                     dt = double.Parse(drInner["totalcount"].ToString()),
@@ -81,21 +82,21 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpGet]
         [Route("gethtdtblock")]
-        public List<mtmkpi> gethtdt()
+        public List<gethtdtBlockModel> gethtdt()
         {
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<gethtdtBlockModel> RList = new List<gethtdtBlockModel>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
 
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select block_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'diabetes_mellitus' is not null and b.mtm_beneficiary->>'hypertension' is not null group by block_id";
+            cmdInner.CommandText = "select * from public.gethtdtblock()";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new gethtdtBlockModel
                 {
                     block_id = drInner["block_id"].ToString(),
                     htdt = double.Parse(drInner["totalcount"].ToString()),
@@ -106,21 +107,21 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpGet]
         [Route("getpallativeblock")]
-        public List<mtmkpi> getpallative()
+        public List<getpallativeblock> getpallative()
         {
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<getpallativeblock> RList = new List<getpallativeblock>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
 
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select block_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'palliative_care' is not null group by block_id";
+            cmdInner.CommandText = "select * from public.getpallativeblock()";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new getpallativeblock
                 {
                     block_id = drInner["block_id"].ToString(),
                     pallative = double.Parse(drInner["TotalCount"].ToString()),
@@ -131,21 +132,21 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpGet]
         [Route("getphysioblock")]
-        public List<mtmkpi> getphysio()
+        public List<getphysioblock> getphysio()
         {
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<getphysioblock> RList = new List<getphysioblock>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
 
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select block_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'physiotherapy' is not null group by block_id";
+            cmdInner.CommandText = "select * from public.getphysioblock()";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new getphysioblock
                 {
                     block_id = drInner["block_id"].ToString(),
                     physio = double.Parse(drInner["TotalCount"].ToString()),
@@ -156,20 +157,20 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpGet]
         [Route("getcapdblock")]
-        public List<mtmkpi> getcapd()
+        public List<getcapdblock> getcapd()
         {
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<getcapdblock> RList = new List<getcapdblock>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select block_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'dialysis_capd' is not null group by block_id";
+            cmdInner.CommandText = "select * from public.getcapdblock()";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new getcapdblock
                 {
                     block_id = drInner["block_id"].ToString(),
                     capd = double.Parse(drInner["TotalCount"].ToString()),
@@ -181,21 +182,21 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("mtmkpiscreeningblock")]
-        public List<mtmkpi> mtmkpiscreening()
+        public List<mtmkpiscreeningblock> mtmkpiscreening()
         {
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<mtmkpiscreeningblock> RList = new List<mtmkpiscreeningblock>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
 
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select block_id,count(tbl.member_id) uniquescount,sum(userscreening) totalscreening from  ((select block_id,member_id,count(screening_id) userscreening from health_screening hs inner join family_master fm on  hs.family_id=fm.family_id group by block_id,member_id )) tbl group by block_id";
+            cmdInner.CommandText = "select * from public.mtmkpiscreeningblock()";
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             CommunityTriageModel SList = new CommunityTriageModel();
             while (drInner.Read())
             {
-                RList.Add(new mtmkpi
+                RList.Add(new mtmkpiscreeningblock
                 {
                     block_id = drInner["block_id"].ToString(),
                     uniquescreening = double.Parse(drInner["uniquescount"].ToString()),

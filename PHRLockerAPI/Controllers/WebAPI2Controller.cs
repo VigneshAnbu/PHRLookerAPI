@@ -834,7 +834,7 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugBlock")]
-        public List<BlockModel> getBlock([FromQuery] FilterpayloadModel F)
+        public List<GetDrugBlock> getBlock([FromQuery] FilterpayloadModel F)
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
@@ -850,17 +850,15 @@ namespace PHRLockerAPI.Controllers
             //cmd.CommandText = "select BL.block_name,BL.block_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_block_master as BL on BL.block_id = M.block_id where s.drugs!='null' group by BL.block_name,BL.block_gid";
 
 
-
-            cmd.CommandText = "select BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name,count(screening_id) TotalCount from (SELECT(B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER,screening_id, family_id  FROM PUBLIC.HEALTH_SCREENING B WHERE drugs != 'null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER, screening_id, member_id) tbl inner join family_master fm on fm.family_id = tbl.family_id  " + CommunityParam + " inner join address_district_master adm on adm.district_id = fm.district_id INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "inner join public.address_block_master as BL on BL.block_id = fm.block_id inner join address_hud_master HD on HD.hud_id=BL.Hud_id group by BL.block_name, BL.block_gid, HD.hud_gid, HD.hud_name";
-
+            cmd.CommandText = String.Format("select * from public.GetDrugBlock('" + CommunityParam + "','" + InstitutionParam + "')");
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<BlockModel> RList = new List<BlockModel>();
+            List<GetDrugBlock> RList = new List<GetDrugBlock>();
 
             while (dr.Read())
             {
 
-                var SList = new BlockModel();
+                var SList = new GetDrugBlock();
 
                 SList.block_name = dr["block_name"].ToString();
                 SList.block_gid = dr["block_gid"].ToString();
@@ -2223,7 +2221,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpPost]
         [Route("getblockmtm")]
-        public List<BlockModel> getblockmtm(FilterpayloadModel F)
+        public List<getblockmtm> getblockmtm(FilterpayloadModel F)
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
@@ -2239,15 +2237,15 @@ namespace PHRLockerAPI.Controllers
             //cmdHud.CommandText = "select fm.block_id,count(hh.member_id) TotalCount  from health_history hh   inner join family_master fm on hh.family_id=fm.family_id where CAST (mtm_beneficiary ->> 'avail_service' as text)='yes'  group by fm.block_id";
 
 
-            cmdHud.CommandText = "select fm.block_id,count(member_id) TotalCount from \r\n (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n family_id,member_id,medical_history_id  FROM PUBLIC.health_history B\r\n WHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,member_id,medical_history_id) tbl\r\n inner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "  \r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + " group by fm.block_id";
+            cmdHud.CommandText = String.Format("select * from public.getblockmtm('" + CommunityParam + "','" + InstitutionParam + "')");
 
             NpgsqlDataReader drHud = cmdHud.ExecuteReader();
-            List<BlockModel> RListHud = new List<BlockModel>();
+            List<getblockmtm> RListHud = new List<getblockmtm>();
 
             while (drHud.Read())
             {
 
-                var SList = new BlockModel();
+                var SList = new getblockmtm();
 
                 SList.block_id = drHud["block_id"].ToString();
 
