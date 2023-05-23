@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
 using PHRLockerAPI.Models;
+using PHRLockerAPI.Models.MtmBenfModel;
 using PHRLockerAPI.ViewModel;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -1374,7 +1376,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getmtmkidistrict")]
-        public List<mtmkpi> getmtmkidistrict()
+        public List<getmtmkidistrictModel> getmtmkidistrict()
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMCommunityTriage VM = new VMCommunityTriage();
@@ -1383,20 +1385,18 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT public.getmtmkidistrict() ";
+            cmd.CommandText = "SELECT * FROM  public.getmtmkidistrict(); ";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<mtmkpi> RList = new List<mtmkpi>();
+            List<getmtmkidistrictModel> RList = new List<getmtmkidistrictModel>();
 
             while (dr.Read())
             {
-                var SList = new mtmkpi();
+                var SList = new getmtmkidistrictModel();
 
-                SList.district_name = dr["district_name"].ToString();
-                SList.district_gid = dr["district_gid"].ToString();
-                SList.district_id = dr["district_id"].ToString();
-                //SList.TotalCount = dr["TotalCount"].ToString();
-
+                SList.district_name = dr["district_name"]?.ToString() ?? string.Empty;
+                SList.district_gid = dr["district_gid"]?.ToString() ?? string.Empty;
+                SList.district_id = dr["district_id"]?.ToString() ?? string.Empty;
                 RList.Add(SList);
             }
             con.Close();
@@ -1406,16 +1406,17 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpPost]
         [Route("getht")]
-        public List<mtmkpi> getht(List<mtmkpi> RList)
+        public List<gethtModel> getht(List<getmtmkidistrictModel> RList)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
+            List<gethtModel> htList = new List<gethtModel>();
             if (RList.Count > 0)
             {
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select district_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'hypertension' is not null  and b.mtm_beneficiary->>'diabetes_mellitus' is null group by district_id";
+                cmdInner.CommandText = "SELECT * from  public.getht() ";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
                 while (drInner.Read())
@@ -1424,52 +1425,62 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (RList[i].district_id == drInner["district_id"].ToString())
                         {
-                            RList[i].ht = double.Parse(drInner["TotalCount"].ToString());
+                            gethtModel htObj = new gethtModel();
+                            htObj.district_id = RList[i].district_id;
+                            htObj.ht = double.Parse(drInner["TotalCount"].ToString());
+                            htList.Add(htObj);
                         }
                     }
                 }
             }
-            return RList;
+            return htList;
         }
         [HttpPost]
         [Route("getdt")]
-        public List<mtmkpi> getdt(List<mtmkpi> RList)
+        public List<getdtModel> getdt(List<getmtmkidistrictModel> RList)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
+            List<getdtModel> dtList = new List<getdtModel>();
             if (RList.Count > 0)
             {
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select district_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'diabetes_mellitus' is not null and b.mtm_beneficiary->>'hypertension' is null group by district_id";
+                cmdInner.CommandText = "SELECT * from  public.getdt() ";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
+                
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
                     {
                         if (RList[i].district_id == drInner["district_id"].ToString())
                         {
-                            RList[i].dt = double.Parse(drInner["TotalCount"].ToString());
+                            getdtModel dtObj = new getdtModel();
+                            dtObj.district_id = RList[i].district_id;
+                            dtObj.dt = double.Parse(drInner["TotalCount"].ToString());
+                            dtList.Add(dtObj);
                         }
+                        
                     }
                 }
             }
-            return RList;
+            return dtList;
         }
         [HttpPost]
         [Route("gethtdt")]
-        public List<mtmkpi> gethtdt(List<mtmkpi> RList)
+        public List<getHtDtModel> gethtdt(List<getmtmkidistrictModel> RList)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
+            List<getHtDtModel> htdtList = new List<getHtDtModel>();
             if (RList.Count > 0)
             {
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select district_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'diabetes_mellitus' is not null and b.mtm_beneficiary->>'hypertension' is not null group by district_id";
+                cmdInner.CommandText = "SELECT * from  public.getHtdt() ";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
                 while (drInner.Read())
@@ -1478,25 +1489,29 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (RList[i].district_id == drInner["district_id"].ToString())
                         {
-                            RList[i].htdt = double.Parse(drInner["TotalCount"].ToString());
+                            getHtDtModel htdtObj = new getHtDtModel();
+                            htdtObj.district_id = RList[i].district_id;
+                            htdtObj.htdt = double.Parse(drInner["TotalCount"].ToString());
+                            htdtList.Add(htdtObj);
                         }
                     }
                 }
             }
-            return RList;
+            return htdtList;
         }
         [HttpPost]
         [Route("getpallative")]
-        public List<mtmkpi> getpallative(List<mtmkpi> RList)
+        public List<getPalliativeModel> getpallative(List<getmtmkidistrictModel> RList)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
+            List<getPalliativeModel> pallativeList = new List<getPalliativeModel>();
             if (RList.Count > 0)
             {
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select district_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'palliative_care' is not null group by district_id";
+                cmdInner.CommandText = "SELECT * from  public.getpallative()";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
                 while (drInner.Read())
@@ -1505,25 +1520,29 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (RList[i].district_id == drInner["district_id"].ToString())
                         {
-                            RList[i].pallative = double.Parse(drInner["TotalCount"].ToString());
+                            getPalliativeModel pallativeObj = new getPalliativeModel();
+                            pallativeObj.district_id = RList[i].district_id;
+                            pallativeObj.pallative   = double.Parse(drInner["TotalCount"].ToString());
+                            pallativeList.Add(pallativeObj);
                         }
                     }
                 }
             }
-            return RList;
+            return pallativeList;
         }
         [HttpPost]
         [Route("getphysio")]
-        public List<mtmkpi> getphysio(List<mtmkpi> RList)
+        public List<getPhysioModel> getphysio(List<getmtmkidistrictModel> RList)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
+            List<getPhysioModel> physioList = new List<getPhysioModel>();
             if (RList.Count > 0)
             {
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select district_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'physiotherapy' is not null group by district_id";
+                cmdInner.CommandText = "select * from public.getPhysio()";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
                 while (drInner.Read())
@@ -1532,25 +1551,29 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (RList[i].district_id == drInner["district_id"].ToString())
                         {
-                            RList[i].physio = double.Parse(drInner["TotalCount"].ToString());
+                            getPhysioModel phyObj = new getPhysioModel();
+                            phyObj.district_id = RList[i].district_id;
+                            phyObj.physio = double.Parse(drInner["TotalCount"].ToString());
+                            physioList.Add(phyObj);
                         }
                     }
                 }
             }
-            return RList;
+            return physioList;
         }
         [HttpPost]
         [Route("getcapd")]
-        public List<mtmkpi> getcapd(List<mtmkpi> RList)
+        public List<getCapdModel> getcapd(List<getmtmkidistrictModel> RList)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
+            List<getCapdModel> capdList = new List<getCapdModel>();
             if (RList.Count > 0)
             {
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select district_id,count(b.member_id) TotalCount from Health_history b inner join family_master fmm on b.family_id=fmm.family_id where b.mtm_beneficiary->>'avail_service'='yes' and b.mtm_beneficiary->>'dialysis_capd' is not null group by district_id";
+                cmdInner.CommandText = "select * from public.getCapd()";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
                 while (drInner.Read())
@@ -1559,12 +1582,15 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (RList[i].district_id == drInner["district_id"].ToString())
                         {
-                            RList[i].capd = double.Parse(drInner["TotalCount"].ToString());
+                            getCapdModel getCapd = new getCapdModel();
+                            getCapd.district_id = RList[i].district_id;
+                            getCapd.capd = double.Parse(drInner["TotalCount"].ToString());
+                            capdList.Add(getCapd);
                         }
                     }
                 }
             }
-            return RList;
+            return capdList;
         }
 
         [HttpGet]
