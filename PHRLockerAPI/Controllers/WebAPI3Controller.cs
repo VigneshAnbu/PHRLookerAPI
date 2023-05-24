@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
+using PHRLockerAPI.DBContext;
 using PHRLockerAPI.Models;
 using PHRLockerAPI.Models.MtmBenfModel;
 using PHRLockerAPI.ViewModel;
@@ -21,9 +23,11 @@ namespace PHRLockerAPI.Controllers
     public class WebAPI3Controller : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        public WebAPI3Controller(IConfiguration configuration)
+        private readonly DapperContext _context;
+        public WebAPI3Controller(IConfiguration configuration, DapperContext context)
         {
             _configuration = configuration;
+            _context = context;
         }
 
         string fdate = "2000-01-01";
@@ -1376,33 +1380,16 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getmtmkidistrict")]
-        public List<getmtmkidistrictModel> getmtmkidistrict()
+        public async Task<List<getmtmkidistrictModel>> getmtmkidistrict()
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
-
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT * FROM  public.getmtmkidistrict(); ";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<getmtmkidistrictModel> RList = new List<getmtmkidistrictModel>();
-
-            while (dr.Read())
+           
+            string query = "SELECT * FROM  public.getmtmkidistrict(); ";
+            using (var connection = _context.CreateConnection())
             {
-                var SList = new getmtmkidistrictModel();
-
-                SList.district_name = dr["district_name"]?.ToString() ?? string.Empty;
-                SList.district_gid = dr["district_gid"]?.ToString() ?? string.Empty;
-                SList.district_id = dr["district_id"]?.ToString() ?? string.Empty;
-                RList.Add(SList);
+                var OBJ = await connection.QueryAsync<getmtmkidistrictModel>(query);
+                return OBJ.ToList();
             }
-            con.Close();
-            
 
-            return RList;
         }
         [HttpPost]
         [Route("getht")]
