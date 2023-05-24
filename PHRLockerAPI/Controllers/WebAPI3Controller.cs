@@ -1393,228 +1393,154 @@ namespace PHRLockerAPI.Controllers
         }
         [HttpPost]
         [Route("getht")]
-        public List<gethtModel> getht(List<getmtmkidistrictModel> RList)
+        public async Task<List<gethtModel>> getht(List<getmtmkidistrictModel> RList)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            con.Open();
-            List<gethtModel> htList = new List<gethtModel>();
-            if (RList.Count > 0)
+            string query = "SELECT * FROM public.getht()";
+            using (var connection = _context.CreateConnection())
             {
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT * from  public.getht() ";
-                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
-                while (drInner.Read())
-                {
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        if (RList[i].district_id == drInner["district_id"].ToString())
-                        {
-                            gethtModel htObj = new gethtModel();
-                            htObj.district_id = RList[i].district_id;
-                            htObj.ht = double.Parse(drInner["TotalCount"].ToString());
-                            htList.Add(htObj);
-                        }
-                    }
-                }
+                var results = await connection.QueryAsync<gethtModel>(query);
+
+                var htList = RList
+                  .Where(RItem => results.Any(result => result.district_id == RItem.district_id))
+                  .Select(RItem => new gethtModel
+                  {
+                      district_id = RItem.district_id,
+                      ht = results.First(result => result.district_id == RItem.district_id).ht
+                  })
+                  .ToList();
+
+
+                return htList;
             }
-            return htList;
         }
+
         [HttpPost]
         [Route("getdt")]
-        public List<getdtModel> getdt(List<getmtmkidistrictModel> RList)
+        public async Task<List<getdtModel>> getdt(List<getmtmkidistrictModel> RList)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            con.Open();
-            List<getdtModel> dtList = new List<getdtModel>();
-            if (RList.Count > 0)
+            string query = "SELECT * FROM public.getdt()";
+            using (var connection = _context.CreateConnection())
             {
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT * from  public.getdt() ";
-                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
-                
-                while (drInner.Read())
-                {
-                    for (int i = 0; i < RList.Count; i++)
+                var results = await connection.QueryAsync<getdtModel>(query);
+
+                var dtList = RList
+                    .Where(RItem => results.Any(result => result.district_id == RItem.district_id))
+                    .Select(RItem => new getdtModel
                     {
-                        if (RList[i].district_id == drInner["district_id"].ToString())
-                        {
-                            getdtModel dtObj = new getdtModel();
-                            dtObj.district_id = RList[i].district_id;
-                            dtObj.dt = double.Parse(drInner["TotalCount"].ToString());
-                            dtList.Add(dtObj);
-                        }
-                        
-                    }
-                }
+                        district_id = RItem.district_id,
+                        dt = results.First(result => result.district_id == RItem.district_id).dt
+                    })
+                    .ToList();
+
+                return dtList;
             }
-            return dtList;
         }
+
+
+
+
         [HttpPost]
         [Route("gethtdt")]
-        public List<getHtDtModel> gethtdt(List<getmtmkidistrictModel> RList)
+        public async  Task<List<getHtDtModel>> gethtdt(List<getmtmkidistrictModel> RList)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            con.Open();
-            List<getHtDtModel> htdtList = new List<getHtDtModel>();
-            if (RList.Count > 0)
+            string query = "SELECT * FROM public.getHtdt()";
+            using (var connection = _context.CreateConnection())
             {
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT * from  public.getHtdt() ";
-                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
-                while (drInner.Read())
-                {
-                    for (int i = 0; i < RList.Count; i++)
+                var results =await connection.QueryAsync<getHtDtModel>(query);
+
+                var htdtList = RList
+                    .Where(RItem => results.Any(result => result.district_id == RItem.district_id))
+                    .Select(RItem => new getHtDtModel
                     {
-                        if (RList[i].district_id == drInner["district_id"].ToString())
-                        {
-                            getHtDtModel htdtObj = new getHtDtModel();
-                            htdtObj.district_id = RList[i].district_id;
-                            htdtObj.htdt = double.Parse(drInner["TotalCount"].ToString());
-                            htdtList.Add(htdtObj);
-                        }
-                    }
-                }
+                        district_id = RItem.district_id,
+                        htdt = results.First(result => result.district_id == RItem.district_id).htdt
+                    })
+                    .ToList();
+
+                return htdtList;
             }
-            return htdtList;
         }
+
+
+
         [HttpPost]
         [Route("getpallative")]
-        public List<getPalliativeModel> getpallative(List<getmtmkidistrictModel> RList)
+        public async Task<List<getPalliativeModel>> getpallative(List<getmtmkidistrictModel> RList)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            con.Open();
-            List<getPalliativeModel> pallativeList = new List<getPalliativeModel>();
-            if (RList.Count > 0)
+            string query = "SELECT * FROM public.getpallative()";
+            using (var connection = _context.CreateConnection())
             {
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT * from  public.getpallative()";
-                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
-                while (drInner.Read())
-                {
-                    for (int i = 0; i < RList.Count; i++)
+                var results = await connection.QueryAsync<getPalliativeModel>(query);
+
+                var pallativeList = RList
+                    .Where(RItem => results.Any(result => result.district_id == RItem.district_id))
+                    .Select(RItem => new getPalliativeModel
                     {
-                        if (RList[i].district_id == drInner["district_id"].ToString())
-                        {
-                            getPalliativeModel pallativeObj = new getPalliativeModel();
-                            pallativeObj.district_id = RList[i].district_id;
-                            pallativeObj.pallative   = double.Parse(drInner["TotalCount"].ToString());
-                            pallativeList.Add(pallativeObj);
-                        }
-                    }
-                }
+                        district_id = RItem.district_id,
+                        pallative = results.FirstOrDefault(result => result.district_id == RItem.district_id)?.pallative ?? 0
+                    })
+                    .ToList();
+
+                return pallativeList;
             }
-            return pallativeList;
         }
+
         [HttpPost]
         [Route("getphysio")]
-        public List<getPhysioModel> getphysio(List<getmtmkidistrictModel> RList)
+        public async Task<List<getPhysioModel>> getphysio(List<getmtmkidistrictModel> RList)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            con.Open();
-            List<getPhysioModel> physioList = new List<getPhysioModel>();
-            if (RList.Count > 0)
+            string query = "SELECT * FROM public.getPhysio()";
+            using (var connection = _context.CreateConnection())
             {
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.getPhysio()";
-                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
-                while (drInner.Read())
-                {
-                    for (int i = 0; i < RList.Count; i++)
+                var results = await connection.QueryAsync<getPhysioModel>(query);
+
+                var physioList = RList
+                    .Where(RItem => results.Any(result => result.district_id == RItem.district_id))
+                    .Select(RItem => new getPhysioModel
                     {
-                        if (RList[i].district_id == drInner["district_id"].ToString())
-                        {
-                            getPhysioModel phyObj = new getPhysioModel();
-                            phyObj.district_id = RList[i].district_id;
-                            phyObj.physio = double.Parse(drInner["TotalCount"].ToString());
-                            physioList.Add(phyObj);
-                        }
-                    }
-                }
+                        district_id = RItem.district_id,
+                        physio = results.FirstOrDefault(result => result.district_id == RItem.district_id)?.physio ?? 0
+                    })
+                    .ToList();
+
+                return physioList;
             }
-            return physioList;
         }
+
         [HttpPost]
         [Route("getcapd")]
-        public List<getCapdModel> getcapd(List<getmtmkidistrictModel> RList)
+        public async Task<List<getCapdModel>> getcapd(List<getmtmkidistrictModel> RList)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            con.Open();
-            List<getCapdModel> capdList = new List<getCapdModel>();
-            if (RList.Count > 0)
+            string query = "SELECT * FROM public.getCapd()";
+            using (var connection = _context.CreateConnection())
             {
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.getCapd()";
-                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
-                while (drInner.Read())
-                {
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        if (RList[i].district_id == drInner["district_id"].ToString())
-                        {
-                            getCapdModel getCapd = new getCapdModel();
-                            getCapd.district_id = RList[i].district_id;
-                            getCapd.capd = double.Parse(drInner["TotalCount"].ToString());
-                            capdList.Add(getCapd);
-                        }
-                    }
-                }
-            }
-            return capdList;
-        }
+                var results = await connection.QueryAsync<getCapdModel>(query);
 
+                var capdList = RList
+                    .Where(RItem => results.Any(result => result.district_id == RItem.district_id))
+                    .Select(RItem => new getCapdModel
+                    {
+                        district_id = RItem.district_id,
+                        capd = results.FirstOrDefault(result => result.district_id == RItem.district_id)?.capd ?? 0
+                    })
+                    .ToList();
+
+                return capdList;
+            }
+        }
         [HttpGet]
         [Route("mtmkpiscreening")]
-        public List<mtmkpiscreening> mtmkpiscreening()
+        public async Task<List<mtmkpiscreening>> mtmkpiscreening()
         {
-
-            List<mtmkpiscreening> RList = new List<mtmkpiscreening>();
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            con.Open();
-
-            NpgsqlCommand cmdInner = new NpgsqlCommand();
-            cmdInner.Connection = con;
-            cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select * from public.mtmkpiscreening() ";
-            NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-            CommunityTriageModel SList = new CommunityTriageModel();
-            while (drInner.Read())
+            string query = "SELECT * FROM public.mtmkpiscreening()";
+            using (var connection = _context.CreateConnection())
             {
-                RList.Add(new mtmkpiscreening
-                {
-                    district_id = drInner["district_id"].ToString(),
-                    uniquescreening = double.Parse(drInner["uniquescount"].ToString()),
-                    totalscreening = double.Parse(drInner["totalscreening"].ToString()),
+                var results = await connection.QueryAsync<mtmkpiscreening>(query);
 
-                });
-                //for (int i = 0; i < RList.Count; i++)
-                //{
-                //    if (RList[i].district_id == drInner["district_id"].ToString())
-                //    {
-                //        RList[i].capd = double.Parse(drInner["TotalCount"].ToString());
-                //    }
-                //}
+                return results.ToList();
             }
-            con.Close();
-            return RList;
         }
-    
+
+
     }
 }

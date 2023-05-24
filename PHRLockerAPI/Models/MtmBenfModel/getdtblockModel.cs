@@ -2,7 +2,7 @@
 {
     public class getdtblockModel
     {
-        public string? block_id { get; set; }
+        public Guid? block_id { get; set; }
         public double? dt { get; set; }
     }
 }

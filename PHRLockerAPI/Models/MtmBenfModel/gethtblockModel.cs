@@ -2,7 +2,7 @@
 {
     public class gethtblockModel
     {
-        public string? block_id { get; set; }
+        public Guid? block_id { get; set; }
         public double? ht { get; set; }
     }
 }

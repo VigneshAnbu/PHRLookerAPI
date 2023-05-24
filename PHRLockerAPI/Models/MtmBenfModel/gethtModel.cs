@@ -2,7 +2,7 @@
 {
     public class gethtModel
     {
-        public string district_id { get; set; }
+        public Guid district_id { get; set; }
         public double ht { get; set; }
     }
 }

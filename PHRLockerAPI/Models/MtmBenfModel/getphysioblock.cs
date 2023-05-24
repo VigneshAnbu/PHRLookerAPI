@@ -1,8 +1,8 @@
-﻿namespace PHRLockerAPI.Models
+﻿namespace PHRLockerAPI.Models.MtmBenfModel
 {
     public class getphysioblock
     {
-        public string block_id { get; set; }
+        public Guid block_id { get; set; }
         public double physio { get; set; }
     }
 }

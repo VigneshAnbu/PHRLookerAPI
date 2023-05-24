@@ -2,7 +2,7 @@
 {
     public class getcapdblock
     {
-        public string block_id { get; set; }
+        public Guid block_id { get; set; }
         public double capd { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class getpallativeblock
     {
-        public string block_id { get; set; }
+        public Guid block_id { get; set; }
         public double pallative { get; set; }
     }
 }
