@@ -2042,47 +2042,31 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
-        [OutputCache(Duration = 30 * 60)]
         [Route("rolewisescreening")]
         public List<RoleReport> rolewisescreening([FromQuery] FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
-            string TotalPopulation = "0";
-            con.Open();
-
-            Filterforall(F);
-
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  (select tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from (SELECT jsonb_array_elements(b.update_register) AS arruser,screening_id FROM   public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id) tbl inner join user_master um on cast(tbl.user_id as uuid)=um.user_id inner join user_role_Master urm on urm.role_id=um.role where tbl.user_id!='system' group by role_name order by desigcount desc limit 10";
-
-            cmd.CommandText = "select role_name,sum(userCount) desigcount from  \r\n(select tbl.family_id,tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from \r\n(SELECT jsonb_array_elements(b.update_register) AS arruser,family_id,screening_id \r\nFROM public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id,tbl.family_id) tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "\r\ninner join user_master um on cast(tbl.user_id as uuid)= um.user_id \r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ninner join user_role_Master urm on urm.role_id = um.role \r\nwhere tbl.user_id != 'system' group by role_name order by desigcount desc limit 10";
-
-
-            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  (select tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from (SELECT jsonb_array_elements(b.update_register) AS arruser,screening_id FROM   public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl --inner join user_master um on um.user_id=cast(tbl.arruser -> 'user_id' as uuid) group by user_id) tbl inner join user_master um on cast(tbl.user_id as uuid)=um.user_id inner join user_role_Master urm on urm.role_id=um.role where tbl.user_id!='system' group by role_name order by desigcount desc limit 10";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<RoleReport> RList = new List<RoleReport>();
-            int ReuseCount = 0;
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-                RList.Add(new RoleReport
+                Filterforall(F);
+
+                string query = "SELECT * FROM public.rolewisescreening(@CommunityParam, @InstitutionParam)";
+
+                var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
+
+                var results = connection.Query<RoleReport>(query,parameters);
+
+                List<RoleReport> RList = results.ToList();
+                int ReuseCount = RList.Sum(r => int.Parse(r.RoleCount ?? "0"));
+
+                foreach (var aa in RList)
                 {
-                    RoleName = dr["role_name"].ToString(),
-                    RoleCount = dr["desigcount"].ToString(),
-                });
-                ReuseCount = ReuseCount + int.Parse(dr["desigcount"].ToString());
-                //TotalPopulation = dr["TotalCount"].ToString();
+                    aa.CountPer = Percentage_Cal(ReuseCount, int.Parse(aa.RoleCount));
+                }
+
+                return RList;
             }
-            con.Close();
-            foreach (var aa in RList) { aa.CountPer = Percentage_Cal(ReuseCount, int.Parse(aa.RoleCount)); }
-            return RList;
         }
+
         private string Percentage_Cal(int Total, int Value)
         {
             double Male_Per = 0;
@@ -2160,7 +2144,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getblockmtm")]
-        public async Task<List<getblockmtm>> getblockmtm([FromQuery] FilterpayloadModel F)
+        public async Task<List<getblockmtm>> getblockmtm(FilterpayloadModel F)
         {
             Filterforall(F);
             string query = "SELECT * FROM public.getblockmtm(@CommunityParam, @InstitutionParam)";

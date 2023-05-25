@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
+using PHRLockerAPI.DBContext;
 using PHRLockerAPI.Models;
 using PHRLockerAPI.ViewModel;
 using System;
@@ -10,6 +13,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -21,13 +25,15 @@ namespace PHRLockerAPI.Controllers
     {
         private readonly IConfiguration _configuration;
 
+        private readonly DapperContext _context;
         string CommunityParam = "";
         string InstitutionParam = "";
 
 
-        public WebAPINewController(IConfiguration configuration)
+        public WebAPINewController(IConfiguration configuration, DapperContext context)
         {
             _configuration = configuration;
+            _context = context;
         }
 
         [HttpGet]
@@ -1764,38 +1770,27 @@ namespace PHRLockerAPI.Controllers
 
         [HttpPost]
         [Route("Getdistrictpbs")]
-        public VMPbsModel districtpbs(FilterpayloadModel F)
+       
+        public async Task<Getdistrictpbs> districtpbs(FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPbsModel VM = new VMPbsModel();
-            con.Open();
-
+            Getdistrictpbs VM = new Getdistrictpbs();
             Filterforall(F);
+            var parameters = new { CommunityParam = CommunityParam };
 
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
+            string query = "select * from public.Getdistrictpbs(@CommunityParam)";
+            List<Getdistrictpbs> RList = new List<Getdistrictpbs>();
 
-            cmd.CommandText = "select MS.district_name,MS.district_gid from  public.address_district_master as MS  \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id  " + CommunityParam + " \r\ngroup by MS.district_name,MS.district_gid";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPbsModel> RList = new List<VMPbsModel>();
-
-            while (dr.Read())
+            using (var connection = _context.CreateConnection())
             {
-                var SList = new VMPbsModel();
-
-                SList.district_name = dr["district_name"].ToString();
-                SList.district_gid = dr["district_gid"].ToString();
-                //SList.TotalCount = dr["TotalCount"].ToString();
-                SList.screeningCount = "0";
-                SList.uniqueCount = "0";
-
-                RList.Add(SList);
+                var results = await connection.QueryAsync<Getdistrictpbs>(query, parameters);
+                foreach (var result in results)
+                {
+                    result.screeningCount = "0";
+                    result.uniqueCount = "0";
+                    RList.Add(result);
+                }
             }
-            con.Close();
-
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
             if (RList.Count > 0)
             {
@@ -1806,7 +1801,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh \r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n group by fm.district_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\n inner join address_district_master dm on tbl.district_id=dm.district_id \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getdistrictpbs SList = new Getdistrictpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1831,7 +1826,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = " select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh  \r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n inner join address_district_master dm on fm.district_id=dm.district_id \r\n group by fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getdistrictpbs SList = new Getdistrictpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1856,7 +1851,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from (select fm.district_id, district_name, district_gid, member_id, count(screening_id), JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_district_master dm on fm.district_id = dm.district_id where (hh.diseases->0->> 'outcome' = 'Referred out' or hh.diseases->0->> 'outcome' = 'Referred Out')group by fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.district_id,district_name,district_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getdistrictpbs SList = new Getdistrictpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1881,41 +1876,27 @@ namespace PHRLockerAPI.Controllers
 
         [HttpPost]
         [Route("Gethudpbs")]
-        public VMPbsModel hudpbs(FilterpayloadModel F)
-        {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPbsModel VM = new VMPbsModel();
-            con.Open();
-
+        public async Task<Gethudpbs> hudpbs(FilterpayloadModel F) { 
+        
             Filterforall(F);
 
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
+             var parameters = new { CommunityParam = CommunityParam };
+            string query = "select * from public.Gethudpbs(@CommunityParam)";
+            Gethudpbs VM = new Gethudpbs();
+            List<Gethudpbs> RList = new List<Gethudpbs>();
 
-            cmd.CommandText = "select MS.district_name,MS.district_gid,H.hud_id,H.hud_name,H.hud_gid from  public.address_district_master as MS  inner join address_hud_master H on H.district_id=MS.district_id \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id  " + CommunityParam + " \r\ngroup by MS.district_name,MS.district_gid,H.hud_id,H.hud_name,H.hud_gid";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPbsModel> RList = new List<VMPbsModel>();
-
-            while (dr.Read())
+            using (var connection = _context.CreateConnection())
             {
-                var SList = new VMPbsModel();
-
-                SList.district_name = dr["district_name"].ToString();
-                SList.district_gid = dr["district_gid"].ToString();
-                SList.hud_id = dr["hud_id"].ToString();
-                SList.hud_name = dr["hud_name"].ToString();
-                SList.hud_gid = dr["hud_gid"].ToString();
-                //SList.TotalCount = dr["TotalCount"].ToString();
-                SList.screeningCount = "0";
-                SList.uniqueCount = "0";
-
-                RList.Add(SList);
+                var results = await connection.QueryAsync<Gethudpbs>(query, parameters);
+                foreach (var result in results)
+                {
+                    result.screeningCount = "0";
+                    result.uniqueCount = "0";
+                    RList.Add(result);
+                }
             }
-            con.Close();
-
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+           
             con.Open();
             if (RList.Count > 0)
             {
@@ -1926,7 +1907,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.hud_id,tbl.hud_name,tbl.hud_gid,count(member_id) TotalCount from (select fm.hud_id, H.hud_name,H.hud_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_hud_master H on H.hud_id = fm.hud_id group by fm.hud_id, H.hud_name, H.hud_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.hud_id,tbl.hud_name,tbl.hud_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Gethudpbs SList = new Gethudpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1952,7 +1933,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = " select tbl.hud_id,hud_name,hud_gid,count(member_id) TotalCount from (select fm.hud_id, hud_name, hud_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_hud_master H on H.hud_id = fm.hud_id group by fm.hud_id, hud_name, hud_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "group by tbl.hud_id,hud_name,hud_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Gethudpbs SList = new Gethudpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1977,7 +1958,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.hud_id,hud_name,hud_gid,count(member_id) TotalCount from (select fm.hud_id, hud_name, hud_gid, member_id, count(screening_id), JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner                                                     join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner                                              join address_hud_master hd on fm.hud_id = hd.hud_id where (hh.diseases->0->> 'outcome' = 'Referred out' or hh.diseases->0->> 'outcome' = 'Referred Out')group by fm.hud_id,hud_name,hud_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.hud_id,hud_name,hud_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Gethudpbs SList = new Gethudpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1999,72 +1980,28 @@ namespace PHRLockerAPI.Controllers
 
         [HttpPost]
         [Route("Getblockpbs")]
-        public VMPbsModel blockpbs(FilterpayloadModel F)
+        public async Task<Getblockpbs> blockpbs(FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPbsModel VM = new VMPbsModel();
-            con.Open();
-
             Filterforall(F);
 
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
+            var parameters = new { CommunityParam = CommunityParam };
 
-            cmd.CommandText = "select MS.district_name,MS.district_gid,H.hud_id,H.hud_name,H.hud_gid,B.block_id,B.block_name,B.block_gid from  public.address_district_master as MS  inner join address_hud_master H on H.district_id=MS.district_id \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id inner join address_block_master B on B.block_id=fm.block_id  " + CommunityParam + " \r\ngroup by MS.district_name,MS.district_gid,H.hud_id,H.hud_name,H.hud_gid,B.block_id,B.block_name,B.block_gid";
+            string query = "select * from public.Getblockpbs(@CommunityParam)";
+            Getblockpbs VM = new Getblockpbs();
+            List<Getblockpbs> RList = new List<Getblockpbs>();
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPbsModel> RList = new List<VMPbsModel>();
-
-            while (dr.Read())
+            using (var connection = _context.CreateConnection())
             {
-                var SList = new VMPbsModel();
-
-                SList.district_name = dr["district_name"].ToString();
-                SList.district_gid = dr["district_gid"].ToString();
-                SList.hud_id = dr["hud_id"].ToString();
-                SList.hud_name = dr["hud_name"].ToString();
-                SList.hud_gid = dr["hud_gid"].ToString();
-
-                SList.block_id = dr["block_id"].ToString();
-                SList.block_name = dr["block_name"].ToString();
-                SList.block_gid = dr["block_gid"].ToString();
-
-                //SList.TotalCount = dr["TotalCount"].ToString();
-                SList.screeningCount = "0";
-                SList.uniqueCount = "0";
-
-                RList.Add(SList);
-            }
-            con.Close();
-
-            con.Open();
-            if (RList.Count > 0)
-            {
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "select tbl.block_id,tbl.block_name,tbl.block_gid,count(member_id) TotalCount from(select fm.block_id, H.block_name, H.block_gid, member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_block_master H on H.block_id = fm.block_id group by fm.block_id, H.block_name, H.block_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID " + InstitutionParam + " group by tbl.block_id,tbl.block_name,tbl.block_gid";
-
-                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
-                while (drInner.Read())
+                var results = await connection.QueryAsync<Getblockpbs>(query, parameters);
+                foreach (var result in results)
                 {
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        SList.block_name = RList[i].block_name;
-                        SList.block_id = RList[i].block_id;
-                        SList.block_gid = RList[i].block_gid;
-                        if (SList.block_gid == drInner["block_gid"].ToString())
-                        {
-                            RList[i].screeningCount = drInner["TotalCount"].ToString();
-                        }
-                    }
+                    result.screeningCount = "0";
+                    result.uniqueCount = "0";
+                    RList.Add(result);
                 }
             }
-            con.Close();
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+      
             con.Open();
             if (RList.Count > 0)
             {
@@ -2075,7 +2012,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.block_id,block_name,block_gid,count(member_id) TotalCount from (select fm.block_id, block_name, block_gid, member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_block_master H on H.block_id = fm.block_id group by fm.block_id, block_name, block_gid,member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.block_id,block_name,block_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getblockpbs SList = new Getblockpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -2100,7 +2037,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.block_id,block_name,block_gid,count(member_id) TotalCount from (select fm.block_id, block_name, block_gid, member_id, count(screening_id),JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_block_master hd on fm.block_id = hd.block_id where(hh.diseases->0->> 'outcome' = 'Referred out' or hh.diseases->0->> 'outcome' = 'Referred Out') group by fm.block_id, block_name, block_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id')tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.block_id,block_name,block_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getblockpbs SList = new Getblockpbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -2123,50 +2060,26 @@ namespace PHRLockerAPI.Controllers
 
         [HttpPost]
         [Route("Getvillagepbs")]
-        public VMPbsModel villagepbs(FilterpayloadModel F)
+        public async Task<Getvillagepbs> villagepbs(FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPbsModel VM = new VMPbsModel();
-            con.Open();
-
             Filterforall(F);
+            var parameters = new { CommunityParam = CommunityParam };
 
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
+            string query = "select * from public.getGetvillagepbs(@CommunityParam)";
+            Getvillagepbs VM = new Getvillagepbs();
+            List<Getvillagepbs> RList = new List<Getvillagepbs>();
 
-            cmd.CommandText = "select MS.district_name,MS.district_gid,H.hud_id,H.hud_name,H.hud_gid,B.block_id,B.block_name,B.block_gid,V.village_id,V.village_gid,V.village_name from  public.address_district_master as MS inner join address_hud_master H on H.district_id=MS.district_id inner join public.family_member_master as fm on MS.district_id=fm.district_id  " + CommunityParam + " INNER JOIN health_screening HS on HS.member_id=fm.member_id inner join address_block_master B on B.block_id=fm.block_id inner join address_village_master V on V.village_id=fm.village_id group by MS.district_name, MS.district_gid, H.hud_id, H.hud_name, H.hud_gid, B.block_id, B.block_name, B.block_gid, V.village_id, V.village_gid, V.village_name";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPbsModel> RList = new List<VMPbsModel>();
-
-            while (dr.Read())
+            using (var connection = _context.CreateConnection())
             {
-                var SList = new VMPbsModel();
-
-                SList.district_name = dr["district_name"].ToString();
-                SList.district_gid = dr["district_gid"].ToString();
-                SList.hud_id = dr["hud_id"].ToString();
-                SList.hud_name = dr["hud_name"].ToString();
-                SList.hud_gid = dr["hud_gid"].ToString();
-
-                SList.block_id = dr["block_id"].ToString();
-                SList.block_name = dr["block_name"].ToString();
-                SList.block_gid = dr["block_gid"].ToString();
-
-                SList.village_gid = dr["village_gid"].ToString();
-                SList.village_name = dr["village_name"].ToString();
-                SList.village_id = dr["village_id"].ToString();
-
-
-                //SList.TotalCount = dr["TotalCount"].ToString();
-                SList.screeningCount = "0";
-                SList.uniqueCount = "0";
-
-                RList.Add(SList);
+                var results = await connection.QueryAsync<Getvillagepbs>(query, parameters);
+                foreach (var result in results)
+                {
+                    result.screeningCount = "0";
+                    result.uniqueCount = "0";
+                    RList.Add(result);
+                }
             }
-            con.Close();
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
             con.Open();
             if (RList.Count > 0)
@@ -2178,7 +2091,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.village_id,tbl.village_name,tbl.village_gid,count(member_id) TotalCount from(select fm.village_id, H.village_name, H.village_gid, member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_village_master H on H.village_id = fm.village_id group by fm.village_id, H.village_name, H.village_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID " + InstitutionParam + " group by tbl.village_id,tbl.village_name,tbl.village_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getvillagepbs SList = new Getvillagepbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -2204,7 +2117,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.village_id,village_name,village_gid,count(member_id) TotalCount from (select fm.village_id, village_name, village_gid, member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_village_master H on H.village_id = fm.village_id group by fm.village_id, village_name, village_gid,member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.village_id,village_name,village_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getvillagepbs SList = new Getvillagepbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -2229,7 +2142,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "select tbl.village_id,village_name,village_gid,count(member_id) TotalCount from (select fm.village_id, village_name, village_gid, member_id, count(screening_id),JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh inner join family_master fm on hh.family_id = fm.family_id  " + CommunityParam + " inner join address_village_master hd on fm.village_id = hd.village_id where(hh.diseases->0->> 'outcome' = 'Referred out' or hh.diseases->0->> 'outcome' = 'Referred Out') group by fm.village_id, village_name, village_gid, member_id, JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id')tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.village_id,village_name,village_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                VMPbsModel SList = new VMPbsModel();
+                Getvillagepbs SList = new Getvillagepbs();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
