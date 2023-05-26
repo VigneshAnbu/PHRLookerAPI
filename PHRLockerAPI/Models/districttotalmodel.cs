@@ -1,6 +1,6 @@
 ﻿namespace PHRLockerAPI.Models
 {
-    public class Familiesstreetunallocated
+    public class districttotalmodel
     {
         public string district_name { get; set; }
 

@@ -766,8 +766,8 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
-        [Route("GetDrugdistricttest")]
-        public async Task<IEnumerable<OdrugdistrictModel>> GetDrugdistricttest([FromQuery] FilterpayloadModel F)
+        [Route("GetDrugdistrict")]
+        public async Task<IEnumerable<Familiesstreetunallocated>> GetDrugdistricttest([FromQuery] FilterpayloadModel F)
         {
 
             Filterforall(F);
@@ -778,12 +778,10 @@ namespace PHRLockerAPI.Controllers
 
             using (var connection = context.CreateConnection())
             {
-                var OBJ = await connection.QueryAsync<OdrugdistrictModel>(query);
+                var OBJ = await connection.QueryAsync<Familiesstreetunallocated>(query);
                 return OBJ.ToList();
             }
         }
-
-
 
 
         [HttpGet]
@@ -810,8 +808,10 @@ namespace PHRLockerAPI.Controllers
         }
 
 
+
         [HttpGet]
         [Route("GetDrugBlock")]
+
         public async Task<List<GetDrugBlock>> getBlock([FromQuery] FilterpayloadModel F)
         {
             Filterforall(F);
@@ -830,145 +830,193 @@ namespace PHRLockerAPI.Controllers
                 }
             }
 
-            return RList;
-        }
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetmtmbenBlock")]
-        public List<BlockModel> GetmtmbenBlock([FromQuery] FilterpayloadModel F)
+
+        public async Task<IEnumerable<blockhudtotalmodel>> GetmtmbenBlock([FromQuery] FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            //cmd.CommandText = "select BL.block_name,BL.block_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_block_master as BL on BL.block_id = M.block_id where s.drugs!='null' group by BL.block_name,BL.block_gid";
+            var query = "SELECT * from public.getmtmbenblock('" + CommunityParam + "','" + InstitutionParam + "')";
 
-
-
-            cmd.CommandText = "select tbl.block_name,tbl.block_gid,tbl.hud_gid,tbl.hud_name,sum(TotalCount) TotalCount from (SELECT(B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER, BL.block_name, BL.block_gid, HD.hud_gid, HD.hud_name, count(medical_history_id) TotalCount FROM  PUBLIC.HEALTH_history B  inner join family_master fm on fm.family_id = b.family_id " + CommunityParam + "  inner join address_district_master adm on adm.district_id = fm.district_id  inner join public.address_block_master as BL on BL.block_id = fm.block_id  inner join address_hud_master HD on HD.hud_id=BL.Hud_id WHERE b.mtm_beneficiary->>'avail_service'='yes'  and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array'  GROUP BY ARRUSER,BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name) tbl  INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID as text)  INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.block_name, tbl.block_gid, tbl.hud_gid, tbl.hud_name";
-
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<BlockModel> RList = new List<BlockModel>();
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new BlockModel();
-
-                SList.block_name = dr["block_name"].ToString();
-                SList.block_gid = dr["block_gid"].ToString();
-                SList.hud_gid = dr["hud_gid"].ToString();
-                SList.hud_name = dr["hud_name"].ToString();
-                SList.TotalCount = dr["TotalCount"].ToString();
-
-                RList.Add(SList);
+                var OBJ = await connection.QueryAsync<blockhudtotalmodel>(query);
+                return OBJ.ToList();
             }
-            con.Close();
-
-
-            return RList;
         }
+        //public List<BlockModel> GetmtmbenBlock([FromQuery] FilterpayloadModel F)
+        //{
+
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+
+        //    //cmd.CommandText = "select BL.block_name,BL.block_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_block_master as BL on BL.block_id = M.block_id where s.drugs!='null' group by BL.block_name,BL.block_gid";
+
+
+
+        //    cmd.CommandText = "select tbl.block_name,tbl.block_gid,tbl.hud_gid,tbl.hud_name,sum(TotalCount) TotalCount from (SELECT(B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER, BL.block_name, BL.block_gid, HD.hud_gid, HD.hud_name, count(medical_history_id) TotalCount FROM  PUBLIC.HEALTH_history B  inner join family_master fm on fm.family_id = b.family_id " + CommunityParam + "  inner join address_district_master adm on adm.district_id = fm.district_id  inner join public.address_block_master as BL on BL.block_id = fm.block_id  inner join address_hud_master HD on HD.hud_id=BL.Hud_id WHERE b.mtm_beneficiary->>'avail_service'='yes'  and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array'  GROUP BY ARRUSER,BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name) tbl  INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID as text)  INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.block_name, tbl.block_gid, tbl.hud_gid, tbl.hud_name";
+
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+        //    List<BlockModel> RList = new List<BlockModel>();
+
+        //    while (dr.Read())
+        //    {
+
+        //        var SList = new BlockModel();
+
+        //        SList.block_name = dr["block_name"].ToString();
+        //        SList.block_gid = dr["block_gid"].ToString();
+        //        SList.hud_gid = dr["hud_gid"].ToString();
+        //        SList.hud_name = dr["hud_name"].ToString();
+        //        SList.TotalCount = dr["TotalCount"].ToString();
+
+        //        RList.Add(SList);
+        //    }
+        //    con.Close();
+
+
+        //    return RList;
+        //}
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugVillage")]
-        public List<VillageModel> getVillage([FromQuery] FilterpayloadModel F)
-        {
 
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        public async Task<IEnumerable<Villagehudtotalmodel>> getVillage([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "select VL.village_name,VL.village_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_village_master as VL on VL.village_id = M.village_id where s.drugs!='null' group by VL.village_name,VL.village_gid";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
+            var query = "SELECT * from public.getdrugvillage('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmd.CommandText = "select VL.village_name,VL.village_gid,BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name,adm.district_gid\r\n,adm.district_name,count(screening_id) TotalCount from (SELECT (B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER, \r\nscreening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' \r\nGROUP BY ARRUSER,screening_id,member_id) tbl inner join family_master fm on fm.family_id=tbl.family_id   " + CommunityParam + "\r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID   " + InstitutionParam + "\r\ninner join address_district_master adm on adm.district_id=fm.district_id inner join public.address_village_master as VL on VL.village_id = fm.village_id inner join public.address_block_master as BL on BL.block_id = fm.block_id inner join address_hud_master HD on HD.hud_id=BL.Hud_id group by VL.village_name,VL.village_gid,BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name\r\n,adm.district_gid,adm.district_name";
-
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VillageModel> RList = new List<VillageModel>();
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new VillageModel();
-
-                SList.village_name = dr["village_name"].ToString();
-                SList.village_gid = dr["village_gid"].ToString();
-
-                SList.district_gid = dr["district_gid"].ToString();
-                SList.district_name = dr["district_name"].ToString();
-
-                SList.hud_gid = dr["hud_gid"].ToString();
-                SList.hud_name = dr["hud_name"].ToString();
-
-                SList.TotalCount = dr["TotalCount"].ToString();
-
-                RList.Add(SList);
+                var OBJ = await connection.QueryAsync<Villagehudtotalmodel>(query);
+                return OBJ.ToList();
             }
-            con.Close();
-
-
-            return RList;
         }
+
+        //public List<VillageModel> getVillage([FromQuery] FilterpayloadModel F)
+        //{
+
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    //cmd.CommandText = "select VL.village_name,VL.village_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_village_master as VL on VL.village_id = M.village_id where s.drugs!='null' group by VL.village_name,VL.village_gid";
+
+
+        //    cmd.CommandText = "select VL.village_name,VL.village_gid,BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name,adm.district_gid\r\n,adm.district_name,count(screening_id) TotalCount from (SELECT (B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER, \r\nscreening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' \r\nGROUP BY ARRUSER,screening_id,member_id) tbl inner join family_master fm on fm.family_id=tbl.family_id   " + CommunityParam + "\r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID   " + InstitutionParam + "\r\ninner join address_district_master adm on adm.district_id=fm.district_id inner join public.address_village_master as VL on VL.village_id = fm.village_id inner join public.address_block_master as BL on BL.block_id = fm.block_id inner join address_hud_master HD on HD.hud_id=BL.Hud_id group by VL.village_name,VL.village_gid,BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name\r\n,adm.district_gid,adm.district_name";
+
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+        //    List<VillageModel> RList = new List<VillageModel>();
+
+        //    while (dr.Read())
+        //    {
+
+        //        var SList = new VillageModel();
+
+        //        SList.village_name = dr["village_name"].ToString();
+        //        SList.village_gid = dr["village_gid"].ToString();
+
+        //        SList.district_gid = dr["district_gid"].ToString();
+        //        SList.district_name = dr["district_name"].ToString();
+
+        //        SList.hud_gid = dr["hud_gid"].ToString();
+        //        SList.hud_name = dr["hud_name"].ToString();
+
+        //        SList.TotalCount = dr["TotalCount"].ToString();
+
+        //        RList.Add(SList);
+        //    }
+        //    con.Close();
+
+
+        //    return RList;
+        //}
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetDrughud")]
-        public VMCommunityTriage gethud([FromQuery] FilterpayloadModel F)
+
+        public async Task<IEnumerable<Huddistricttotalmodel>> gethud([FromQuery] FilterpayloadModel F)
         {
-
-
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
 
             Filterforall(F);
 
-            ///*Hud Wise*/
-            con.Open();
-            NpgsqlCommand cmdHud = new NpgsqlCommand();
-            cmdHud.Connection = con;
-            cmdHud.CommandType = CommandType.Text;
-            //cmdHud.CommandText = "select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,count(S.member_id) TotalCount from  public.health_screening as S  inner join public.family_Master as M on M.family_id=S.family_id inner join public.address_district_master as MS on MS.district_id=M.district_id  inner join public.address_hud_master as hu on hu.HUD_id=M.HUD_id  where  s.drugs!='null' group by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
+            var query = "SELECT * from public.getdrughud('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdHud.CommandText = "select hu.hud_gid,hu.HUD_name,adm.district_gid,adm.district_name,count(screening_id) TotalCount from (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n screening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\n WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id,member_id) tbl\r\n inner join family_master fm on fm.family_id=tbl.family_id \r\n " + CommunityParam + "\r\n inner join address_district_master adm on adm.district_id=fm.district_id\r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text)  \r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID inner join public.address_hud_master as hu on hu.HUD_id=fm.HUD_id  \r\n " + InstitutionParam + "  group by hu.hud_gid,hu.HUD_name,adm.district_name,adm.district_gid";
-
-
-            NpgsqlDataReader drHud = cmdHud.ExecuteReader();
-            List<HudModel> RListHud = new List<HudModel>();
-            while (drHud.Read())
+            using (var connection = context.CreateConnection())
             {
-                var SList = new HudModel();
-                SList.hud_name = drHud["hud_name"].ToString();
-                SList.hud_gid = drHud["hud_gid"].ToString();
-                //SList.hud_id = drHud["hud_id"].ToString();
-                SList.district_gid = drHud["district_gid"].ToString();
-                SList.district_name = drHud["district_name"].ToString();
-                SList.TotalCount = drHud["TotalCount"].ToString();
-                RListHud.Add(SList);
+                var OBJ = await connection.QueryAsync<Huddistricttotalmodel>(query);
+                return OBJ.ToList();
             }
-            con.Close();
-            VM.HudWise = RListHud;
-            return VM;
         }
+
+        //public VMCommunityTriage gethud([FromQuery] FilterpayloadModel F)
+        //{
+
+
+
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMCommunityTriage VM = new VMCommunityTriage();
+
+        //    Filterforall(F);
+
+        //    ///*Hud Wise*/
+        //    con.Open();
+        //    NpgsqlCommand cmdHud = new NpgsqlCommand();
+        //    cmdHud.Connection = con;
+        //    cmdHud.CommandType = CommandType.Text;
+        //    //cmdHud.CommandText = "select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,count(S.member_id) TotalCount from  public.health_screening as S  inner join public.family_Master as M on M.family_id=S.family_id inner join public.address_district_master as MS on MS.district_id=M.district_id  inner join public.address_hud_master as hu on hu.HUD_id=M.HUD_id  where  s.drugs!='null' group by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid";
+
+
+        //    cmdHud.CommandText = "select hu.hud_gid,hu.HUD_name,adm.district_gid,adm.district_name,count(screening_id) TotalCount from (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n screening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\n WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id,member_id) tbl\r\n inner join family_master fm on fm.family_id=tbl.family_id \r\n " + CommunityParam + "\r\n inner join address_district_master adm on adm.district_id=fm.district_id\r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text)  \r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID inner join public.address_hud_master as hu on hu.HUD_id=fm.HUD_id  \r\n " + InstitutionParam + "  group by hu.hud_gid,hu.HUD_name,adm.district_name,adm.district_gid";
+
+
+        //    NpgsqlDataReader drHud = cmdHud.ExecuteReader();
+        //    List<HudModel> RListHud = new List<HudModel>();
+        //    while (drHud.Read())
+        //    {
+        //        var SList = new HudModel();
+        //        SList.hud_name = drHud["hud_name"].ToString();
+        //        SList.hud_gid = drHud["hud_gid"].ToString();
+        //        //SList.hud_id = drHud["hud_id"].ToString();
+        //        SList.district_gid = drHud["district_gid"].ToString();
+        //        SList.district_name = drHud["district_name"].ToString();
+        //        SList.TotalCount = drHud["TotalCount"].ToString();
+        //        RListHud.Add(SList);
+        //    }
+        //    con.Close();
+        //    VM.HudWise = RListHud;
+        //    return VM;
+        //}
         [HttpGet]
         [Route("GetDistrictScreenAgeWise")]
         public VMCommunityTriage getdistrictscreening()
@@ -1272,13 +1320,15 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getdistrictpopulation")]
-        public VMCommunityTriage districtpopulation([FromQuery] FilterpayloadModel F)
+
+        public districtscreeningcountmodel districtpopulation([FromQuery] FilterpayloadModel F)
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
+            districtscreeningcountmodel VM = new districtscreeningcountmodel();
             con.Open();
 
             Filterforall(F);
@@ -1288,14 +1338,17 @@ namespace PHRLockerAPI.Controllers
             cmd.CommandType = CommandType.Text;
             //cmd.CommandText = "select MS.district_name,MS.district_gid,count(M.family_id) TotalCount from  public.address_district_master as MS  inner join public.family_member_master as M on MS.district_id=M.district_id  group by MS.district_name,MS.district_gid";
 
-            cmd.CommandText = "select MS.district_name,MS.district_gid,count(fm.family_id) TotalCount from  public.address_district_master as MS  \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id  " + CommunityParam + " \r\ngroup by MS.district_name,MS.district_gid";
+            //cmd.CommandText = "select MS.district_name,MS.district_gid,count(fm.family_id) TotalCount from  public.address_district_master as MS  \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id  " + CommunityParam + " \r\ngroup by MS.district_name,MS.district_gid";
+
+            cmd.CommandText = "SELECT * from public.getdistrictpopulation('" + CommunityParam + "')";
+
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
+            List<districtscreeningcountmodel> RList = new List<districtscreeningcountmodel>();
 
             while (dr.Read())
             {
-                var SList = new CommunityTriageModel();
+                var SList = new districtscreeningcountmodel();
 
                 SList.district_name = dr["district_name"].ToString();
                 SList.district_gid = dr["district_gid"].ToString();
@@ -1313,11 +1366,17 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select tbl.district_name,tbl.district_gid,CASE  WHEN age between 0 and 17 THEN 'Below 18'  WHEN age between 18 and 29 THEN '18 to 30'  WHEN age between 30 and 120 THEN 'Above 30'  END AgeText,count(member_id) TotalCount from ( select MS.district_name,MS.district_gid,date_part('year',age(birth_date)) Age,M.member_id from  public.address_district_master as MS  inner join public.family_member_master as M on MS.district_id=M.district_id  inner join public.health_screening as S  on M.member_id=S.member_id  group by MS.district_name,MS.district_gid,date_part('year',age(birth_date)),M.member_id) tbl group by tbl.district_name,tbl.district_gid,CASE  WHEN age between 0 and 17 THEN 'Below 18'  WHEN age between 18 and 29 THEN '18 to 30'  WHEN age between 30 and 120 THEN 'Above 30'  END";
-                //cmdInner.CommandText = "select MS.district_name,MS.district_gid,CASE             WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'            WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'            WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'        END AgeText,count(M.family_id) TotalCount from  public.address_district_master as MS  inner join public.family_member_master as M on MS.district_id=M.district_id inner join public.health_screening as S  on M.member_id=S.member_id   group by MS.district_name,MS.district_gid,CASE             WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'            WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'            WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'        END";
+
+
+
+                //cmdInner.CommandText = "select tbl.district_name,tbl.district_gid,CASE  WHEN age between 0 and 17 THEN 'Below 18'  WHEN age between 18 and 29 THEN '18 to 30'  WHEN age between 30 and 120 THEN 'Above 30'  END AgeText,count(member_id) TotalCount from ( select MS.district_name,MS.district_gid,date_part('year',age(birth_date)) Age,M.member_id from  public.address_district_master as MS  inner join public.family_member_master as M on MS.district_id=M.district_id  inner join public.health_screening as S  on M.member_id=S.member_id  group by MS.district_name,MS.district_gid,date_part('year',age(birth_date)),M.member_id) tbl group by tbl.district_name,tbl.district_gid,CASE  WHEN age between 0 and 17 THEN 'Below 18'  WHEN age between 18 and 29 THEN '18 to 30'  WHEN age between 30 and 120 THEN 'Above 30'  END";
+
+                cmdInner.CommandText = "SELECT * from public.getdistrictpopulation_2()";
+
+
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
+                districtscreeningcountmodel SList = new districtscreeningcountmodel();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1347,12 +1406,13 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                //cmdInner.CommandText = "select fm.district_id,district_name,district_gid,count(hh.member_id) TotalCount from health_screening hh  inner join family_master fm on hh.family_id=fm.family_id inner join address_district_master dm on fm.district_id=dm.district_id group by fm.district_id,district_name,district_gid";
 
-                cmdInner.CommandText = "select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh \r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n group by fm.district_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\n inner join address_district_master dm on tbl.district_id=dm.district_id \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
+                cmdInner.CommandText = "SELECT * from public.getdistrictpopulation_3('" + CommunityParam + "','" + InstitutionParam + "')";
+
+                //cmdInner.CommandText = "select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh \r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n group by fm.district_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\n inner join address_district_master dm on tbl.district_id=dm.district_id \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
+                districtscreeningcountmodel SList = new districtscreeningcountmodel();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1373,12 +1433,13 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                //cmdInner.CommandText = "select district_id,district_name,district_gid,count(member_id) TotalCount from (select fm.district_id,district_name,district_gid,member_id  from health_screening hh  inner join family_master fm on hh.family_id=fm.family_id inner join address_district_master dm on fm.district_id=dm.district_id group by fm.district_id,district_name,district_gid,member_id) tbl group by district_id,district_name,district_gid";
 
-                cmdInner.CommandText = " select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh  \r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n inner join address_district_master dm on fm.district_id=dm.district_id \r\n group by fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
+                cmdInner.CommandText = "SELECT * from public.getdistrictpopulation_4('" + CommunityParam + "','" + InstitutionParam + "')";
+
+                //cmdInner.CommandText = " select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh  \r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n inner join address_district_master dm on fm.district_id=dm.district_id \r\n group by fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
+                districtscreeningcountmodel SList = new districtscreeningcountmodel();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1399,12 +1460,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                //cmdInner.CommandText = "select district_id,district_name,district_gid,count(member_id) TotalCount from (select fm.district_id,district_name,district_gid,member_id,count(screening_id) from health_screening hh  inner join family_master fm on hh.family_id=fm.family_id inner join address_district_master dm on fm.district_id=dm.district_id group by fm.district_id,district_name,district_gid,member_id having count(screening_id)=1) tbl group by district_id,district_name,district_gid";
 
-                cmdInner.CommandText = "select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,district_name,district_gid,member_id,count(screening_id),JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh\r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n inner join address_district_master dm on fm.district_id=dm.district_id \r\n group by fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' having count(screening_id)=1) tbl \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
+
+                cmdInner.CommandText = "SELECT * from public.getdistrictpopulation_5('" + CommunityParam + "','" + InstitutionParam + "')";
+
+                //cmdInner.CommandText = "select tbl.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (select fm.district_id,district_name,district_gid,member_id,count(screening_id),JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER from health_screening hh\r\n inner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\n inner join address_district_master dm on fm.district_id=dm.district_id \r\n group by fm.district_id,district_name,district_gid,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' having count(screening_id)=1) tbl \r\n INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\n group by tbl.district_id,district_name,district_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
+                districtscreeningcountmodel SList = new districtscreeningcountmodel();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RList.Count; i++)
@@ -1433,10 +1496,10 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetHUDScreenPopulationAgeWise")]
-        public VMCommunityTriage gethudscreeningAge([FromQuery] FilterpayloadModel F)
+        public populationHudModel gethudscreeningAge([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
+            populationHudModel VM = new populationHudModel();
 
             Filterforall(F);
 
@@ -1444,17 +1507,21 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdHud = new NpgsqlCommand();
             cmdHud.Connection = con;
             cmdHud.CommandType = CommandType.Text;
-            //cmdHud.CommandText = "select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,count(M.family_id) TotalCount from  public.address_district_master as MS  inner join public.address_hud_master as hu on MS.district_id=hu.district_id inner join public.family_member_master as M on MS.district_id=M.district_id and  hu.HUD_id=M.HUD_id  group by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid";
 
-            cmdHud.CommandText = "select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,count(fm.family_id) TotalCount from  \r\npublic.address_district_master as MS  \r\ninner join public.address_hud_master as hu on MS.district_id=hu.district_id \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id and  hu.HUD_id=fm.HUD_id  " + CommunityParam + " \r\ngroup by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid";
+
+
+
+            //cmdHud.CommandText = "select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,count(fm.family_id) TotalCount from  \r\npublic.address_district_master as MS  \r\ninner join public.address_hud_master as hu on MS.district_id=hu.district_id \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id and  hu.HUD_id=fm.HUD_id  " + CommunityParam + " \r\ngroup by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid";
+
+            cmdHud.CommandText = "SELECT * from public.gethudscreenpopulationagewise_1('" + CommunityParam + "','" + InstitutionParam + "')";
 
             NpgsqlDataReader drHud = cmdHud.ExecuteReader();
-            List<HudModel> RListHud = new List<HudModel>();
+            List<populationHudModel> RListHud = new List<populationHudModel>();
 
             while (drHud.Read())
             {
 
-                var SList = new HudModel();
+                var SList = new populationHudModel();
 
                 SList.hud_name = drHud["hud_name"].ToString();
                 SList.hud_gid = drHud["hud_gid"].ToString();
@@ -1477,15 +1544,17 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                //cmdInner.CommandText = "select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,count(M.family_id) TotalCount,CASE             WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'            WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'            WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30' END AgeText from  public.address_district_master as MS  inner join public.address_hud_master as hu on MS.district_id=hu.district_id inner join public.family_member_master as M on MS.district_id=M.district_id and  hu.HUD_id=M.HUD_id inner join public.health_screening as S  on M.member_id=S.member_id  group by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,CASE      WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'            WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'            WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30' END";
 
-                cmdInner.CommandText = "select tblFinal.district_name,tblFinal.hud_gid,tblFinal.HUD_name,tblFinal.district_gid,tblFinal.AgeText,sum(tblFinal.totalcount)TotalCount   from(select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid\r\n,(fm.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER,count(fm.family_id) TotalCount,CASE             \r\nWHEN date_part('year',age(fm.birth_date)) between 0 and 17 THEN 'Below 18'            \r\nWHEN date_part('year',age(fm.birth_date)) between 18 and 29 THEN '18 to 30'            \r\nWHEN date_part('year',age(fm.birth_date)) between 30 and 120 THEN 'Above 30' END AgeText \r\nfrom  public.address_district_master as MS  \r\ninner join public.address_hud_master as hu on MS.district_id=hu.district_id \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id and  hu.HUD_id=fm.HUD_id  " + CommunityParam + " \r\ninner join public.health_screening as S  on fm.member_id=S.member_id  \r\ngroup by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,ARRUSER,\r\nCASE      \r\nWHEN date_part('year',age(fm.birth_date)) between 0 and 17 THEN 'Below 18'            \r\nWHEN date_part('year',age(fm.birth_date)) between 18 and 29 THEN '18 to 30'            \r\nWHEN date_part('year',age(fm.birth_date)) between 30 and 120 THEN 'Above 30' END)tblFinal\r\nINNER JOIN USER_MASTER UM ON CAST(tblFinal.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by tblFinal.district_name,tblFinal.hud_gid,tblFinal.HUD_name,tblFinal.district_gid,tblFinal.AgeText";
+
+                cmdInner.CommandText = "SELECT * from public.gethudscreenpopulationagewise_2('" + CommunityParam + "','" + InstitutionParam + "')";
+
+                //cmdInner.CommandText = "select tblFinal.district_name,tblFinal.hud_gid,tblFinal.HUD_name,tblFinal.district_gid,tblFinal.AgeText,sum(tblFinal.totalcount)TotalCount   from(select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid\r\n,(fm.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER,count(fm.family_id) TotalCount,CASE             \r\nWHEN date_part('year',age(fm.birth_date)) between 0 and 17 THEN 'Below 18'            \r\nWHEN date_part('year',age(fm.birth_date)) between 18 and 29 THEN '18 to 30'            \r\nWHEN date_part('year',age(fm.birth_date)) between 30 and 120 THEN 'Above 30' END AgeText \r\nfrom  public.address_district_master as MS  \r\ninner join public.address_hud_master as hu on MS.district_id=hu.district_id \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id and  hu.HUD_id=fm.HUD_id  " + CommunityParam + " \r\ninner join public.health_screening as S  on fm.member_id=S.member_id  \r\ngroup by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,ARRUSER,\r\nCASE      \r\nWHEN date_part('year',age(fm.birth_date)) between 0 and 17 THEN 'Below 18'            \r\nWHEN date_part('year',age(fm.birth_date)) between 18 and 29 THEN '18 to 30'            \r\nWHEN date_part('year',age(fm.birth_date)) between 30 and 120 THEN 'Above 30' END)tblFinal\r\nINNER JOIN USER_MASTER UM ON CAST(tblFinal.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by tblFinal.district_name,tblFinal.hud_gid,tblFinal.HUD_name,tblFinal.district_gid,tblFinal.AgeText";
 
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                CommunityTriageModel SList = new CommunityTriageModel();
+                populationHudModel SList = new populationHudModel();
 
 
 
@@ -1515,12 +1584,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                //cmdInner.CommandText = "select hm.hud_gid,count(member_id) TotalCount from (select fm.hud_id,member_id  from health_screening hh inner join family_master fm on hh.family_id=fm.family_id group by fm.hud_id,member_id) tbl inner join address_hud_master hm on hm.hud_id=tbl.hud_id group by hm.hud_gid";
 
-                cmdInner.CommandText = "select hm.hud_gid,count(member_id) TotalCount from \r\n(select fm.hud_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh \r\ninner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\ngroup by fm.hud_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\ninner join address_hud_master hm on hm.hud_id=tbl.hud_id \r\nINNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by hm.hud_gid";
+
+                cmdInner.CommandText = "SELECT * from public.gethudscreenpopulationagewise_3('" + CommunityParam + "','" + InstitutionParam + "')";
+
+                //cmdInner.CommandText = "select hm.hud_gid,count(member_id) TotalCount from \r\n(select fm.hud_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh \r\ninner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + "\r\ngroup by fm.hud_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id') tbl \r\ninner join address_hud_master hm on hm.hud_id=tbl.hud_id \r\nINNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by hm.hud_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
+                populationHudModel SList = new populationHudModel();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RListHud.Count; i++)
@@ -1540,13 +1611,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                //cmdInner.CommandText = "select fm.hud_id,hm.hud_gid,count(member_id) TotalCount  from health_screening hh inner join family_master fm on hh.family_id=fm.family_id inner join address_hud_master hm on hm.hud_id=fm.hud_id group by fm.hud_id,hm.hud_gid";
 
-                cmdInner.CommandText = "select fm.hud_id,hm.hud_gid,count(member_id) TotalCount  from \r\n(SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,member_id  FROM PUBLIC.health_screening B\r\nWHERE JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,member_id,family_id) hh \r\ninner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + " \r\ninner join address_hud_master hm on hm.hud_id=fm.hud_id \r\nINNER JOIN USER_MASTER UM ON CAST(hh.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by fm.hud_id,hm.hud_gid";
+                cmdInner.CommandText = "SELECT * from public.gethudscreenpopulationagewise_4('" + CommunityParam + "','" + InstitutionParam + "')";
+
+                //cmdInner.CommandText = "select fm.hud_id,hm.hud_gid,count(member_id) TotalCount  from \r\n(SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,member_id  FROM PUBLIC.health_screening B\r\nWHERE JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,member_id,family_id) hh \r\ninner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + " \r\ninner join address_hud_master hm on hm.hud_id=fm.hud_id \r\nINNER JOIN USER_MASTER UM ON CAST(hh.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by fm.hud_id,hm.hud_gid";
 
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
+                populationHudModel SList = new populationHudModel();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RListHud.Count; i++)
@@ -1565,14 +1637,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                //cmdInner.CommandText = "select hm.hud_gid,count(member_id) TotalCount from (select fm.hud_id,member_id,count(screening_id)  from health_screening hh inner join family_master fm on hh.family_id=fm.family_id group by fm.hud_id,member_id having count(screening_id)=1) tbl inner join address_hud_master hm on hm.hud_id=tbl.hud_id  group by hm.hud_gid";
+                cmdInner.CommandText = "SELECT * from public.gethudscreenpopulationagewise_5('" + CommunityParam + "','" + InstitutionParam + "')";
 
 
-                cmdInner.CommandText = "select hm.hud_gid,count(member_id) TotalCount from \r\n(select fm.hud_id,member_id,count(screening_id),JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh \r\ninner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + " \r\ngroup by fm.hud_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' having count(screening_id)=1) tbl \r\ninner join address_hud_master hm on hm.hud_id=tbl.hud_id  \r\nINNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by hm.hud_gid";
+                //cmdInner.CommandText = "select hm.hud_gid,count(member_id) TotalCount from \r\n(select fm.hud_id,member_id,count(screening_id),JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' AS ARRUSER  from health_screening hh \r\ninner join family_master fm on hh.family_id=fm.family_id  " + CommunityParam + " \r\ngroup by fm.hud_id,member_id,JSONB_ARRAY_ELEMENTS(hh.UPDATE_REGISTER)->> 'user_id' having count(screening_id)=1) tbl \r\ninner join address_hud_master hm on hm.hud_id=tbl.hud_id  \r\nINNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by hm.hud_gid";
 
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
-                CommunityTriageModel SList = new CommunityTriageModel();
+                populationHudModel SList = new populationHudModel();
                 while (drInner.Read())
                 {
                     for (int i = 0; i < RListHud.Count; i++)
@@ -1599,228 +1671,246 @@ namespace PHRLockerAPI.Controllers
         //Dashboard Count
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
-        [OutputCache(Duration =30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gettotalpopulation")]
-        public Object gettotalpopulation([FromQuery] FilterpayloadModel F)
+
+        public async Task<IEnumerable<Object>> gettotalpopulation([FromQuery] FilterpayloadModel F)
         {
 
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
-            string TotalPopulation = "0";
+            Filterforall(F);
 
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            if (F.district_id != "")
+            var query = "SELECT * from public.gettotalpopulation('" + CommunityParam + "')";
+
+            using (var connection = context.CreateConnection())
             {
-                string Disparam = "";
-
-                if (F.district_id.Contains(","))
-                {
-                    string[] DistrictValue = F.district_id.Split(",");
-
-                    int i = 0;
-
-                    foreach (var v in DistrictValue)
-                    {
-                        if (i == (DistrictValue.Length - 1))
-                        {
-                            Disparam = Disparam + "(fm.district_id = '" + v + "')";
-                        }
-                        else
-                        {
-                            Disparam = Disparam + "(fm.district_id = '" + v + "') or";
-                        }
-                        i++;
-                    }
-
-                    Disparam = "where " + Disparam;
-
-                }
-                else
-                {
-                    Disparam = "where (fm.district_id = '" + F.district_id + "')";
-                }
-
-
-                CommunityParam = Disparam;
-
+                var OBJ = await connection.QueryAsync<Object>(query);
+                return OBJ.ToList();
             }
-            if (F.hud_id != "")
-            {
-                string Disparam = "";
-
-                if (F.hud_id.Contains(","))
-                {
-                    int i = 0;
-
-                    string[] HudValue = F.hud_id.Split(",");
-
-                    foreach (var v in HudValue)
-                    {
-                        if (i == (HudValue.Length - 1))
-                        {
-                            Disparam = Disparam + "(fm.hud_id = '" + v + "')";
-                        }
-                        else
-                        {
-                            Disparam = Disparam + "(fm.hud_id = '" + v + "') or";
-                        }
-
-                        i++;
-                    }
-
-                    if (F.district_id != "")
-                    {
-                        Disparam = "and " + Disparam;
-                    }
-                    else
-                    {
-                        Disparam = "where " + Disparam;
-                    }
-
-
-
-                }
-                else
-                {
-                    if (F.district_id != "")
-                    {
-                        Disparam = "and " + "(fm.hud_id = '" + F.hud_id + "')";
-                    }
-                    else
-                    {
-                        Disparam = "where (fm.hud_id = '" + F.hud_id + "')";
-                    }
-                }
-
-
-                CommunityParam = CommunityParam + Disparam;
-            }
-            if (F.block_id != "")
-            {
-                string Disparam = "";
-
-                if (F.block_id.Contains(","))
-                {
-                    int i = 0;
-                    string[] BlockValue = F.block_id.Split(",");
-
-                    foreach (var v in BlockValue)
-                    {
-                        if (i == (BlockValue.Length - 1))
-                        {
-                            Disparam = Disparam + "(fm.block_id = '" + v + "')";
-                        }
-                        else
-                        {
-                            Disparam = Disparam + "(fm.block_id = '" + v + "') or";
-                        }
-
-                        i++;
-                    }
-
-
-                    if (F.district_id != "" || F.hud_id != "")
-                    {
-                        Disparam = "and " + Disparam;
-                    }
-                    else
-                    {
-                        Disparam = "where " + Disparam;
-                    }
-
-
-
-                }
-                else
-                {
-                    if (F.district_id != "" || F.hud_id != "")
-                    {
-                        Disparam = "and " + "(fm.block_id = '" + F.block_id + "')";
-                    }
-                    else
-                    {
-                        Disparam = "where (fm.block_id = '" + F.block_id + "')";
-                    }
-
-                }
-
-                CommunityParam = CommunityParam + Disparam;
-
-            }
-            if (F.facility_id != "")
-            {
-                string Disparam = "";
-
-                if (F.facility_id.Contains(","))
-                {
-
-                    int i = 0;
-
-                    string[] FacilityValue = F.facility_id.Split(",");
-
-                    foreach (var v in FacilityValue)
-                    {
-                        if (i == (FacilityValue.Length - 1))
-                        {
-                            Disparam = Disparam + "(fm.facility_id = '" + v + "')";
-                        }
-                        else
-                        {
-                            Disparam = Disparam + "(fm.facility_id = '" + v + "') or";
-                        }
-
-                        i++;
-                    }
-
-                    if (F.district_id != "" || F.hud_id != "" || F.block_id != "")
-                    {
-                        Disparam = "and " + Disparam;
-                    }
-                    else
-                    {
-                        Disparam = "where " + Disparam;
-                    }
-
-
-
-                }
-                else
-                {
-                    if (F.district_id != "" || F.hud_id != "" || F.block_id != "")
-                    {
-                        Disparam = "and " + "(fm.facility_id = '" + F.facility_id + "')";
-                    }
-                    else
-                    {
-                        Disparam = "where (fm.facility_id = '" + F.facility_id + "')";
-                    }
-
-
-                }
-
-
-
-                CommunityParam = CommunityParam + Disparam;
-            }
-
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "select count(M.family_id) TotalCount from  public.family_member_master  M";
-
-            cmd.CommandText = "select count(fm.family_id) TotalCount from  public.family_member_master fm " + CommunityParam + "";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
-
-            while (dr.Read())
-            {
-                TotalPopulation = dr["TotalCount"].ToString();
-            }
-            con.Close();
-            return new { totalPopulation = TotalPopulation };
         }
+
+
+        //public Object gettotalpopulation([FromQuery] FilterpayloadModel F)
+        //{
+
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMCommunityTriage VM = new VMCommunityTriage();
+        //    string TotalPopulation = "0";
+
+
+        //    if (F.district_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.district_id.Contains(","))
+        //        {
+        //            string[] DistrictValue = F.district_id.Split(",");
+
+        //            int i = 0;
+
+        //            foreach (var v in DistrictValue)
+        //            {
+        //                if (i == (DistrictValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.district_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.district_id = '" + v + "') or";
+        //                }
+        //                i++;
+        //            }
+
+        //            Disparam = "where " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "where (fm.district_id = '" + F.district_id + "')";
+        //        }
+
+
+        //        CommunityParam = Disparam;
+
+        //    }
+        //    if (F.hud_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.hud_id.Contains(","))
+        //        {
+        //            int i = 0;
+
+        //            string[] HudValue = F.hud_id.Split(",");
+
+        //            foreach (var v in HudValue)
+        //            {
+        //                if (i == (HudValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.hud_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.hud_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+        //            if (F.district_id != "")
+        //            {
+        //                Disparam = "and " + Disparam;
+        //            }
+        //            else
+        //            {
+        //                Disparam = "where " + Disparam;
+        //            }
+
+
+
+        //        }
+        //        else
+        //        {
+        //            if (F.district_id != "")
+        //            {
+        //                Disparam = "and " + "(fm.hud_id = '" + F.hud_id + "')";
+        //            }
+        //            else
+        //            {
+        //                Disparam = "where (fm.hud_id = '" + F.hud_id + "')";
+        //            }
+        //        }
+
+
+        //        CommunityParam = CommunityParam + Disparam;
+        //    }
+        //    if (F.block_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.block_id.Contains(","))
+        //        {
+        //            int i = 0;
+        //            string[] BlockValue = F.block_id.Split(",");
+
+        //            foreach (var v in BlockValue)
+        //            {
+        //                if (i == (BlockValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.block_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.block_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+
+        //            if (F.district_id != "" || F.hud_id != "")
+        //            {
+        //                Disparam = "and " + Disparam;
+        //            }
+        //            else
+        //            {
+        //                Disparam = "where " + Disparam;
+        //            }
+
+
+
+        //        }
+        //        else
+        //        {
+        //            if (F.district_id != "" || F.hud_id != "")
+        //            {
+        //                Disparam = "and " + "(fm.block_id = '" + F.block_id + "')";
+        //            }
+        //            else
+        //            {
+        //                Disparam = "where (fm.block_id = '" + F.block_id + "')";
+        //            }
+
+        //        }
+
+        //        CommunityParam = CommunityParam + Disparam;
+
+        //    }
+        //    if (F.facility_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.facility_id.Contains(","))
+        //        {
+
+        //            int i = 0;
+
+        //            string[] FacilityValue = F.facility_id.Split(",");
+
+        //            foreach (var v in FacilityValue)
+        //            {
+        //                if (i == (FacilityValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.facility_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.facility_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+        //            if (F.district_id != "" || F.hud_id != "" || F.block_id != "")
+        //            {
+        //                Disparam = "and " + Disparam;
+        //            }
+        //            else
+        //            {
+        //                Disparam = "where " + Disparam;
+        //            }
+
+
+
+        //        }
+        //        else
+        //        {
+        //            if (F.district_id != "" || F.hud_id != "" || F.block_id != "")
+        //            {
+        //                Disparam = "and " + "(fm.facility_id = '" + F.facility_id + "')";
+        //            }
+        //            else
+        //            {
+        //                Disparam = "where (fm.facility_id = '" + F.facility_id + "')";
+        //            }
+
+
+        //        }
+
+
+
+        //        CommunityParam = CommunityParam + Disparam;
+        //    }
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    //cmd.CommandText = "select count(M.family_id) TotalCount from  public.family_member_master  M";
+
+        //    cmd.CommandText = "select count(fm.family_id) TotalCount from  public.family_member_master fm " + CommunityParam + "";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+        //    List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
+
+        //    while (dr.Read())
+        //    {
+        //        TotalPopulation = dr["TotalCount"].ToString();
+        //    }
+        //    con.Close();
+        //    return new { totalPopulation = TotalPopulation };
+        //}
 
 
 
