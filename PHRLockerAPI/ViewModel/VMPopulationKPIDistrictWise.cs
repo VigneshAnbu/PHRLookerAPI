@@ -5,6 +5,8 @@ namespace PHRLockerAPI.ViewModel
     public class VMPopulationKPIDistrictWise
     {
 
+        public string village_id { get; set; }
+
 
         public string district_id { get; set; }
 
@@ -16,6 +18,15 @@ namespace PHRLockerAPI.ViewModel
 
         public string hud_name { get; set; }
 
+        public string block_id { get; set; }
+
+        public string block_gid { get; set; }
+
+        public string block_name { get; set; }
+
+        public string village_gid { get; set; }
+
+        public string village_name { get; set; }
 
         public string total_population { get; set; }
 
