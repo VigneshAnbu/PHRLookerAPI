@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Npgsql;
+using PHRLockerAPI.DBContext;
 using PHRLockerAPI.Models;
 using PHRLockerAPI.ViewModel;
 using System;
@@ -25,10 +27,18 @@ namespace PHRLockerAPI.Controllers
         string InstitutionParam = "";
 
 
-        public WebAPINewController(IConfiguration configuration)
+        private readonly DapperContext context;
+
+        public WebAPINewController(DapperContext context,IConfiguration configuration)
         {
+            this.context = context;
             _configuration = configuration;
         }
+
+        //public WebAPINewController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //}
 
         [HttpGet]
         [Route("FilterAll")]
@@ -1135,436 +1145,591 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart1")]
-        public List<GenderWise> GetChartDetails1([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+
+        public async Task<IEnumerable<GenderWise>> GetChartDetails1([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "select count(S.screening_id)as Count,Gender from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ngroup by Gender limit 3";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmd.CommandText = "select count(screening_id)as Count,tbl.Gender from (SELECT B.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,screening_id, gender  FROM PUBLIC.health_screening B inner join family_member_master fm on B.member_id = fm.member_id   " + CommunityParam + " GROUP BY ARRUSER, screening_id, gender) tbl INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.Gender order by count desc limit 3";
+            var query = "SELECT * from public.getchart1('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<GenderWise> RList = new List<GenderWise>();
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new GenderWise();
-
-                SList.Gender = dr["Gender"].ToString();
-                SList.Count = dr["Count"].ToString();
-
-                RList.Add(SList);
+                var OBJ = await connection.QueryAsync<GenderWise>(query);
+                return OBJ.ToList();
             }
-
-
-            con.Close();
-
-            VM.GenderList = RList;
-
-
-            return RList;
-
         }
+
+        //public List<GenderWise> GetChartDetails1([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    //cmd.CommandText = "select count(S.screening_id)as Count,Gender from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ngroup by Gender limit 3";
+
+        //    cmd.CommandText = "select count(screening_id)as Count,tbl.Gender from (SELECT B.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,screening_id, gender  FROM PUBLIC.health_screening B inner join family_member_master fm on B.member_id = fm.member_id   " + CommunityParam + " GROUP BY ARRUSER, screening_id, gender) tbl INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " group by tbl.Gender order by count desc limit 3";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+        //    List<GenderWise> RList = new List<GenderWise>();
+
+        //    while (dr.Read())
+        //    {
+
+        //        var SList = new GenderWise();
+
+        //        SList.Gender = dr["Gender"].ToString();
+        //        SList.Count = dr["Count"].ToString();
+
+        //        RList.Add(SList);
+        //    }
+
+
+        //    con.Close();
+
+        //    VM.GenderList = RList;
+
+
+        //    return RList;
+
+        //}
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart2")]
-        public AgeWiseDisplayModel GetChartDetails2([FromQuery] FilterpayloadModel F)
+        public async Task<IEnumerable<AgeWiseDisplayModel>> GetChartDetails2([FromQuery] FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            AgeWiseDisplayModel VM = new AgeWiseDisplayModel();
-
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmdAge = new NpgsqlCommand();
-            cmdAge.Connection = con;
-            cmdAge.CommandType = CommandType.Text;
-            //cmdAge.CommandText = "SELECT \r\n       CASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END Age,count(M.family_id)\r\nFROM public.family_member_master as M \r\ninner join public.health_screening ON health_screening.member_id = M.member_id\r\ngroup by \r\nCASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END limit 3";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdAge.CommandText = "select tblFinal.Age,sum(tblFinal.totalcount) count from(SELECT\r\nS.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,CASE \r\nWHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\nWHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\nWHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\nEND Age,count(fm.member_id ) totalcount\r\nFROM public.family_member_master as fm \r\ninner join public.health_screening S ON S.member_id = fm.member_id \r\n " + CommunityParam + " \r\ngroup by ARRUSER\r\n,Age)tblFinal\r\nINNER JOIN USER_MASTER UM ON CAST(tblFinal.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by tblFinal.Age\r\norder by count desc limit 3";
+            var query = "SELECT * from public.getchart2('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlDataReader drAge = cmdAge.ExecuteReader();
-            List<AgeWiseDisplayModel> RListAge = new List<AgeWiseDisplayModel>();
-
-            while (drAge.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new AgeWiseDisplayModel();
-
-                if (drAge["age"].ToString() == "18 to 30")
-                {
-                    VM.middle = drAge["count"].ToString();
-
-                }
-                else if (drAge["age"].ToString() == "Below 18")
-                {
-                    VM.below = drAge["count"].ToString();
-
-                }
-                else if (drAge["age"].ToString() == "Above 30")
-                {
-                    VM.above = drAge["count"].ToString();
-                }
-
-
-
-                RListAge.Add(SList);
+                var OBJ = await connection.QueryAsync<AgeWiseDisplayModel>(query);
+                return OBJ.ToList();
             }
+        }
 
-            con.Close();
-            //VM.AgeList = RListAge;
+        //public AgeWiseDisplayModel GetChartDetails2([FromQuery] FilterpayloadModel F)
+        //{
+
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    AgeWiseDisplayModel VM = new AgeWiseDisplayModel();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmdAge = new NpgsqlCommand();
+        //    cmdAge.Connection = con;
+        //    cmdAge.CommandType = CommandType.Text;
+        //    //cmdAge.CommandText = "SELECT \r\n       CASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END Age,count(M.family_id)\r\nFROM public.family_member_master as M \r\ninner join public.health_screening ON health_screening.member_id = M.member_id\r\ngroup by \r\nCASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END limit 3";
+
+        //    cmdAge.CommandText = "select tblFinal.Age,sum(tblFinal.totalcount) count from(SELECT\r\nS.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,CASE \r\nWHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\nWHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\nWHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\nEND Age,count(fm.member_id ) totalcount\r\nFROM public.family_member_master as fm \r\ninner join public.health_screening S ON S.member_id = fm.member_id \r\n " + CommunityParam + " \r\ngroup by ARRUSER\r\n,Age)tblFinal\r\nINNER JOIN USER_MASTER UM ON CAST(tblFinal.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by tblFinal.Age\r\norder by count desc limit 3";
+
+        //    NpgsqlDataReader drAge = cmdAge.ExecuteReader();
+        //    List<AgeWiseDisplayModel> RListAge = new List<AgeWiseDisplayModel>();
+
+        //    while (drAge.Read())
+        //    {
+
+        //        var SList = new AgeWiseDisplayModel();
+
+        //        if (drAge["age"].ToString() == "18 to 30")
+        //        {
+        //            VM.middle = drAge["count"].ToString();
+
+        //        }
+        //        else if (drAge["age"].ToString() == "Below 18")
+        //        {
+        //            VM.below = drAge["count"].ToString();
+
+        //        }
+        //        else if (drAge["age"].ToString() == "Above 30")
+        //        {
+        //            VM.above = drAge["count"].ToString();
+        //        }
+
+
+
+        //        RListAge.Add(SList);
+        //    }
+
+        //    con.Close();
+        //    //VM.AgeList = RListAge;
             
 
-            return VM;
+        //    return VM;
 
-        }
+        //}
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart3")]
-        public List<WeekModel> GetChartDetails3([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+        public async Task<IEnumerable<WeekModel>> GetChartDetails3([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmdWeek = new NpgsqlCommand();
-            cmdWeek.Connection = con;
-            cmdWeek.CommandType = CommandType.Text;
-            //cmdWeek.CommandText = "select to_char(Weekly, 'mon') as Months,Count from(SELECT DATE_TRUNC('week',last_update_date)AS  weekly,COUNT(screening_id) AS count\r\nFROM public.health_screening GROUP BY weekly order by weekly desc limit 14)tbl";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdWeek.CommandText = "select to_char(Weekly, 'mon') as Months,Count \r\nfrom(SELECT DATE_TRUNC('week',tbl.last_update_date)AS  weekly,COUNT(screening_id) AS count\r\nFROM (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,screening_id,last_update_date  FROM PUBLIC.health_screening B\r\nWHERE JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id) tbl\r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " \r\nGROUP BY weekly order by weekly desc limit 14)tbl1";
+            var query = "SELECT * from public.getchart3('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlDataReader drWeek = cmdWeek.ExecuteReader();
-            List<WeekModel> RListWeek = new List<WeekModel>();
-
-            while (drWeek.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new WeekModel();
-
-                SList.Months = drWeek["Months"].ToString();
-                SList.Count = drWeek["Count"].ToString();
-
-                RListWeek.Add(SList);
+                var OBJ = await connection.QueryAsync<WeekModel>(query);
+                return OBJ.ToList();
             }
-
-
-            con.Close();
-
-            
-            VM.WeekList = RListWeek;
-            
-
-            return RListWeek;
-
         }
+
+        //public List<WeekModel> GetChartDetails3([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmdWeek = new NpgsqlCommand();
+        //    cmdWeek.Connection = con;
+        //    cmdWeek.CommandType = CommandType.Text;
+        //    //cmdWeek.CommandText = "select to_char(Weekly, 'mon') as Months,Count from(SELECT DATE_TRUNC('week',last_update_date)AS  weekly,COUNT(screening_id) AS count\r\nFROM public.health_screening GROUP BY weekly order by weekly desc limit 14)tbl";
+
+        //    cmdWeek.CommandText = "select to_char(Weekly, 'mon') as Months,Count \r\nfrom(SELECT DATE_TRUNC('week',tbl.last_update_date)AS  weekly,COUNT(screening_id) AS count\r\nFROM (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,screening_id,last_update_date  FROM PUBLIC.health_screening B\r\nWHERE JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id) tbl\r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " \r\nGROUP BY weekly order by weekly desc limit 14)tbl1";
+
+        //    NpgsqlDataReader drWeek = cmdWeek.ExecuteReader();
+        //    List<WeekModel> RListWeek = new List<WeekModel>();
+
+        //    while (drWeek.Read())
+        //    {
+
+        //        var SList = new WeekModel();
+
+        //        SList.Months = drWeek["Months"].ToString();
+        //        SList.Count = drWeek["Count"].ToString();
+
+        //        RListWeek.Add(SList);
+        //    }
+
+
+        //    con.Close();
+
+            
+        //    VM.WeekList = RListWeek;
+            
+
+        //    return RListWeek;
+
+        //}
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart4")]
-        public VMMtmPerformance GetChartDetails4([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+        public async Task<IEnumerable<AgeWiseDisplayModel>> GetChartDetails4([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmdAge = new NpgsqlCommand();
-            cmdAge.Connection = con;
-            cmdAge.CommandType = CommandType.Text;
-            //cmdAge.CommandText = "SELECT \r\n       CASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END Age,count(M.family_id)\r\nFROM public.family_member_master as M \r\ninner join public.health_screening ON health_screening.member_id = M.member_id\r\ngroup by \r\nCASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END limit 3";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdAge.CommandText = "select tblFinal.Age,sum(tblFinal.totalcount) count from(SELECT\r\nS.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,CASE \r\nWHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\nWHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\nWHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\nEND Age,count(fm.member_id ) totalcount\r\nFROM public.family_member_master as fm \r\ninner join public.health_screening S ON S.member_id = fm.member_id \r\n " + CommunityParam + " \r\ngroup by ARRUSER\r\n,Age)tblFinal\r\nINNER JOIN USER_MASTER UM ON CAST(tblFinal.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by tblFinal.Age\r\norder by count desc limit 3";
+            var query = "SELECT * from public.getchart4('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlDataReader drAge = cmdAge.ExecuteReader();
-            List<AgeWiseModel> RListAge = new List<AgeWiseModel>();
-
-            while (drAge.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new AgeWiseModel();
-
-                if (drAge["age"].ToString() == "18 to 30")
-                {
-                    VM.Middle = drAge["count"].ToString();
-
-                }
-                else if (drAge["age"].ToString() == "Below 18")
-                {
-                    VM.Below = drAge["count"].ToString();
-
-                }
-                else if (drAge["age"].ToString() == "Above 30")
-                {
-                    VM.Above = drAge["count"].ToString();
-                }
-
-
-
-                RListAge.Add(SList);
+                var OBJ = await connection.QueryAsync<AgeWiseDisplayModel>(query);
+                return OBJ.ToList();
             }
-
-
-            con.Close();
-
-
-            VM.AgeList = RListAge;
-
-
-            return VM;
-
         }
+
+        //public VMMtmPerformance GetChartDetails4([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmdAge = new NpgsqlCommand();
+        //    cmdAge.Connection = con;
+        //    cmdAge.CommandType = CommandType.Text;
+        //    //cmdAge.CommandText = "SELECT \r\n       CASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END Age,count(M.family_id)\r\nFROM public.family_member_master as M \r\ninner join public.health_screening ON health_screening.member_id = M.member_id\r\ngroup by \r\nCASE \r\n           WHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\n           WHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\n           WHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\n       END limit 3";
+
+        //    cmdAge.CommandText = "select tblFinal.Age,sum(tblFinal.totalcount) count from(SELECT\r\nS.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,CASE \r\nWHEN date_part('year',age(birth_date)) between 0 and 17 THEN 'Below 18'\r\nWHEN date_part('year',age(birth_date)) between 18 and 29 THEN '18 to 30'\r\nWHEN date_part('year',age(birth_date)) between 30 and 120 THEN 'Above 30'\r\nEND Age,count(fm.member_id ) totalcount\r\nFROM public.family_member_master as fm \r\ninner join public.health_screening S ON S.member_id = fm.member_id \r\n " + CommunityParam + " \r\ngroup by ARRUSER\r\n,Age)tblFinal\r\nINNER JOIN USER_MASTER UM ON CAST(tblFinal.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ngroup by tblFinal.Age\r\norder by count desc limit 3";
+
+        //    NpgsqlDataReader drAge = cmdAge.ExecuteReader();
+        //    List<AgeWiseModel> RListAge = new List<AgeWiseModel>();
+
+        //    while (drAge.Read())
+        //    {
+
+        //        var SList = new AgeWiseModel();
+
+        //        if (drAge["age"].ToString() == "18 to 30")
+        //        {
+        //            VM.Middle = drAge["count"].ToString();
+
+        //        }
+        //        else if (drAge["age"].ToString() == "Below 18")
+        //        {
+        //            VM.Below = drAge["count"].ToString();
+
+        //        }
+        //        else if (drAge["age"].ToString() == "Above 30")
+        //        {
+        //            VM.Above = drAge["count"].ToString();
+        //        }
+
+
+
+        //        RListAge.Add(SList);
+        //    }
+
+
+        //    con.Close();
+
+
+        //    VM.AgeList = RListAge;
+
+
+        //    return VM;
+
+        //}
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart5")]
-        public List<BlockWiseModel> GetChartDetails5([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+
+        public async Task<IEnumerable<BlockWiseModel>> GetChartDetails5([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmdBlock = new NpgsqlCommand();
-            cmdBlock.Connection = con;
-            cmdBlock.CommandType = CommandType.Text;
-            //cmdBlock.CommandText = "select count(S.Screening_id)as Count,B.block_name from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_block_master as B on B.block_id = M.block_id\r\ngroup by B.block_name order by Count desc limit 5";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdBlock.CommandText = "select sum(Scount)as Count,BL.block_name from (SELECT(B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER,fm.family_id, count(screening_id) Scount, block_id FROM PUBLIC.health_screening B inner join family_master fm on b.family_id = fm.family_id  " + CommunityParam + " GROUP BY ARRUSER, screening_id, block_id, fm.family_id)tbl INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID   " + InstitutionParam + "inner join public.address_block_master as BL on BL.block_id = tbl.block_id group by BL.block_name order by Count desc limit 5";
+            var query = "SELECT * from public.getchart5('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlDataReader drBlock = cmdBlock.ExecuteReader();
-            List<BlockWiseModel> RListBlock = new List<BlockWiseModel>();
-
-            while (drBlock.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new BlockWiseModel();
-
-                SList.Block_Name = drBlock["Block_Name"].ToString();
-                SList.Count = drBlock["Count"].ToString();
-
-                RListBlock.Add(SList);
+                var OBJ = await connection.QueryAsync<BlockWiseModel>(query);
+                return OBJ.ToList();
             }
-
-
-            con.Close();
-
-
-            VM.BlockList = RListBlock;
-
-
-            return RListBlock;
-
         }
+
+        //public List<BlockWiseModel> GetChartDetails5([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmdBlock = new NpgsqlCommand();
+        //    cmdBlock.Connection = con;
+        //    cmdBlock.CommandType = CommandType.Text;
+        //    //cmdBlock.CommandText = "select count(S.Screening_id)as Count,B.block_name from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_block_master as B on B.block_id = M.block_id\r\ngroup by B.block_name order by Count desc limit 5";
+
+        //    cmdBlock.CommandText = "select sum(Scount)as Count,BL.block_name from (SELECT(B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER,fm.family_id, count(screening_id) Scount, block_id FROM PUBLIC.health_screening B inner join family_master fm on b.family_id = fm.family_id  " + CommunityParam + " GROUP BY ARRUSER, screening_id, block_id, fm.family_id)tbl INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID   " + InstitutionParam + "inner join public.address_block_master as BL on BL.block_id = tbl.block_id group by BL.block_name order by Count desc limit 5";
+
+        //    NpgsqlDataReader drBlock = cmdBlock.ExecuteReader();
+        //    List<BlockWiseModel> RListBlock = new List<BlockWiseModel>();
+
+        //    while (drBlock.Read())
+        //    {
+
+        //        var SList = new BlockWiseModel();
+
+        //        SList.Block_Name = drBlock["Block_Name"].ToString();
+        //        SList.Count = drBlock["Count"].ToString();
+
+        //        RListBlock.Add(SList);
+        //    }
+
+
+        //    con.Close();
+
+
+        //    VM.BlockList = RListBlock;
+
+
+        //    return RListBlock;
+
+        //}
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart6")]
-        public List<WeekModel> GetChartDetails6([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+        public async Task<IEnumerable<WeekModel>> GetChartDetails6([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlCommand cmdWeekMTM = new NpgsqlCommand();
-            cmdWeekMTM.Connection = con;
-            cmdWeekMTM.CommandType = CommandType.Text;
-            //cmdWeekMTM.CommandText = "select to_char(Weekly,'mon') as Months,Count from(SELECT DATE_TRUNC('week',last_update_date)AS weekly,COUNT(medical_history_id) AS count\r\nFROM public.health_history GROUP BY weekly order by weekly desc limit 14)tbl";
+            var query = "SELECT * from public.getchart6('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdWeekMTM.CommandText = "select to_char(Weekly,'mon') as Months,Count from\r\n(SELECT DATE_TRUNC('week',tbl1.last_update_date)AS weekly,COUNT(medical_history_id) AS count\r\nFROM (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,last_update_date,medical_history_id  FROM PUBLIC.health_history B\r\nWHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' \r\nand JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,last_update_date,medical_history_id)tbl1\r\ninner join family_master fm on tbl1.family_id=fm.family_id  " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(tbl1.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " \r\nGROUP BY weekly order by weekly desc limit 14)tbl";
-
-            NpgsqlDataReader drWeekMTM = cmdWeekMTM.ExecuteReader();
-            List<WeekModel> RListWeekMTM = new List<WeekModel>();
-
-            while (drWeekMTM.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new WeekModel();
-
-                SList.Months = drWeekMTM["Months"].ToString();
-                SList.Count = drWeekMTM["Count"].ToString();
-
-                RListWeekMTM.Add(SList);
+                var OBJ = await connection.QueryAsync<WeekModel>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            VM.MTMWeekList = RListWeekMTM;
-
-
-            return RListWeekMTM;
-
         }
+
+        //public List<WeekModel> GetChartDetails6([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+
+        //    NpgsqlCommand cmdWeekMTM = new NpgsqlCommand();
+        //    cmdWeekMTM.Connection = con;
+        //    cmdWeekMTM.CommandType = CommandType.Text;
+        //    //cmdWeekMTM.CommandText = "select to_char(Weekly,'mon') as Months,Count from(SELECT DATE_TRUNC('week',last_update_date)AS weekly,COUNT(medical_history_id) AS count\r\nFROM public.health_history GROUP BY weekly order by weekly desc limit 14)tbl";
+
+        //    cmdWeekMTM.CommandText = "select to_char(Weekly,'mon') as Months,Count from\r\n(SELECT DATE_TRUNC('week',tbl1.last_update_date)AS weekly,COUNT(medical_history_id) AS count\r\nFROM (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,last_update_date,medical_history_id  FROM PUBLIC.health_history B\r\nWHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' \r\nand JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,last_update_date,medical_history_id)tbl1\r\ninner join family_master fm on tbl1.family_id=fm.family_id  " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(tbl1.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " \r\nGROUP BY weekly order by weekly desc limit 14)tbl";
+
+        //    NpgsqlDataReader drWeekMTM = cmdWeekMTM.ExecuteReader();
+        //    List<WeekModel> RListWeekMTM = new List<WeekModel>();
+
+        //    while (drWeekMTM.Read())
+        //    {
+
+        //        var SList = new WeekModel();
+
+        //        SList.Months = drWeekMTM["Months"].ToString();
+        //        SList.Count = drWeekMTM["Count"].ToString();
+
+        //        RListWeekMTM.Add(SList);
+        //    }
+
+        //    con.Close();
+
+        //    VM.MTMWeekList = RListWeekMTM;
+
+
+        //    return RListWeekMTM;
+
+        //}
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart7")]
-        public List<BlockWiseModel> GetChartDetails7([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+
+        public async Task<IEnumerable<BlockWiseModel>> GetChartDetails7([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmdBlockMTM = new NpgsqlCommand();
-            cmdBlockMTM.Connection = con;
-            cmdBlockMTM.CommandType = CommandType.Text;
-            //cmdBlockMTM.CommandText = "select count(S.medical_history_id)as Count,B.block_name from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_block_master as B on B.block_id = M.block_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by B.block_name order by Count desc limit 10";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            //cmdBlockMTM.CommandText = "select count(medical_history_id)as Count,BL.block_name from \r\n(SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,medical_history_id  FROM PUBLIC.health_history B\r\nWHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' \r\nand JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,medical_history_id)tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id   " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " \r\ninner join public.address_block_master as BL on BL.block_id = fm.block_id\r\ngroup by BL.block_name order by Count desc limit 10";
+            var query = "SELECT * from public.getchart7('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdBlockMTM.CommandText = "select sum(ScreeningCOunt)as Count,BL.block_name from (SELECT B.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,block_id, count(medical_history_id) ScreeningCOunt  FROM PUBLIC.health_history B inner join family_master fm on b.family_id = fm.family_id  " + CommunityParam + " WHERE CAST(mtm_beneficiary->> 'avail_service' as text) = 'yes' GROUP BY ARRUSER, block_id)tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "inner join public.address_block_master as BL on BL.block_id = tbl.block_id group by BL.block_name order by Count desc limit 10";
-
-            NpgsqlDataReader drBlockMTM = cmdBlockMTM.ExecuteReader();
-            List<BlockWiseModel> RListBlockMTM = new List<BlockWiseModel>();
-
-            while (drBlockMTM.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new BlockWiseModel();
-
-                SList.Block_Name = drBlockMTM["Block_Name"].ToString();
-                SList.Count = drBlockMTM["Count"].ToString();
-
-                RListBlockMTM.Add(SList);
+                var OBJ = await connection.QueryAsync<BlockWiseModel>(query);
+                return OBJ.ToList();
             }
-
-
-            con.Close();
-
-            VM.MTMBlockList = RListBlockMTM;
-
-
-            return RListBlockMTM;
-
         }
+
+        //public List<BlockWiseModel> GetChartDetails7([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmdBlockMTM = new NpgsqlCommand();
+        //    cmdBlockMTM.Connection = con;
+        //    cmdBlockMTM.CommandType = CommandType.Text;
+        //    //cmdBlockMTM.CommandText = "select count(S.medical_history_id)as Count,B.block_name from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_block_master as B on B.block_id = M.block_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by B.block_name order by Count desc limit 10";
+
+        //    //cmdBlockMTM.CommandText = "select count(medical_history_id)as Count,BL.block_name from \r\n(SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nfamily_id,medical_history_id  FROM PUBLIC.health_history B\r\nWHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' \r\nand JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,medical_history_id)tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id   " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + " \r\ninner join public.address_block_master as BL on BL.block_id = fm.block_id\r\ngroup by BL.block_name order by Count desc limit 10";
+
+        //    cmdBlockMTM.CommandText = "select sum(ScreeningCOunt)as Count,BL.block_name from (SELECT B.UPDATE_REGISTER->0->> 'user_id' AS ARRUSER,block_id, count(medical_history_id) ScreeningCOunt  FROM PUBLIC.health_history B inner join family_master fm on b.family_id = fm.family_id  " + CommunityParam + " WHERE CAST(mtm_beneficiary->> 'avail_service' as text) = 'yes' GROUP BY ARRUSER, block_id)tbl INNER JOIN USER_MASTER UM ON CAST(tbl.ARRUSER AS text) = cast(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "inner join public.address_block_master as BL on BL.block_id = tbl.block_id group by BL.block_name order by Count desc limit 10";
+
+        //    NpgsqlDataReader drBlockMTM = cmdBlockMTM.ExecuteReader();
+        //    List<BlockWiseModel> RListBlockMTM = new List<BlockWiseModel>();
+
+        //    while (drBlockMTM.Read())
+        //    {
+
+        //        var SList = new BlockWiseModel();
+
+        //        SList.Block_Name = drBlockMTM["Block_Name"].ToString();
+        //        SList.Count = drBlockMTM["Count"].ToString();
+
+        //        RListBlockMTM.Add(SList);
+        //    }
+
+
+        //    con.Close();
+
+        //    VM.MTMBlockList = RListBlockMTM;
+
+
+        //    return RListBlockMTM;
+
+        //}
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart8")]
-        public List<WeekModel> GetChartDetails8([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+        public async Task<IEnumerable<WeekModel>> GetChartDetails8([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlCommand cmdWeekDrug = new NpgsqlCommand();
-            cmdWeekDrug.Connection = con;
-            cmdWeekDrug.CommandType = CommandType.Text;
-            //cmdWeekDrug.CommandText = "select to_char(Weekly,'mon') as Months,Count from(SELECT DATE_TRUNC('week',last_update_date)AS weekly,COUNT(screening_id) AS count\r\nFROM public.health_screening where drugs !='null' GROUP BY weekly order by weekly desc limit 14)tbl";
+            var query = "SELECT * from public.getchart8('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdWeekDrug.CommandText = "select to_char(Weekly,'mon') as Months,Count from\r\n(SELECT DATE_TRUNC('week',tbl.last_update_date)AS weekly,COUNT(screening_id) AS count\r\nFROM (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nscreening_id,family_id,last_update_date  FROM PUBLIC.HEALTH_SCREENING B\r\nWHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' \r\nGROUP BY ARRUSER,screening_id,last_update_date) tbl\r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID   " + InstitutionParam + " \r\nGROUP BY weekly order by weekly desc limit 14)tbl1";
-
-            NpgsqlDataReader drWeekMTMDrug = cmdWeekDrug.ExecuteReader();
-            List<WeekModel> RListWeekMTMDrug = new List<WeekModel>();
-
-            while (drWeekMTMDrug.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new WeekModel();
-
-                SList.Months = drWeekMTMDrug["Months"].ToString();
-                SList.Count = drWeekMTMDrug["Count"].ToString();
-
-                RListWeekMTMDrug.Add(SList);
+                var OBJ = await connection.QueryAsync<WeekModel>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            VM.MTMWeekListDrug = RListWeekMTMDrug;
-
-
-            return RListWeekMTMDrug;
-
         }
+
+        //public List<WeekModel> GetChartDetails8([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+
+        //    NpgsqlCommand cmdWeekDrug = new NpgsqlCommand();
+        //    cmdWeekDrug.Connection = con;
+        //    cmdWeekDrug.CommandType = CommandType.Text;
+        //    //cmdWeekDrug.CommandText = "select to_char(Weekly,'mon') as Months,Count from(SELECT DATE_TRUNC('week',last_update_date)AS weekly,COUNT(screening_id) AS count\r\nFROM public.health_screening where drugs !='null' GROUP BY weekly order by weekly desc limit 14)tbl";
+
+        //    cmdWeekDrug.CommandText = "select to_char(Weekly,'mon') as Months,Count from\r\n(SELECT DATE_TRUNC('week',tbl.last_update_date)AS weekly,COUNT(screening_id) AS count\r\nFROM (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nscreening_id,family_id,last_update_date  FROM PUBLIC.HEALTH_SCREENING B\r\nWHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' \r\nGROUP BY ARRUSER,screening_id,last_update_date) tbl\r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID   " + InstitutionParam + " \r\nGROUP BY weekly order by weekly desc limit 14)tbl1";
+
+        //    NpgsqlDataReader drWeekMTMDrug = cmdWeekDrug.ExecuteReader();
+        //    List<WeekModel> RListWeekMTMDrug = new List<WeekModel>();
+
+        //    while (drWeekMTMDrug.Read())
+        //    {
+
+        //        var SList = new WeekModel();
+
+        //        SList.Months = drWeekMTMDrug["Months"].ToString();
+        //        SList.Count = drWeekMTMDrug["Count"].ToString();
+
+        //        RListWeekMTMDrug.Add(SList);
+        //    }
+
+        //    con.Close();
+
+        //    VM.MTMWeekListDrug = RListWeekMTMDrug;
+
+
+        //    return RListWeekMTMDrug;
+
+        //}
 
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetChart9")]
-        public List<DrugModel> GetChartDetails9([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMMtmPerformance VM = new VMMtmPerformance();
 
+        public async Task<IEnumerable<DrugModel>> GetChartDetails9([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            con.Open();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlCommand cmdDrug = new NpgsqlCommand();
-            cmdDrug.Connection = con;
-            cmdDrug.CommandType = CommandType.Text;
-            //cmdDrug.CommandText = "select Drugarray->>'drug_name'as drug,count(screening_id)as Count from(SELECT jsonb_array_elements(b.drugs) AS Drugarray,screening_id\r\nFROM   public.health_screening b WHERE  jsonb_typeof(b.drugs) = 'array')tbl group by drug order by Count desc limit 10";
+            var query = "SELECT * from public.getchart9('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            cmdDrug.CommandText = "select Drugarray->>'drug_name'as drug,count(screening_id)as Count from\r\n(SELECT jsonb_array_elements(b.drugs) AS Drugarray,JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nscreening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\nWHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' \r\nGROUP BY ARRUSER,screening_id,Drugarray)tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id   " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "   \r\ngroup by drug order by Count desc limit 10";
-
-            NpgsqlDataReader drDrug = cmdDrug.ExecuteReader();
-            List<DrugModel> RListDrug = new List<DrugModel>();
-
-            while (drDrug.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new DrugModel();
-
-                SList.drug = drDrug["drug"].ToString();
-                SList.count = drDrug["Count"].ToString();
-
-                RListDrug.Add(SList);
+                var OBJ = await connection.QueryAsync<DrugModel>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            VM.DrugList = RListDrug;
-
-
-            return RListDrug;
-
         }
+
+        //public List<DrugModel> GetChartDetails9([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+        //    VMMtmPerformance VM = new VMMtmPerformance();
+
+
+        //    Filterforall(F);
+
+        //    con.Open();
+
+        //    NpgsqlCommand cmdDrug = new NpgsqlCommand();
+        //    cmdDrug.Connection = con;
+        //    cmdDrug.CommandType = CommandType.Text;
+        //    //cmdDrug.CommandText = "select Drugarray->>'drug_name'as drug,count(screening_id)as Count from(SELECT jsonb_array_elements(b.drugs) AS Drugarray,screening_id\r\nFROM   public.health_screening b WHERE  jsonb_typeof(b.drugs) = 'array')tbl group by drug order by Count desc limit 10";
+
+        //    cmdDrug.CommandText = "select Drugarray->>'drug_name'as drug,count(screening_id)as Count from\r\n(SELECT jsonb_array_elements(b.drugs) AS Drugarray,JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\nscreening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\nWHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' \r\nGROUP BY ARRUSER,screening_id,Drugarray)tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id   " + CommunityParam + " \r\nINNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "   \r\ngroup by drug order by Count desc limit 10";
+
+        //    NpgsqlDataReader drDrug = cmdDrug.ExecuteReader();
+        //    List<DrugModel> RListDrug = new List<DrugModel>();
+
+        //    while (drDrug.Read())
+        //    {
+
+        //        var SList = new DrugModel();
+
+        //        SList.drug = drDrug["drug"].ToString();
+        //        SList.count = drDrug["Count"].ToString();
+
+        //        RListDrug.Add(SList);
+        //    }
+
+        //    con.Close();
+
+        //    VM.DrugList = RListDrug;
+
+
+        //    return RListDrug;
+
+        //}
 
 
         [HttpGet]
@@ -1687,46 +1852,67 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetFacilityScreeningFilter")]
-        public List<FacilityModel> GetFacilityWiseScreeningFilter([FromQuery] FilterpayloadModel F)
-        {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
+
+        public async Task<IEnumerable<FacilityModel>> GetFacilityWiseScreeningFilter([FromQuery] FilterpayloadModel F)
+        {
 
             Filterforall(F);
 
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT Fr.facility_name,count(screening_id) count\r\nFROM   public.health_screening b \r\ninner join family_member_master fm on b.member_id=fm.member_id  " + CommunityParam + "\r\ninner join facility_registry Fr on Fr.facility_id = fm.facility_id  " + InstitutionParam + "\r\ngroup by Fr.facility_name order by count desc limit 10";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            List<FacilityModel> Flist = new List<FacilityModel>();
+            var query = "SELECT * from public.getfacilityscreeningfilter('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new FacilityModel();
-
-
-                SList.facility_name = dr["facility_name"].ToString();
-                SList.count = dr["count"].ToString();
-
-                Flist.Add(SList);
+                var OBJ = await connection.QueryAsync<FacilityModel>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-
-
-            return Flist;
         }
 
+        //public List<FacilityModel> GetFacilityWiseScreeningFilter([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+
+        //    Filterforall(F);
+
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "SELECT Fr.facility_name,count(screening_id) count\r\nFROM   public.health_screening b \r\ninner join family_member_master fm on b.member_id=fm.member_id  " + CommunityParam + "\r\ninner join facility_registry Fr on Fr.facility_id = fm.facility_id  " + InstitutionParam + "\r\ngroup by Fr.facility_name order by count desc limit 10";
+
+        //    List<FacilityModel> Flist = new List<FacilityModel>();
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+
+        //    while (dr.Read())
+        //    {
+
+        //        var SList = new FacilityModel();
+
+
+        //        SList.facility_name = dr["facility_name"].ToString();
+        //        SList.count = dr["count"].ToString();
+
+        //        Flist.Add(SList);
+        //    }
+
+        //    con.Close();
+
+
+
+        //    return Flist;
+        //}
+
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
+
         [Route("GetFacilityScreening")]
-        public List<FacilityModel> GetFacilityWiseScreening()
+        public List<FacilitynamecountModel> GetFacilityWiseScreening()
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
@@ -1734,9 +1920,14 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT Fr.facility_name,count(screening_id) count\r\nFROM   public.health_screening b \r\ninner join family_member_master fm on b.member_id=fm.member_id\r\ninner join facility_registry Fr on Fr.facility_id = fm.facility_id\r\ngroup by Fr.facility_name order by count desc limit 10";
 
-            List<FacilityModel> Flist = new List<FacilityModel>();
+            cmd.CommandText = "select * from public.getfacilityscreening()";
+
+
+
+            //cmd.CommandText = "SELECT Fr.facility_name,count(screening_id) count\r\nFROM   public.health_screening b \r\ninner join family_member_master fm on b.member_id=fm.member_id\r\ninner join facility_registry Fr on Fr.facility_id = fm.facility_id\r\ngroup by Fr.facility_name order by count desc limit 10";
+
+            List<FacilitynamecountModel> Flist = new List<FacilitynamecountModel>();
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
 
@@ -1744,7 +1935,7 @@ namespace PHRLockerAPI.Controllers
             while (dr.Read())
             {
 
-                var SList = new FacilityModel();
+                var SList = new FacilitynamecountModel();
 
 
                 SList.facility_name = dr["facility_name"].ToString();
@@ -2254,46 +2445,64 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetReferredFacility")]
-        public List<FacilityModel> GetReferredFacility([FromQuery] FilterpayloadModel F)
+        public async Task<IEnumerable<FacilityModel>> GetReferredFacility([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
             Filterforall(F);
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(screening_id)Count,FR.facility_name from (select JSONB_ARRAY_ELEMENTS(diseases)->> 'outcome' as RR\r\n,screening_id,(diseases)->0->> 'followup_place_id' AS ARRUSER,family_id from health_screening \r\nwhere JSONB_TYPEOF(diseases) = 'array')tbl inner join family_master fm on fm.family_id=tbl.family_id   " + CommunityParam + " INNER JOIN FACILITY_REGISTRY FR ON CAST(FR.FACILITY_ID AS text)=CAST(tbl.ARRUSER AS text)   " + InstitutionParam + "\r\nwhere (rr='Referred out' or rr='Referred Out') group by FR.facility_name order by Count desc limit 6";
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            List<FacilityModel> Flist = new List<FacilityModel>();
+            var query = "SELECT * from public.getreferredfacility('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new FacilityModel();
-
-
-                SList.facility_name = dr["facility_name"].ToString();
-                SList.count = dr["count"].ToString();
-
-                Flist.Add(SList);
+                var OBJ = await connection.QueryAsync<FacilityModel>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-
-
-            return Flist;
         }
+
+        //public List<FacilityModel> GetReferredFacility([FromQuery] FilterpayloadModel F)
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    Filterforall(F);
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(screening_id)Count,FR.facility_name from (select JSONB_ARRAY_ELEMENTS(diseases)->> 'outcome' as RR\r\n,screening_id,(diseases)->0->> 'followup_place_id' AS ARRUSER,family_id from health_screening \r\nwhere JSONB_TYPEOF(diseases) = 'array')tbl inner join family_master fm on fm.family_id=tbl.family_id   " + CommunityParam + " INNER JOIN FACILITY_REGISTRY FR ON CAST(FR.FACILITY_ID AS text)=CAST(tbl.ARRUSER AS text)   " + InstitutionParam + "\r\nwhere (rr='Referred out' or rr='Referred Out') group by FR.facility_name order by Count desc limit 6";
+
+        //    List<FacilityModel> Flist = new List<FacilityModel>();
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+
+        //    while (dr.Read())
+        //    {
+
+        //        var SList = new FacilityModel();
+
+
+        //        SList.facility_name = dr["facility_name"].ToString();
+        //        SList.count = dr["count"].ToString();
+
+        //        Flist.Add(SList);
+        //    }
+
+        //    con.Close();
+
+
+
+        //    return Flist;
+        //}
 
 
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getuserperdistrictwise")]
         public VMUserPerformance GetUserPerformance()
         {
@@ -2317,7 +2526,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select MS.district_id,MS.district_name,MS.district_gid from public.address_district_master as MS order by district_name";
+
+            cmd.CommandText = "select * from public.getuserperdistrictwise()";
+            //cmd.CommandText = "select MS.district_id,MS.district_name,MS.district_gid from public.address_district_master as MS order by district_name";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
             List<UserPerformanceModel> RList = new List<UserPerformanceModel>();
@@ -2348,7 +2559,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_1()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2388,7 +2602,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-48 hours' < S.last_update_date group by M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_2()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-48 hours' < S.last_update_date group by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2428,7 +2645,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date group by M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_3()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date group by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2472,7 +2692,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_4()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2511,7 +2734,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_5()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2550,7 +2776,12 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_6()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2589,7 +2820,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_7()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2631,7 +2865,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date\r\ngroup by M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_8()";
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date\r\ngroup by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2671,7 +2907,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date\r\ngroup by M.district_id";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_9()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date\r\ngroup by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2712,7 +2950,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(S.screening_id)as Count,D.district_name,D.district_id from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\nwhere S.drugs !='null'\r\ngroup by D.district_name,D.district_id";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_10()";
+
+                //cmdInner.CommandText = "select count(S.screening_id)as Count,D.district_name,D.district_id from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\nwhere S.drugs !='null'\r\ngroup by D.district_name,D.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2749,7 +2989,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(S.medical_history_id)as Count,D.district_name,D.district_id from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by D.district_name,D.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_11()";
+
+                //cmdInner.CommandText = "select count(S.medical_history_id)as Count,D.district_name,D.district_id from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by D.district_name,D.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2765,7 +3008,7 @@ namespace PHRLockerAPI.Controllers
 
                         if (RList[i].district_id == drInner["district_id"].ToString())
                         {
-                            RList[i].mtmcount = drInner["Count"].ToString();
+                            RList[i].mtmcount = drInner["Count1"].ToString();
                         }
 
                     }
@@ -2805,6 +3048,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getuserperBlockwise")]
         public VMUserPerformance GetUserPerformanceBlock()
         {
@@ -2828,7 +3073,10 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select MS.district_id,MS.district_name,MS.district_gid,BM.block_name,BM.block_gid,HM.hud_name,HM.hud_gid from address_district_master as MS \r\ninner join address_block_master as BM on BM.district_id = MS.district_id\r\ninner join address_hud_master HM on HM.hud_id = BM.hud_id\r\norder by district_name";
+
+            cmd.CommandText = "select * from public.getuserperblockwise_1()";
+
+            //cmd.CommandText = "select MS.district_id,MS.district_name,MS.district_gid,BM.block_name,BM.block_gid,HM.hud_name,HM.hud_gid from address_district_master as MS \r\ninner join address_block_master as BM on BM.district_id = MS.district_id\r\ninner join address_hud_master HM on HM.hud_id = BM.hud_id\r\norder by district_name";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
             List<UserPerformanceModel> RList = new List<UserPerformanceModel>();
@@ -2866,7 +3114,11 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
+
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_2()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2906,7 +3158,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-48 hours' < S.last_update_date group by M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_3()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-48 hours' < S.last_update_date group by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2946,7 +3201,11 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date group by M.district_id";
+
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_4()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date group by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -2988,7 +3247,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_5()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3027,7 +3289,13 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
+
+
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_6()";
+
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3065,7 +3333,11 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
+
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_7()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3104,7 +3376,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_8()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3146,7 +3421,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date\r\ngroup by M.district_id";
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_9()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date\r\ngroup by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3186,7 +3464,11 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date\r\ngroup by M.district_id";
+
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_10()";
+
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date\r\ngroup by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3228,7 +3510,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(S.screening_id)as Count,BL.block_gid,BL.block_name from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\ninner join public.address_block_master BL on BL.district_id = D.district_id\r\nwhere S.drugs !='null'\r\ngroup by BL.block_gid,BL.block_name";
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_11()";
+
+                //cmdInner.CommandText = "select count(S.screening_id)as Count,BL.block_gid,BL.block_name from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\ninner join public.address_block_master BL on BL.district_id = D.district_id\r\nwhere S.drugs !='null'\r\ngroup by BL.block_gid,BL.block_name";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3265,7 +3550,11 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(S.medical_history_id)as Count,BM.block_name,BM.block_gid from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\ninner join public.address_block_master as BM on BM.district_id = D.district_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by BM.block_name,BM.block_gid";
+
+
+                cmdInner.CommandText = "select * from public.getuserperblockwise_12()";
+
+                //cmdInner.CommandText = "select count(S.medical_history_id)as Count,BM.block_name,BM.block_gid from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\ninner join public.address_block_master as BM on BM.district_id = D.district_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by BM.block_name,BM.block_gid";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -6213,492 +6502,770 @@ namespace PHRLockerAPI.Controllers
         /*Data Quality*/
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetFamiliesstreetunallocated")]
-        public string Familiesstreetunallocated()
+
+        public async Task<IEnumerable<DataQuality>> Familiesstreetunallocated([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(family_id) from family_master where street_id is null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.GetFamiliesstreetunallocated()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ;
             }
-
-            con.Close();
-
-            return CountValue;
         }
 
+        //public string Familiesstreetunallocated()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(family_id) from family_master where street_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
+
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetFamiliesfacilityunallocated")]
-        public string Familiesfacilityunallocated()
+        public async Task<IEnumerable<DataQuality>> GetFamiliesfacilityunallocated([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(family_id) from family_master where facility_id is null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            string CountValue = "";
+            var query = "SELECT * from public.GetFamiliesfacilityunallocated()";
 
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string Familiesfacilityunallocated()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(family_id) from family_master where facility_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetFamilieswithnull")]
-        public string Familieswithnull()
+
+        public async Task<IEnumerable<DataQuality>> GetFamilieswithnull([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(family_id) from family_master where shop_id is null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            string CountValue = "";
+            var query = "SELECT * from public.GetFamilieswithnull()";
 
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string Familieswithnull()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(family_id) from family_master where shop_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetFamilieswithmore")]
-        public string Familieswithmore()
+        public async Task<IEnumerable<DataQuality>> GetFamilieswithmore([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(family_id) from family_master where family_members_count>=10";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            string CountValue = "";
+            var query = "SELECT * from public.GetFamilieswithmore()";
 
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string Familieswithmore()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(family_id) from family_master where family_members_count>=10";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getmemberswithstreetsunallocated")]
-        public string memberswithstreetsunallocated()
+
+        public async Task<IEnumerable<DataQuality>> Getmemberswithstreetsunallocated([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where street_id is null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            string CountValue = "";
+            var query = "SELECT * from public.Getmemberswithstreetsunallocated()";
 
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string memberswithstreetsunallocated()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where street_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getmemberswithfacilityunallocated")]
-        public string memberswithfacilityunallocated()
+
+        public async Task<IEnumerable<DataQuality>> Getmemberswithfacilityunallocated([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where facility_id is null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            string CountValue = "";
+            var query = "SELECT * from public.Getmemberswithfacilityunallocated()";
 
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string memberswithfacilityunallocated()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where facility_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getmemberswithaadhaar_number")]
-        public string memberswithaadhaar_number()
+
+        public async Task<IEnumerable<DataQuality>> Getmemberswithaadhaar_number([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where aadhaar_number is not null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            string CountValue = "";
+            var query = "SELECT * from public.Getmemberswithaadhaar_number()";
 
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string memberswithaadhaar_number()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where aadhaar_number is not null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getverifiedmembers")]
-        public string verifiedmembers()
+        public async Task<IEnumerable<DataQuality>> Getverifiedmembers([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'resident_details'='Verified'";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            string CountValue = "";
+            var query = "SELECT * from public.Getverifiedmembers()";
 
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string verifiedmembers()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'resident_details'='Verified'";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getstreetswithfacilityunallocated")]
-        public string streetswithfacilityunallocated()
+        public async Task<IEnumerable<DataQuality>> Getstreetswithfacilityunallocated([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(street_id) from address_street_master where facility_id is null";
+            Filterforall(F);            
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.Getstreetswithfacilityunallocated()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string streetswithfacilityunallocated()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(street_id) from address_street_master where facility_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getshopswithnomappinfstreets")]
-        public string shopswithnomappinfstreets()
+
+        public async Task<IEnumerable<DataQuality>> Getshopswithnomappinfstreets([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(shop_id) from address_shop_master where street_gid is not null ";
+            Filterforall(F);            
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.Getshopswithnomappinfstreets()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string shopswithnomappinfstreets()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(shop_id) from address_shop_master where street_gid is not null ";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getmembersinhistorynothavingscreening")]
-        public string membersinhistorynothavingscreening()
+        public async Task<IEnumerable<DataQuality>> Getmembersinhistorynothavingscreening([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(medical_history_id) from health_history h left join health_screening HS on HS.member_id=h.member_id where HS.screening_id is null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.Getmembersinhistorynothavingscreening()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string membersinhistorynothavingscreening()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(medical_history_id) from health_history h left join health_screening HS on HS.member_id=h.member_id where HS.screening_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getmembershavingscreeningnothavinghistory")]
-        public string membershavingscreeningnothavinghistory()
+        public async Task<IEnumerable<DataQuality>> Getmembershavingscreeningnothavinghistory([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(screening_id) from health_screening  h left join health_history HS on HS.member_id=h.member_id where HS.medical_history_id is null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.Getmembershavingscreeningnothavinghistory()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string membershavingscreeningnothavinghistory()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(screening_id) from health_screening  h left join health_history HS on HS.member_id=h.member_id where HS.medical_history_id is null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getmobilenumbermorethan")]
-        public string mobilenumbermorethan()
+        public async Task<IEnumerable<DataQuality>> Getmobilenumbermorethan([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select sum(cnt) count from(select count(mobile_number) cnt,mobile_number from family_member_master where  LENGTH(mobile_number::text)>=10 group by mobile_number having count(mobile_number) >10 order by mobile_number desc)tbl";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.Getmobilenumbermorethan()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string mobilenumbermorethan()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select sum(cnt) count from(select count(mobile_number) cnt,mobile_number from family_member_master where  LENGTH(mobile_number::text)>=10 group by mobile_number having count(mobile_number) >10 order by mobile_number desc)tbl";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getmemberswithmobilenumber")]
-        public string memberswithmobilenumber()
+
+        public async Task<IEnumerable<DataQuality>> Getmemberswithmobilenumber([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where LENGTH(mobile_number::text)>=10";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.Getmemberswithmobilenumber()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string memberswithmobilenumber()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where LENGTH(mobile_number::text)>=10";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getpopulationmappedwithstreet")]
-        public string populationmappedwithstreet()
+        public async Task<IEnumerable<DataQuality>> Getpopulationmappedwithstreet([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where street_id is not null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.Getpopulationmappedwithstreet()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string populationmappedwithstreet()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where street_id is not null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetMembersmappedtoUnallocatedfacility")]
-        public string MembersmappedtoUnallocatedfacility()
+
+        public async Task<IEnumerable<DataQuality>> GetMembersmappedtoUnallocatedfacility([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where street_id is not null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.GetMembersmappedtoUnallocatedfacility()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string MembersmappedtoUnallocatedfacility()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where street_id is not null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetMemberswithstreetasUnAllocated")]
-        public string MemberswithstreetasUnAllocated()
+        public async Task<IEnumerable<DataQuality>> GetMemberswithstreetasUnAllocated([FromQuery] FilterpayloadModel F)
         {
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master where street_id is not null";
+            Filterforall(F);
 
-            NpgsqlDataReader dr = cmd.ExecuteReader();
+            var query = "SELECT * from public.GetMemberswithstreetasUnAllocated()";
 
-            string CountValue = "";
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                CountValue = dr["count"].ToString();
-
+                var OBJ = await connection.QueryAsync<DataQuality>(query);
+                return OBJ.ToList();
             }
-
-            con.Close();
-
-            return CountValue;
         }
+        //public string MemberswithstreetasUnAllocated()
+        //{
+        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+        //    con.Open();
+        //    NpgsqlCommand cmd = new NpgsqlCommand();
+        //    cmd.Connection = con;
+        //    cmd.CommandType = CommandType.Text;
+        //    cmd.CommandText = "select count(member_id) from family_member_master where street_id is not null";
+
+        //    NpgsqlDataReader dr = cmd.ExecuteReader();
+
+        //    string CountValue = "";
+
+        //    while (dr.Read())
+        //    {
+
+        //        CountValue = dr["count"].ToString();
+
+        //    }
+
+        //    con.Close();
+
+        //    return CountValue;
+        //}
 
 
     }
