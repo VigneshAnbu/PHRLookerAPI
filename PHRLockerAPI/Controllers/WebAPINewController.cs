@@ -3329,7 +3329,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master P inner join address_district_master D on D.district_id=P.district_id group by D.district_id";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_TotPopl()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3364,7 +3364,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master P inner join address_district_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Verified' group by D.district_id  ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_VerPopl() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3401,7 +3401,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master P inner join address_district_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Unverified' group by D.district_id ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_UnVerPopl() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3438,7 +3438,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master P inner join address_district_master D on D.district_id=P.district_id where resident_status_details->>'status'='Resident' group by D.district_id ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_ResdPopl() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3475,7 +3475,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master P inner join address_district_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  group by D.district_id";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_MigrPopl() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3513,7 +3513,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master P inner join address_district_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' group by D.district_id";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_NonTrac()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3550,7 +3550,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master P inner join address_district_master D on D.district_id=P.district_id where resident_status_details->>'status'='Duplicate' group by D.district_id";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Duplicate() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3587,7 +3587,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master P inner join address_district_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death' group by D.district_id";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Death() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3624,7 +3624,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master P inner join address_district_master D on D.district_id=P.district_id where consent_status='RECEIVED' group by D.district_id";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Consent() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3661,7 +3661,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master P inner join address_district_master D on D.district_id=P.district_id where street_id is not null group by D.district_id";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_AllocStreet() ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 

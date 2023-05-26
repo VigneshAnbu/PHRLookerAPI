@@ -2144,7 +2144,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getblockmtm")]
-        public async Task<List<getblockmtm>> getblockmtm(FilterpayloadModel F)
+        public async Task<List<getblockmtm>> getblockmtm([FromQuery] FilterpayloadModel F)
         {
             Filterforall(F);
             string query = "SELECT * FROM public.getblockmtm(@CommunityParam, @InstitutionParam)";
