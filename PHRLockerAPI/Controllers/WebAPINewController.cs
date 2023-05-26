@@ -3220,108 +3220,77 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("Getpopulationkpidashboard")]
-        public VMPopulationKPIModel GetPopulationKPI()
+        public async  Task<VMPopulationKPIModel> GetPopulationKPI()
         {
 
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+           
             VMPopulationKPIModel VM = new VMPopulationKPIModel();
-
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select count(member_id) from family_member_master";
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            while (dr.Read())
+            
+            using (var connection = _context.CreateConnection())
             {
-                VM.total_population = dr["count"].ToString();
-            }
-            con.Close();
+                string query = "select * from public.Getpopulationkpidashboard_totPop() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.total_population = result;
 
-            con.Open();
-            NpgsqlCommand cmdVerified = new NpgsqlCommand();
-            cmdVerified.Connection = con;
-            cmdVerified.CommandType = CommandType.Text;
-            cmdVerified.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'resident_details'='Verified'";
-            NpgsqlDataReader drVerified = cmdVerified.ExecuteReader();
-            while (drVerified.Read())
+            }
+
+           
+            using (var connection = _context.CreateConnection())
             {
-                VM.verified_population = drVerified["count"].ToString();
-            }
-            con.Close();
+                string query = "select * from public.Getpopulationkpidashboard_VerPop() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.verified_population = result;
 
-            con.Open();
-            NpgsqlCommand cmdUnVerified = new NpgsqlCommand();
-            cmdUnVerified.Connection = con;
-            cmdUnVerified.CommandType = CommandType.Text;
-            cmdUnVerified.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'resident_details'='Unverified'";
-            NpgsqlDataReader drUnVerified = cmdUnVerified.ExecuteReader();
-            while (drUnVerified.Read())
+            }
+
+            using (var connection = _context.CreateConnection())
             {
-                VM.unverified_population = drUnVerified["count"].ToString();
-            }
-            con.Close();
+                string query = "select * from public.Getpopulationkpidashboard_UnVerPop() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.unverified_population = result;
 
-            con.Open();
-            NpgsqlCommand cmdMigrated = new NpgsqlCommand();
-            cmdMigrated.Connection = con;
-            cmdMigrated.CommandType = CommandType.Text;
-            cmdMigrated.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'";
-            NpgsqlDataReader drMigrated = cmdMigrated.ExecuteReader();
-            while (drMigrated.Read())
+            }
+
+            using (var connection = _context.CreateConnection())
             {
-                VM.migrated_population = drMigrated["count"].ToString();
-            }
-            con.Close();
+                string query = "select * from public.Getpopulationkpidashboard_MigrPop() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.migrated_population = result;
 
-            con.Open();
-            NpgsqlCommand cmdNontraceable = new NpgsqlCommand();
-            cmdNontraceable.Connection = con;
-            cmdNontraceable.CommandType = CommandType.Text;
-            cmdNontraceable.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable'";
-            NpgsqlDataReader drNontraceable = cmdNontraceable.ExecuteReader();
-            while (drNontraceable.Read())
+            }
+
+            using (var connection = _context.CreateConnection())
             {
-                VM.nontraceable = drNontraceable["count"].ToString();
-            }
-            con.Close();
+                string query = "select * from public.Getpopulationkpidashboard_NonTrc() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.nontraceable = result;
 
-            con.Open();
-            NpgsqlCommand cmdDuplicate = new NpgsqlCommand();
-            cmdDuplicate.Connection = con;
-            cmdDuplicate.CommandType = CommandType.Text;
-            cmdDuplicate.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'status'='Duplicate'";
-            NpgsqlDataReader drDuplicate = cmdDuplicate.ExecuteReader();
-            while (drDuplicate.Read())
+            }
+
+            using (var connection = _context.CreateConnection())
             {
-                VM.duplicate = drDuplicate["count"].ToString();
-            }
-            con.Close();
+                string query = "select * from public.Getpopulationkpidashboard_Dupl() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.duplicate = result;
 
-            con.Open();
-            NpgsqlCommand cmdDeath = new NpgsqlCommand();
-            cmdDeath.Connection = con;
-            cmdDeath.CommandType = CommandType.Text;
-            cmdDeath.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'";
-            NpgsqlDataReader drDeath = cmdDeath.ExecuteReader();
-            while (drDeath.Read())
+            }
+
+            using (var connection = _context.CreateConnection())
             {
-                VM.death = drDeath["count"].ToString();
+                string query = "select * from public.Getpopulationkpidashboard_Death() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.death = result;
+
             }
-            con.Close();
 
 
-            con.Open();
-            NpgsqlCommand cmdResident = new NpgsqlCommand();
-            cmdResident.Connection = con;
-            cmdResident.CommandType = CommandType.Text;
-            cmdResident.CommandText = "select count(member_id) from family_member_master where resident_status_details->>'status'='Resident'";
-            NpgsqlDataReader drResident = cmdResident.ExecuteReader();
-            while (drResident.Read())
+            using (var connection = _context.CreateConnection())
             {
-                VM.resident_population = drResident["count"].ToString();
+                string query = "select * from public.Getpopulationkpidashboard_resdPop() ";
+                var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+                VM.resident_population = result;
+
             }
-            con.Close();
 
 
 
@@ -3333,37 +3302,23 @@ namespace PHRLockerAPI.Controllers
 
 
         [Route("GetKPIDistrictWise")]
-        public List<VMPopulationKPIDistrictWise> GetPopulationKPIDistrictWise()
+        public async Task<List<GetKPIDistrictWise>> GetPopulationKPIDistrictWise()
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPopulationKPIDistrictWise VM = new VMPopulationKPIDistrictWise();
+            GetKPIDistrictWise VM = new GetKPIDistrictWise();
 
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select district_id,district_gid,district_name from address_district_master";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPopulationKPIDistrictWise> RList = new List<VMPopulationKPIDistrictWise>();
-
-            while (dr.Read())
+            string query = "select * from public.GetKPIDistrictWise()";
+         
+            
+            List<GetKPIDistrictWise> RList = new List<GetKPIDistrictWise>();
+            using (var connection = _context.CreateConnection())
             {
-
-                var SList = new VMPopulationKPIDistrictWise();
-
-                SList.district_name = dr["district_name"].ToString();
-                SList.district_gid = dr["district_gid"].ToString();
-                SList.district_id = dr["district_id"].ToString();
-
-                RList.Add(SList);
+                var results = await connection.QueryAsync<GetKPIDistrictWise>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
             }
-
-
-            con.Close();
-
-
-
             con.Open();
 
             if (RList.Count > 0)
@@ -3378,7 +3333,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3387,7 +3342,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].total_population = drInner["count"].ToString();
                         }
@@ -3413,7 +3368,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3422,7 +3377,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString() ))
                         {
                             RList[i].verified_population = drInner["count"].ToString();
                         }
@@ -3450,7 +3405,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3459,7 +3414,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id ==Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].unverified_population = drInner["count"].ToString();
                         }
@@ -3487,7 +3442,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3496,7 +3451,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].resident_population = drInner["count"].ToString();
                         }
@@ -3524,7 +3479,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3533,7 +3488,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].migrated_population = drInner["count"].ToString();
                         }
@@ -3562,7 +3517,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3571,7 +3526,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].nontraceable = drInner["count"].ToString();
                         }
@@ -3599,7 +3554,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3608,7 +3563,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].duplicate = drInner["count"].ToString();
                         }
@@ -3636,7 +3591,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3645,7 +3600,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].death = drInner["count"].ToString();
                         }
@@ -3673,7 +3628,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3682,7 +3637,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id ==Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].consent = drInner["count"].ToString();
                         }
@@ -3710,7 +3665,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                GetKPIDistrictWise SList = new GetKPIDistrictWise();
 
 
 
@@ -3719,7 +3674,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == drInner["district_id"].ToString())
+                        if (RList[i].district_id ==Guid.Parse( drInner["district_id"].ToString()) )
                         {
                             RList[i].allocated_streets = drInner["count"].ToString();
                         }

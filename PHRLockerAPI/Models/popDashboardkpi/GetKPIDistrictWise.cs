@@ -2,19 +2,15 @@
 
 namespace PHRLockerAPI.ViewModel
 {
-    public class VMPopulationKPIDistrictWise
+    public class GetKPIDistrictWise
     {
 
 
-        public string district_id { get; set; }
+        public Guid district_id { get; set; }
 
         public string district_name { get; set; }
 
         public string district_gid { get; set; }
-
-        public string hud_id { get; set; }
-
-        public string hud_name { get; set; }
 
 
         public string total_population { get; set; }
