@@ -1,13 +1,17 @@
 ﻿//using Dapper;
 using Dapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 using PHRLockerAPI.DBContext;
 //using PHRLockerAPI.DBContext;
 using PHRLockerAPI.Intfa;
 using PHRLockerAPI.Models;
+using PHRLockerAPI.Models.MtmBenfModel;
 using PHRLockerAPI.ViewModel;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
@@ -780,116 +784,52 @@ namespace PHRLockerAPI.Controllers
         }
 
 
-
-
-        //[HttpGet]
-        //[ResponseCache(Duration = 30 * 60)]
-        //[OutputCache(Duration = 30 * 60)]
-        //[Route("GetDrugdistrict")]
-        //public VMCommunityTriage getdistrict([FromQuery] FilterpayloadModel F)
-        //{
-
-        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-        //    VMCommunityTriage VM = new VMCommunityTriage();
-
-        //    con.Open();
-        //    NpgsqlCommand cmd = new NpgsqlCommand();
-        //    cmd.Connection = con;
-        //    cmd.CommandType = CommandType.Text;
-        //    //cmd.CommandText = "select MS.district_name,MS.district_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_district_master as MS on M.district_id=MS.district_id where s.drugs!='null' group by MS.district_name,MS.district_gid";
-
-
-        //    Filterforall(F);
-
-        //    cmd.CommandText = "select adm.district_gid,adm.district_name,count(screening_id) TotalCount from (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n screening_id,family_id  FROM PUBLIC.HEALTH_SCREENING B\r\n WHERE drugs!='null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,screening_id,member_id) tbl\r\n inner join family_master fm on fm.family_id=tbl.family_id \r\n " + CommunityParam + "\r\n inner join address_district_master adm on adm.district_id=fm.district_id\r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID  as text)  \r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + "  group by adm.district_name,adm.district_gid";
-
-        //    //cmd.CommandText = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
-
-
-        //    NpgsqlDataReader dr = cmd.ExecuteReader();
-        //    List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
-
-        //    while (dr.Read())
-        //    {
-
-        //        var SList = new CommunityTriageModel();
-
-        //        SList.district_name = dr["district_name"].ToString();
-        //        SList.district_gid = dr["district_gid"].ToString();
-        //        SList.TotalCount = dr["TotalCount"].ToString();
-
-        //        RList.Add(SList);
-        //    }
-        //    con.Close();
-
-        //    VM.DistrictWise = RList;
-
-        //    return VM;
-        //}
-
-
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
-        [Route("GetDrugBlock")]
-
-        public async Task<IEnumerable<Blockhudwisemodel>> getBlock([FromQuery] FilterpayloadModel F)
+        [Route("GetDrugdistrict")]
+        public async Task<getDrugListModelList> getdistrict([FromQuery] FilterpayloadModel F)
         {
-
             Filterforall(F);
+            string query = "SELECT * FROM public.getdrugdistrict(@CommunityParam, @InstitutionParam)";
 
-            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
-
-            var query = "SELECT * from public.getdrugblock('" + CommunityParam + "','" + InstitutionParam + "')";
+            var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
+            getDrugListModelList VM = new getDrugListModelList();
+           
 
             using (var connection = context.CreateConnection())
             {
-                var OBJ = await connection.QueryAsync<Blockhudwisemodel>(query);
-                return OBJ.ToList();
+                var results = await connection.QueryAsync<GetDrugdistrictModel>(query, parameters);
+
+                VM.DistrictWise = results.ToList();
+
+                return VM;
             }
         }
 
-        //public List<BlockModel> getBlock([FromQuery] FilterpayloadModel F)
-        //{
-
-        //    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
 
 
-        //    Filterforall(F);
+        [HttpGet]
+        [Route("GetDrugBlock")]
 
-        //    con.Open();
-        //    NpgsqlCommand cmd = new NpgsqlCommand();
-        //    cmd.Connection = con;
-        //    cmd.CommandType = CommandType.Text;
+        public async Task<List<GetDrugBlock>> getBlock([FromQuery] FilterpayloadModel F)
+        {
+            Filterforall(F);
+            string query = "SELECT * FROM public.GetDrugBlock(@CommunityParam, @InstitutionParam)";
+            
+            var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
+            List<GetDrugBlock> RList = new List<GetDrugBlock>();
 
-        //    //cmd.CommandText = "select BL.block_name,BL.block_gid,count(S.member_id) TotalCount from  public.health_screening as S inner join public.family_master as M on M.family_id=S.family_id inner join public.address_block_master as BL on BL.block_id = M.block_id where s.drugs!='null' group by BL.block_name,BL.block_gid";
+            using (var connection = context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<GetDrugBlock>(query, parameters);
 
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
 
-
-        //    cmd.CommandText = "select BL.block_name,BL.block_gid,HD.hud_gid,HD.hud_name,count(screening_id) TotalCount from (SELECT(B.UPDATE_REGISTER)->0->> 'user_id' AS ARRUSER,screening_id, family_id  FROM PUBLIC.HEALTH_SCREENING B WHERE drugs != 'null' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER, screening_id, member_id) tbl inner join family_master fm on fm.family_id = tbl.family_id  " + CommunityParam + " inner join address_district_master adm on adm.district_id = fm.district_id INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = CAST(UM.USER_ID as text) INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "inner join public.address_block_master as BL on BL.block_id = fm.block_id inner join address_hud_master HD on HD.hud_id=BL.Hud_id group by BL.block_name, BL.block_gid, HD.hud_gid, HD.hud_name";
-
-
-        //    NpgsqlDataReader dr = cmd.ExecuteReader();
-        //    List<BlockModel> RList = new List<BlockModel>();
-
-        //    while (dr.Read())
-        //    {
-
-        //        var SList = new BlockModel();
-
-        //        SList.block_name = dr["block_name"].ToString();
-        //        SList.block_gid = dr["block_gid"].ToString();
-        //        SList.hud_gid = dr["hud_gid"].ToString();
-        //        SList.hud_name = dr["hud_name"].ToString();
-        //        SList.TotalCount = dr["TotalCount"].ToString();
-
-        //        RList.Add(SList);
-        //    }
-        //    con.Close();
-
-
-        //    return RList;
-        //}
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
@@ -2192,47 +2132,31 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
-        [OutputCache(Duration = 30 * 60)]
         [Route("rolewisescreening")]
         public List<RoleReport> rolewisescreening([FromQuery] FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
-            string TotalPopulation = "0";
-            con.Open();
-
-            Filterforall(F);
-
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  (select tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from (SELECT jsonb_array_elements(b.update_register) AS arruser,screening_id FROM   public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id) tbl inner join user_master um on cast(tbl.user_id as uuid)=um.user_id inner join user_role_Master urm on urm.role_id=um.role where tbl.user_id!='system' group by role_name order by desigcount desc limit 10";
-
-            cmd.CommandText = "select role_name,sum(userCount) desigcount from  \r\n(select tbl.family_id,tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from \r\n(SELECT jsonb_array_elements(b.update_register) AS arruser,family_id,screening_id \r\nFROM public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id,tbl.family_id) tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "\r\ninner join user_master um on cast(tbl.user_id as uuid)= um.user_id \r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ninner join user_role_Master urm on urm.role_id = um.role \r\nwhere tbl.user_id != 'system' group by role_name order by desigcount desc limit 10";
-
-
-            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  (select tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from (SELECT jsonb_array_elements(b.update_register) AS arruser,screening_id FROM   public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl --inner join user_master um on um.user_id=cast(tbl.arruser -> 'user_id' as uuid) group by user_id) tbl inner join user_master um on cast(tbl.user_id as uuid)=um.user_id inner join user_role_Master urm on urm.role_id=um.role where tbl.user_id!='system' group by role_name order by desigcount desc limit 10";
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<RoleReport> RList = new List<RoleReport>();
-            int ReuseCount = 0;
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-                RList.Add(new RoleReport
+                Filterforall(F);
+
+                string query = "SELECT * FROM public.rolewisescreening(@CommunityParam, @InstitutionParam)";
+
+                var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
+
+                var results = connection.Query<RoleReport>(query,parameters);
+
+                List<RoleReport> RList = results.ToList();
+                int ReuseCount = RList.Sum(r => int.Parse(r.RoleCount ?? "0"));
+
+                foreach (var aa in RList)
                 {
-                    RoleName = dr["role_name"].ToString(),
-                    RoleCount = dr["desigcount"].ToString(),
-                });
-                ReuseCount = ReuseCount + int.Parse(dr["desigcount"].ToString());
-                //TotalPopulation = dr["TotalCount"].ToString();
+                    aa.CountPer = Percentage_Cal(ReuseCount, int.Parse(aa.RoleCount));
+                }
+
+                return RList;
             }
-            con.Close();
-            foreach (var aa in RList) { aa.CountPer = Percentage_Cal(ReuseCount, int.Parse(aa.RoleCount)); }
-            return RList;
         }
+
         private string Percentage_Cal(int Total, int Value)
         {
             double Male_Per = 0;
@@ -2248,46 +2172,25 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("getdistrictmtm")]
-        public VMCommunityTriage getdistrictmtm([FromQuery] FilterpayloadModel F)
+        public async Task<getDrugListModelList> getdistrictmtm([FromQuery] FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
-
-            con.Open();
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "select fm.district_id,district_name,district_gid,count(hh.member_id) TotalCount from health_history hh  inner join family_master fm on hh.family_id=fm.family_id inner join address_district_master dm on fm.district_id=dm.district_id where CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' group by fm.district_id,district_name,district_gid";
-
-
             Filterforall(F);
+            string query = "SELECT * FROM public.getdistrictmtm(@CommunityParam, @InstitutionParam)";
+            
+            var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
+            getDrugListModelList VM = new getDrugListModelList();
+          
 
-            cmd.CommandText = "select fm.district_id,district_name,district_gid,count(member_id) TotalCount from \r\n (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n family_id,member_id,medical_history_id  FROM PUBLIC.health_history B\r\n WHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,member_id,medical_history_id) tbl\r\n inner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "  \r\n inner join address_district_master dm on fm.district_id=dm.district_id \r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + " group by fm.district_id,district_name,district_gid";
-
-
-            NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
-
-            while (dr.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new CommunityTriageModel();
-
-                SList.district_name = dr["district_name"].ToString();
-                SList.district_gid = dr["district_gid"].ToString();
-                SList.TotalCount = dr["TotalCount"].ToString();
-
-                RList.Add(SList);
+                var results = await connection.QueryAsync<GetDrugdistrictModel>(query, parameters);
+                VM.DistrictWise = results.ToList();
+                return VM;
             }
-            con.Close();
-
-            VM.DistrictWise = RList;
-
-            return VM;
         }
+     
 
-        [HttpPost]
+    [HttpPost]
         [Route("gethudmtm")]
         public VMCommunityTriage gethudmtm(FilterpayloadModel F)
         {
@@ -2329,43 +2232,27 @@ namespace PHRLockerAPI.Controllers
             return VM;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("getblockmtm")]
-        public List<BlockModel> getblockmtm(FilterpayloadModel F)
+        public async Task<List<getblockmtm>> getblockmtm([FromQuery] FilterpayloadModel F)
         {
-
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
-
             Filterforall(F);
+            string query = "SELECT * FROM public.getblockmtm(@CommunityParam, @InstitutionParam)";
 
-            ///*Hud Wise*/
-            con.Open();
-            NpgsqlCommand cmdHud = new NpgsqlCommand();
-            cmdHud.Connection = con;
-            cmdHud.CommandType = CommandType.Text;
-            //cmdHud.CommandText = "select fm.block_id,count(hh.member_id) TotalCount  from health_history hh   inner join family_master fm on hh.family_id=fm.family_id where CAST (mtm_beneficiary ->> 'avail_service' as text)='yes'  group by fm.block_id";
+            var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
+            List<getblockmtm> RListHud = new List<getblockmtm>();
 
-
-            cmdHud.CommandText = "select fm.block_id,count(member_id) TotalCount from \r\n (SELECT JSONB_ARRAY_ELEMENTS(B.UPDATE_REGISTER)->> 'user_id' AS ARRUSER, \r\n family_id,member_id,medical_history_id  FROM PUBLIC.health_history B\r\n WHERE CAST (mtm_beneficiary ->> 'avail_service' as text)='yes' and JSONB_TYPEOF(B.UPDATE_REGISTER) = 'array' GROUP BY ARRUSER,member_id,medical_history_id) tbl\r\n inner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "  \r\n INNER JOIN USER_MASTER UM ON CAST(TBL.ARRUSER AS text) = cast(UM.USER_ID as text)\r\n INNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  \r\n " + InstitutionParam + " group by fm.block_id";
-
-            NpgsqlDataReader drHud = cmdHud.ExecuteReader();
-            List<BlockModel> RListHud = new List<BlockModel>();
-
-            while (drHud.Read())
+            using (var connection = context.CreateConnection())
             {
-
-                var SList = new BlockModel();
-
-                SList.block_id = drHud["block_id"].ToString();
-
-                SList.TotalCount = drHud["TotalCount"].ToString();
-
-                RListHud.Add(SList);
+                var results = await connection.QueryAsync<getblockmtm>(query, parameters);
+                foreach (var result in results)
+                {
+                    RListHud.Add(result);
+                }
+                return RListHud;
             }
-            con.Close();
-            //VM.HudblockWise = RListHud;
-            return RListHud;
         }
+
+
     }
 }
