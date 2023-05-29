@@ -1281,7 +1281,10 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("diagnosisreport")]
+        
         public List<DiagnosisReport> diagnosisreport()
         {
             List<DiagnosisReport> dlista = new List<DiagnosisReport>();
@@ -1292,7 +1295,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdHud = new NpgsqlCommand();
             cmdHud.Connection = con;
             cmdHud.CommandType = CommandType.Text;
-            cmdHud.CommandText = "SELECT jsonb_array_elements(cast(jsonb_array_elements(b.diseases)->>'disease_list' as jsonb))->>'diagnosis' AS diagnosis,count(screening_id) totalcount FROM public.health_screening b WHERE  jsonb_typeof(b.diseases) = 'array' group by diagnosis order by totalcount desc";
+            //cmdHud.CommandText = "SELECT jsonb_array_elements(cast(jsonb_array_elements(b.diseases)->>'disease_list' as jsonb))->>'diagnosis' AS diagnosis,count(screening_id) totalcount FROM public.health_screening b WHERE  jsonb_typeof(b.diseases) = 'array' group by diagnosis order by totalcount desc";
+
+            cmdHud.CommandText = "SELECT * from public.diagnosisreport()";
 
             NpgsqlDataReader drHud = cmdHud.ExecuteReader();
             List<BlockModel> RListHud = new List<BlockModel>();
@@ -1311,7 +1316,8 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select Drugarray,CASE WHEN age between 0 and 17 THEN 'child' WHEN age >18 THEN 'Adult' END age2,gender,sum(TotalScreened) totc from ( select Drugarray,date_part('year',age(birth_date)) age,gender,sum(TotalScreening) TotalScreened from  (SELECT jsonb_array_elements(cast(jsonb_array_elements(b.diseases)->>'disease_list' as jsonb))->>'diagnosis' AS Drugarray ,member_id,count(screening_id) TotalScreening FROM public.health_screening b WHERE  jsonb_typeof(b.diseases) = 'array' group by Drugarray,member_id) tbl inner join family_member_master fm on tbl.member_id=fm.member_id group by Drugarray,age,gender) tbl group by drugarray,age2,gender";
+                //cmdInner.CommandText = "select Drugarray,CASE WHEN age between 0 and 17 THEN 'child' WHEN age >18 THEN 'Adult' END age2,gender,sum(TotalScreened) totc from ( select Drugarray,date_part('year',age(birth_date)) age,gender,sum(TotalScreening) TotalScreened from  (SELECT jsonb_array_elements(cast(jsonb_array_elements(b.diseases)->>'disease_list' as jsonb))->>'diagnosis' AS Drugarray ,member_id,count(screening_id) TotalScreening FROM public.health_screening b WHERE  jsonb_typeof(b.diseases) = 'array' group by Drugarray,member_id) tbl inner join family_member_master fm on tbl.member_id=fm.member_id group by Drugarray,age,gender) tbl group by drugarray,age2,gender";
+                cmdInner.CommandText = "SELECT * from public.diagnosisreport_2()";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
                 while (drInner.Read())

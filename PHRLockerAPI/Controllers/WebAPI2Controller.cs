@@ -1573,7 +1573,7 @@ namespace PHRLockerAPI.Controllers
 
             //cmdHud.CommandText = "select MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid,count(fm.family_id) TotalCount from  \r\npublic.address_district_master as MS  \r\ninner join public.address_hud_master as hu on MS.district_id=hu.district_id \r\ninner join public.family_member_master as fm on MS.district_id=fm.district_id and  hu.HUD_id=fm.HUD_id  " + CommunityParam + " \r\ngroup by MS.district_name,hu.hud_gid,hu.HUD_name,MS.district_gid";
 
-            cmdHud.CommandText = "SELECT * from public.gethudscreenpopulationagewise_1('" + CommunityParam + "','" + InstitutionParam + "')";
+            cmdHud.CommandText = "SELECT * from public.gethudscreenpopulationagewise_1('" + CommunityParam + "')";
 
             NpgsqlDataReader drHud = cmdHud.ExecuteReader();
             List<populationHudModel> RListHud = new List<populationHudModel>();

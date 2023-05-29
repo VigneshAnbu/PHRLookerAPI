@@ -540,6 +540,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetList")]
         public VMCommunityTriage Get()
         {
@@ -551,7 +553,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select MS.district_id,MS.district_name,MS.district_gid from public.address_district_master as MS order by district_name";
+            //cmd.CommandText = "select MS.district_id,MS.district_name,MS.district_gid from public.address_district_master as MS order by district_name";
+
+            cmd.CommandText = "SELECT * from public.getlist_1()";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
             List<CommunityTriageModel> RList = new List<CommunityTriageModel>();
@@ -581,7 +585,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, MS.district_name,MS.district_gid from public.health_screening as S inner join public.family_member_master as M on M.member_id=S.member_id inner join public.address_district_master as MS on MS.district_id=M.district_id where screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0 and (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6) group by screening_values ->>'dm_risk_score',MS.district_name,MS.district_gid order by MS.district_name limit 100";
+                //cmdInner.CommandText = "select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, MS.district_name,MS.district_gid from public.health_screening as S inner join public.family_member_master as M on M.member_id=S.member_id inner join public.address_district_master as MS on MS.district_id=M.district_id where screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0 and (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6) group by screening_values ->>'dm_risk_score',MS.district_name,MS.district_gid order by MS.district_name limit 100";
+
+                cmdInner.CommandText = "SELECT * from public.getlist_2()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -627,7 +633,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdHud = new NpgsqlCommand();
             cmdHud.Connection = con;
             cmdHud.CommandType = CommandType.Text;
-            cmdHud.CommandText = "select hud_id,hud_name,hud_gid from public.address_hud_master order by hud_name";
+            //cmdHud.CommandText = "select hud_id,hud_name,hud_gid from public.address_hud_master order by hud_name";
+
+            cmdHud.CommandText = "SELECT * from public.getlist_3()";
 
             NpgsqlDataReader drHud = cmdHud.ExecuteReader();
             List<HudModel> RListHud = new List<HudModel>();
@@ -657,7 +665,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.hud_name,MS.hud_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_hud_master as MS on MS.hud_id = M.hud_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.hud_name,MS.hud_gid\r\norder by MS.hud_name)";
+                //cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.hud_name,MS.hud_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_hud_master as MS on MS.hud_id = M.hud_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.hud_name,MS.hud_gid\r\norder by MS.hud_name)";
+
+                cmdInner.CommandText = "SELECT * from public.getlist_4()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -702,7 +712,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdBlock = new NpgsqlCommand();
             cmdBlock.Connection = con;
             cmdBlock.CommandType = CommandType.Text;
-            cmdBlock.CommandText = "select block_id,block_name,block_gid from public.address_block_master order by block_name";
+            //cmdBlock.CommandText = "select block_id,block_name,block_gid from public.address_block_master order by block_name";
+
+            cmdBlock.CommandText = "SELECT * from public.getlist_5()";
 
             NpgsqlDataReader drBlock = cmdBlock.ExecuteReader();
             List<BlockModel> RListBlock = new List<BlockModel>();
@@ -730,7 +742,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.block_name,MS.block_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_block_master as MS on MS.block_id = M.block_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.block_name,MS.block_gid\r\norder by MS.block_name)";
+                //cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.block_name,MS.block_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_block_master as MS on MS.block_id = M.block_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.block_name,MS.block_gid\r\norder by MS.block_name)";
+
+                cmdInner.CommandText = "SELECT * from public.getlist_6()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -775,7 +789,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdVillage = new NpgsqlCommand();
             cmdVillage.Connection = con;
             cmdVillage.CommandType = CommandType.Text;
-            cmdVillage.CommandText = "select village_id,village_name,village_gid from public.address_village_master order by village_name limit 10";
+            //cmdVillage.CommandText = "select village_id,village_name,village_gid from public.address_village_master order by village_name limit 10";
+
+            cmdVillage.CommandText = "SELECT * from public.getlist_7()";
 
             NpgsqlDataReader drVillage = cmdVillage.ExecuteReader();
             List<VillageModel> RListVillage = new List<VillageModel>();
@@ -803,7 +819,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.village_name,MS.village_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_village_master as MS on MS.village_id = M.village_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.village_name,MS.village_gid\r\norder by MS.village_name limit 50)";
+                //cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.village_name,MS.village_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_village_master as MS on MS.village_id = M.village_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.village_name,MS.village_gid\r\norder by MS.village_name limit 50)";
+
+                cmdInner.CommandText = "SELECT * from public.getlist_8()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -849,7 +867,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdAll = new NpgsqlCommand();
             cmdAll.Connection = con;
             cmdAll.CommandType = CommandType.Text;
-            cmdAll.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues from public.health_screening as S\r\nwhere screening_values ->>'dm_risk_score' is not null  \r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6,7,8)\r\ngroup by screening_values ->>'dm_risk_score')";
+            //cmdAll.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues from public.health_screening as S\r\nwhere screening_values ->>'dm_risk_score' is not null  \r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6,7,8)\r\ngroup by screening_values ->>'dm_risk_score')";
+
+            cmdAll.CommandText = "SELECT * from public.getlist_9()";
 
             NpgsqlDataReader drAll = cmdAll.ExecuteReader();
 
@@ -1733,6 +1753,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetOPDashboard")]
         public List<VMOPDashboardFacility> GetOPdasdhboard()
         {
@@ -1743,7 +1765,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select fr.facility_name,fr.facility_id,fcm.category_name,ftm.facility_type_name,fdm.directorate_name,\r\nadm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,is_hwc\r\nfrom facility_registry fr\r\ninner join facility_category_master fcm on fr.category_id=fcm.Category_id\r\ninner join facility_type_master ftm on fr.facility_type_id=ftm.facility_type_id\r\ninner join facility_directorate_master fdm on fr.directorate_id=fdm.directorate_id\r\ninner join address_district_master adm on adm.district_id=fr.district_id\r\ninner join address_hud_master ahm on ahm.hud_id=fr.hud_id\r\ninner join address_block_master abm on abm.block_id=fr.block_id where fr.facility_level='HSC' or facility_level='PHC' order by adm.district_name  limit 1000";
+            //cmd.CommandText = "select fr.facility_name,fr.facility_id,fcm.category_name,ftm.facility_type_name,fdm.directorate_name,\r\nadm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,is_hwc\r\nfrom facility_registry fr\r\ninner join facility_category_master fcm on fr.category_id=fcm.Category_id\r\ninner join facility_type_master ftm on fr.facility_type_id=ftm.facility_type_id\r\ninner join facility_directorate_master fdm on fr.directorate_id=fdm.directorate_id\r\ninner join address_district_master adm on adm.district_id=fr.district_id\r\ninner join address_hud_master ahm on ahm.hud_id=fr.hud_id\r\ninner join address_block_master abm on abm.block_id=fr.block_id where fr.facility_level='HSC' or facility_level='PHC' order by adm.district_name  limit 1000";
+
+            cmd.CommandText = "SELECT * from public.getopdashboard()";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
             List<VMOPDashboardFacility> RList = new List<VMOPDashboardFacility>();
@@ -1780,7 +1804,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select facility_id,CASE \r\nWHEN age between 0 and 17 THEN 'child' \r\nWHEN age >18 THEN 'Adult'  \r\nEND age2,tbl.gender,sum(sccoun) totc from \r\n    (SELECT jsonb_array_elements(b.update_register)->>'user_id' AS Drugarray,\r\n     date_part('year',age(birth_date)) age,gender,count(screening_id) sccoun\r\nFROM   public.health_screening b \r\n    inner join family_member_master fm on b.member_id=fm.member_id\r\n    group by Drugarray,gender,age) tbl\r\n    inner join user_master um on tbl.Drugarray=cast(um.user_id as text)\r\n    group by um.facility_id,age2,tbl.gender";
+                //cmdInner.CommandText = "select facility_id,CASE \r\nWHEN age between 0 and 17 THEN 'child' \r\nWHEN age >18 THEN 'Adult'  \r\nEND age2,tbl.gender,sum(sccoun) totc from \r\n    (SELECT jsonb_array_elements(b.update_register)->>'user_id' AS Drugarray,\r\n     date_part('year',age(birth_date)) age,gender,count(screening_id) sccoun\r\nFROM   public.health_screening b \r\n    inner join family_member_master fm on b.member_id=fm.member_id\r\n    group by Drugarray,gender,age) tbl\r\n    inner join user_master um on tbl.Drugarray=cast(um.user_id as text)\r\n    group by um.facility_id,age2,tbl.gender";
+
+                cmdInner.CommandText = "SELECT * from public.getopdashboard_2()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4114,6 +4140,10 @@ namespace PHRLockerAPI.Controllers
             return RList;
         }
 
+
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetKPIHUDWise")]
         public List<VMPopulationKPIDistrictWise> GetPopulationKPIHUDWise()
         {
@@ -4124,7 +4154,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select D.district_id,D.district_gid,D.district_name,H.hud_id,H.hud_name from address_district_master D inner join address_hud_master H on H.district_id=D.district_id";
+            cmd.CommandText = "SELECT * from public.getkpihudwise_1()";
+
+            //cmd.CommandText = "select D.district_id,D.district_gid,D.district_name,H.hud_id,H.hud_name from address_district_master D inner join address_hud_master H on H.district_id=D.district_id";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
             List<VMPopulationKPIDistrictWise> RList = new List<VMPopulationKPIDistrictWise>();
@@ -4159,7 +4191,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id group by D.hud_id";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_2()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id group by D.hud_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4196,7 +4231,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Verified' group by D.hud_id";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_3()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Verified' group by D.hud_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4233,7 +4271,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Unverified' group by D.hud_id";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_4()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Unverified' group by D.hud_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4270,7 +4311,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'='Resident' group by D.hud_id";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_5()";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4307,7 +4348,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  group by D.hud_id ";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_6()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  group by D.hud_id ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4345,7 +4389,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' group by D.hud_id";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_7()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' group by D.hud_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4382,7 +4429,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'='Duplicate' group by D.hud_id";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_8()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'='Duplicate' group by D.hud_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4419,7 +4469,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death' group by D.hud_id ";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_9()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death' group by D.hud_id ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4456,7 +4509,10 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where consent_status='RECEIVED' group by D.hud_id";
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_10()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where consent_status='RECEIVED' group by D.hud_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4493,7 +4549,11 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where street_id is not null group by D.hud_id";
+
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_11()";
+
+                //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where street_id is not null group by D.hud_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
