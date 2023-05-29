@@ -2139,9 +2139,27 @@ namespace PHRLockerAPI.Controllers
             {
                 Filterforall(F);
 
+<<<<<<< Updated upstream
                 string query = "SELECT * FROM public.rolewisescreening(@CommunityParam, @InstitutionParam)";
 
                 var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
+=======
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            VMCommunityTriage VM = new VMCommunityTriage();
+            string TotalPopulation = "0";
+            con.Open();
+
+            Filterforall(F);
+
+            NpgsqlCommand cmd = new NpgsqlCommand();
+            cmd.Connection = con;
+            cmd.CommandType = CommandType.Text;
+            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  (select tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from (SELECT jsonb_array_elements(b.update_register) AS arruser,screening_id FROM   public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id) tbl inner join user_master um on cast(tbl.user_id as uuid)=um.user_id inner join user_role_Master urm on urm.role_id=um.role where tbl.user_id!='system' group by role_name order by desigcount desc limit 10";
+
+            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  \r\n(select tbl.family_id,tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from \r\n(SELECT jsonb_array_elements(b.update_register) AS arruser,family_id,screening_id \r\nFROM public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id,tbl.family_id) tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "\r\ninner join user_master um on cast(tbl.user_id as uuid)= um.user_id \r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ninner join user_role_Master urm on urm.role_id = um.role \r\nwhere tbl.user_id != 'system' group by role_name order by desigcount desc limit 10";
+
+            cmd.CommandText = "SELECT * FROM public.rolewisescreening('" + CommunityParam + "', '" + InstitutionParam + "')";
+>>>>>>> Stashed changes
 
                 var results = connection.Query<RoleReport>(query,parameters);
 
