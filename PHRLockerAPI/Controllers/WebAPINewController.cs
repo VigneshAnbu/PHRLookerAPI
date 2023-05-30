@@ -12,6 +12,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
+using System.Runtime.Intrinsics.Arm;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -4435,12 +4437,14 @@ namespace PHRLockerAPI.Controllers
         }
 
 
-        [HttpPost]
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getfieldverificationresidentwise")]
-        public VMPopulationKPIDistrictWise GetFieldresidentwise(FilterpayloadModel F)
+        public VMGetfieldverificationresidentwiseModel GetFieldresidentwise([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPopulationKPIDistrictWise VM = new VMPopulationKPIDistrictWise();
+            VMGetfieldverificationresidentwiseModel VM = new VMGetfieldverificationresidentwiseModel();
 
 
             Filterforall(F);
@@ -4451,9 +4455,12 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdInner = new NpgsqlCommand();
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
-            cmdInner.CommandText = "select count(member_id) from family_member_master where resident_status='Resident' " + CommunityParam + "";
+            //cmdInner.CommandText = "select count(member_id) from family_member_master where resident_status='Resident' " + CommunityParam + "";
+
+            cmdInner.CommandText = "SELECT * FROM public.getfieldverificationresidentwise('" + CommunityParam + "')";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
             while (drInner.Read())
             {
                 VM.total_population = drInner["count"].ToString();
@@ -4466,7 +4473,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdnontraceable = new NpgsqlCommand();
             cmdnontraceable.Connection = con;
             cmdnontraceable.CommandType = CommandType.Text;
-            cmdnontraceable.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->> 'status' = 'Non traceable'  or resident_status_details->> 'status' = 'Non-traceable'  " + CommunityParam + "";
+            //cmdnontraceable.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->> 'status' = 'Non traceable'  or resident_status_details->> 'status' = 'Non-traceable'  " + CommunityParam + "";
+
+            cmdnontraceable.CommandText = "SELECT * FROM public.getfieldverificationresidentwise_1('" + CommunityParam + "')";
 
             NpgsqlDataReader drnontraceable = cmdnontraceable.ExecuteReader();
 
@@ -4484,7 +4493,9 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdDeath = new NpgsqlCommand();
             cmdDeath.Connection = con;
             cmdDeath.CommandType = CommandType.Text;
-            cmdDeath.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + "";
+            //cmdDeath.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + "";
+
+            cmdDeath.CommandText = "SELECT * FROM public.getfieldverificationresidentwise_2('" + CommunityParam + "')";
 
             NpgsqlDataReader drDeath = cmdDeath.ExecuteReader();
 
@@ -4501,10 +4512,11 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdVisitor = new NpgsqlCommand();
             cmdVisitor.Connection = con;
             cmdVisitor.CommandType = CommandType.Text;
-            cmdVisitor.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Visitor'  " + CommunityParam + "";
+            //cmdVisitor.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Visitor'  " + CommunityParam + "";
+
+            cmdVisitor.CommandText = "SELECT * FROM public.getfieldverificationresidentwise_3('" + CommunityParam + "')";
 
             NpgsqlDataReader drVisitor = cmdVisitor.ExecuteReader();
-
 
             while (drVisitor.Read())
             {
@@ -4517,7 +4529,9 @@ namespace PHRLockerAPI.Controllers
         }
 
 
-        [HttpPost]
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationTotalVerified")]
         public FVTotalPopulationModel GetFieldVTotalVerified(FilterpayloadModel F)
         {
@@ -4530,15 +4544,16 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdVerified = new NpgsqlCommand();
             cmdVerified.Connection = con;
             cmdVerified.CommandType = CommandType.Text;
-            cmdVerified.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->>'resident_details'='Verified' " + CommunityParam + "";
+            //cmdVerified.CommandText = "select count(member_id) from family_member_master fm where resident_status_details->>'resident_details'='Verified' " + CommunityParam + "";
+            cmdVerified.CommandText = "SELECT * FROM public.getfieldverificationtotalverified('" + CommunityParam + "')";
             NpgsqlDataReader drVerified = cmdVerified.ExecuteReader();
             while (drVerified.Read())
             {
                 VM.VerifiedPopulation = drVerified["count"].ToString();
             }
             con.Close();
-            return VM;
-        }
+                return VM;
+            }
 
 
 
@@ -4579,9 +4594,11 @@ namespace PHRLockerAPI.Controllers
             return VM;
         }
 
-        [HttpPost]
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationFamilyMember")]
-        public FVFamilyMemberPopulationModel GetFieldVFamilyMember(FilterpayloadModel F)
+        public FVFamilyMemberPopulationModel GetFieldVFamilyMember([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
@@ -4591,7 +4608,8 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdFamily = new NpgsqlCommand();
             cmdFamily.Connection = con;
             cmdFamily.CommandType = CommandType.Text;
-            cmdFamily.CommandText = "select count(family_id)count from family_master fm where update_register->0->>'user_id'!='system'  " + CommunityParam + "";
+            //cmdFamily.CommandText = "select count(family_id)count from family_master fm where update_register->0->>'user_id'!='system'  " + CommunityParam + "";
+            cmdFamily.CommandText = "SELECT * FROM public.getfieldverificationfamilymember('" + CommunityParam + "')";
             NpgsqlDataReader drFamily = cmdFamily.ExecuteReader();
             while (drFamily.Read())
             {
@@ -4604,7 +4622,8 @@ namespace PHRLockerAPI.Controllers
             NpgsqlCommand cmdMember = new NpgsqlCommand();
             cmdMember.Connection = con;
             cmdMember.CommandType = CommandType.Text;
-            cmdMember.CommandText = "select count(member_id) from family_member_master fm where update_register->0->>'user_id'!='system'  " + CommunityParam + "";
+            //cmdMember.CommandText = "select count(member_id) from family_member_master fm where update_register->0->>'user_id'!='system'  " + CommunityParam + "";
+            cmdMember.CommandText = "SELECT * FROM public.getfieldverificationfamilymember_1('" + CommunityParam + "')";
             NpgsqlDataReader drMember = cmdMember.ExecuteReader();
             while (drMember.Read())
             {
@@ -4616,12 +4635,14 @@ namespace PHRLockerAPI.Controllers
             return VM;
         }
 
-        [HttpPost]
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationDistrictWise")]
-        public List<VMPopulationKPIDistrictWise> GetfieldverificationDistrictWise(FilterpayloadModel F)
+        public List<VMGetfieldverificationdistrictwiseModel> GetfieldverificationDistrictWise([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPopulationKPIDistrictWise VM = new VMPopulationKPIDistrictWise();
+            VMGetfieldverificationdistrictwiseModel VM = new VMGetfieldverificationdistrictwiseModel();
 
 
             Filterforall(F);
@@ -4633,12 +4654,12 @@ namespace PHRLockerAPI.Controllers
             cmd.CommandText = "select district_id,district_gid,district_name from address_district_master";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPopulationKPIDistrictWise> RList = new List<VMPopulationKPIDistrictWise>();
+            List<VMGetfieldverificationdistrictwiseModel> RList = new List<VMGetfieldverificationdistrictwiseModel>();
 
             while (dr.Read())
             {
 
-                var SList = new VMPopulationKPIDistrictWise();
+                var SList = new VMGetfieldverificationdistrictwiseModel();
 
                 SList.district_name = dr["district_name"].ToString();
                 SList.district_gid = dr["district_gid"].ToString();
@@ -4661,12 +4682,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id  " + CommunityParam + " group by D.district_id";
+                //cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id  " + CommunityParam + " group by D.district_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4696,12 +4719,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'resident_details'='Verified'  " + CommunityParam + " group by D.district_id  ";
+                //cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'resident_details'='Verified'  " + CommunityParam + " group by D.district_id  ";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_1('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4733,12 +4758,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'resident_details'='Unverified'  " + CommunityParam + " group by D.district_id ";
+                //cmdInner.CommandText = "select count(member_id),D.district_id from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'resident_details'='Unverified'  " + CommunityParam + " group by D.district_id ";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_2('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4770,12 +4797,15 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'='Resident' " + CommunityParam + " group by D.district_id ";
+                //cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'='Resident' " + CommunityParam + " group by D.district_id ";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_3('" + CommunityParam + "')";
+
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4807,12 +4837,15 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by D.district_id";
+                //cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by D.district_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_4('" + CommunityParam + "')";
+
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4845,12 +4878,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable'  " + CommunityParam + " group by D.district_id";
+                //cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable'  " + CommunityParam + " group by D.district_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_5('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4882,12 +4917,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by D.district_id";
+                //cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by D.district_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_6('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4919,12 +4956,15 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by D.district_id";
+                //cmdInner.CommandText = "select count(member_id),D.district_id  from family_member_master fm inner join address_district_master D on D.district_id=fm.district_id where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by D.district_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_7('" + CommunityParam + "')";
+
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4956,12 +4996,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),district_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by district_id";
+                //cmdInner.CommandText = "select count(member_id),district_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by district_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationdistrictwise_8('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationdistrictwiseModel SList = new VMGetfieldverificationdistrictwiseModel();
 
 
 
@@ -4986,12 +5028,14 @@ namespace PHRLockerAPI.Controllers
             return RList;
         }
 
-        [HttpPost]
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationHUDWise")]
-        public List<VMPopulationKPIDistrictWise> GetfieldverificationHUDWise(FilterpayloadModel F)
+        public List<VMGetfieldverificationhudwiseModel> GetfieldverificationHUDWise([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPopulationKPIDistrictWise VM = new VMPopulationKPIDistrictWise();
+            VMGetfieldverificationhudwiseModel VM = new VMGetfieldverificationhudwiseModel();
 
 
             Filterforall(F);
@@ -5003,12 +5047,12 @@ namespace PHRLockerAPI.Controllers
             cmd.CommandText = "select D.district_id,D.district_gid,D.district_name,H.hud_id,H.hud_name from address_district_master D inner join address_hud_master H on H.district_id=D.district_id";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPopulationKPIDistrictWise> RList = new List<VMPopulationKPIDistrictWise>();
+            List<VMGetfieldverificationhudwiseModel> RList = new List<VMGetfieldverificationhudwiseModel>();
 
             while (dr.Read())
             {
 
-                var SList = new VMPopulationKPIDistrictWise();
+                var SList = new VMGetfieldverificationhudwiseModel();
 
                 SList.district_name = dr["district_name"].ToString();
                 SList.district_gid = dr["district_gid"].ToString();
@@ -5042,12 +5086,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.hud_id from family_member_master fm  " + LocalParam + " group by fm.hud_id";
+                //cmdInner.CommandText = "select count(member_id),fm.hud_id from family_member_master fm  " + LocalParam + " group by fm.hud_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise('" + LocalParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5079,12 +5125,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.hud_id from family_member_master fm where resident_status_details->>'resident_details'='Verified' " + CommunityParam + " group by fm.hud_id";
+                //cmdInner.CommandText = "select count(member_id),fm.hud_id from family_member_master fm where resident_status_details->>'resident_details'='Verified' " + CommunityParam + " group by fm.hud_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_1('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5116,12 +5164,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.hud_id from family_member_master fm where resident_status_details->>'resident_details'='Unverified' " + CommunityParam + " group by fm.hud_id";
+                //cmdInner.CommandText = "select count(member_id),fm.hud_id from family_member_master fm where resident_status_details->>'resident_details'='Unverified' " + CommunityParam + " group by fm.hud_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_2('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5153,12 +5203,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'='Resident' " + CommunityParam + " group by fm.hud_id";
+                //cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'='Resident' " + CommunityParam + " group by fm.hud_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_3('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5190,12 +5242,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by fm.hud_id";
+                //cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by fm.hud_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_4('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5230,10 +5284,11 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' " + CommunityParam + " group by fm.hud_id";
 
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_5('" + CommunityParam + "')";
+
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
-
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5265,12 +5320,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by fm.hud_id";
+                //cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by fm.hud_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_6('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5302,12 +5359,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.hud_id ";
+                //cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.hud_id ";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_7('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5340,12 +5399,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),hud_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by hud_id";
+                //cmdInner.CommandText = "select count(member_id),hud_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by hud_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_8('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationhudwiseModel SList = new VMGetfieldverificationhudwiseModel();
 
 
 
@@ -5375,12 +5436,14 @@ namespace PHRLockerAPI.Controllers
 
 
 
-        [HttpPost]
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationblockWise")]
-        public List<VMPopulationKPIDistrictWise> GetfieldverificationblockWise(FilterpayloadModel F)
+        public List<VMGetfieldverificationblockwiseModel> GetfieldverificationblockWise([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPopulationKPIDistrictWise VM = new VMPopulationKPIDistrictWise();
+            VMGetfieldverificationblockwiseModel VM = new VMGetfieldverificationblockwiseModel();
 
 
             Filterforall(F);
@@ -5392,12 +5455,12 @@ namespace PHRLockerAPI.Controllers
             cmd.CommandText = "select D.district_id,D.district_gid,D.district_name,H.hud_id,H.hud_name,B.block_id,B.block_gid,B.block_name from address_district_master D inner join address_hud_master H on H.district_id=D.district_id inner join address_block_master B on B.district_id=D.district_id";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPopulationKPIDistrictWise> RList = new List<VMPopulationKPIDistrictWise>();
+            List<VMGetfieldverificationblockwiseModel> RList = new List<VMGetfieldverificationblockwiseModel>();
 
             while (dr.Read())
             {
 
-                var SList = new VMPopulationKPIDistrictWise();
+                var SList = new VMGetfieldverificationblockwiseModel();
 
                 SList.district_name = dr["district_name"].ToString();
                 SList.district_gid = dr["district_gid"].ToString();
@@ -5436,12 +5499,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.block_id from family_member_master fm  " + LocalParam + " group by fm.block_id";
+                //cmdInner.CommandText = "select count(member_id),fm.block_id from family_member_master fm  " + LocalParam + " group by fm.block_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise('" + LocalParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5473,12 +5538,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.block_id from family_member_master fm where resident_status_details->>'resident_details'='Verified' " + CommunityParam + " group by fm.block_id";
+                //cmdInner.CommandText = "select count(member_id),fm.block_id from family_member_master fm where resident_status_details->>'resident_details'='Verified' " + CommunityParam + " group by fm.block_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_1('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5512,10 +5579,12 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 cmdInner.CommandText = "select count(member_id),fm.block_id from family_member_master fm where resident_status_details->>'resident_details'='Unverified' " + CommunityParam + " group by fm.block_id";
 
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_2('" + CommunityParam + "')";
+
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5549,10 +5618,12 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'='Resident' " + CommunityParam + " group by fm.block_id";
 
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_3('" + CommunityParam + "')";
+
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5584,12 +5655,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by fm.block_id";
+                //cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by fm.block_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_4('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5622,12 +5695,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' " + CommunityParam + " group by fm.block_id";
+                //cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' " + CommunityParam + " group by fm.block_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_5('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5659,12 +5734,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by fm.block_id";
+                //cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by fm.block_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_6('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5696,12 +5773,15 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.block_id ";
+                //cmdInner.CommandText = "select count(member_id),fm.block_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.block_id ";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_7('" + CommunityParam + "')";
+
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5734,12 +5814,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),block_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by block_id";
+                //cmdInner.CommandText = "select count(member_id),block_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by block_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationblockwise_8('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationblockwiseModel SList = new VMGetfieldverificationblockwiseModel();
 
 
 
@@ -5767,12 +5849,14 @@ namespace PHRLockerAPI.Controllers
             return RList;
         }
 
-        [HttpPost]
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationvillageWise")]
-        public List<VMPopulationKPIDistrictWise> GetfieldverificationvillageWise(FilterpayloadModel F)
+        public List<VMGetfieldverificationvillagewiseModel> GetfieldverificationvillageWise([FromQuery]FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMPopulationKPIDistrictWise VM = new VMPopulationKPIDistrictWise();
+            VMGetfieldverificationvillagewiseModel VM = new VMGetfieldverificationvillagewiseModel();
 
 
             Filterforall(F);
@@ -5784,12 +5868,12 @@ namespace PHRLockerAPI.Controllers
             cmd.CommandText = "select D.district_id,D.district_gid,D.district_name,H.hud_id,H.hud_name,B.block_id,B.block_gid,B.block_name,V.village_id,V.village_gid,V.village_name from address_district_master D inner join address_hud_master H on H.district_id=D.district_id inner join address_block_master B on B.district_id=D.district_id inner join address_village_master V on V.block_id=B.block_id";
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
-            List<VMPopulationKPIDistrictWise> RList = new List<VMPopulationKPIDistrictWise>();
+            List<VMGetfieldverificationvillagewiseModel> RList = new List<VMGetfieldverificationvillagewiseModel>();
 
             while (dr.Read())
             {
 
-                var SList = new VMPopulationKPIDistrictWise();
+                var SList = new VMGetfieldverificationvillagewiseModel();
 
                 SList.district_name = dr["district_name"].ToString();
                 SList.district_gid = dr["district_gid"].ToString();
@@ -5833,10 +5917,12 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 cmdInner.CommandText = "select count(member_id),fm.village_id from family_member_master fm  " + LocalParam + " group by fm.village_id";
 
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise('" + LocalParam + "')";
+
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -5870,10 +5956,12 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 cmdInner.CommandText = "select count(member_id),fm.village_id from family_member_master fm where resident_status_details->>'resident_details'='Verified' " + CommunityParam + " group by fm.village_id";
 
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_1('" + CommunityParam + "')";
+
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -5907,10 +5995,12 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 cmdInner.CommandText = "select count(member_id),fm.village_id from family_member_master fm where resident_status_details->>'resident_details'='Unverified' " + CommunityParam + " group by fm.village_id";
 
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_2('" + CommunityParam + "')";
+
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -5942,12 +6032,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'='Resident' " + CommunityParam + " group by fm.village_id";
+                //cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'='Resident' " + CommunityParam + " group by fm.village_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_3('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -5979,12 +6071,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by fm.village_id";
+                // cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  " + CommunityParam + " group by fm.village_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_4('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -6017,12 +6111,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' " + CommunityParam + " group by fm.village_id";
+                //cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' " + CommunityParam + " group by fm.village_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_5('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -6054,12 +6150,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by fm.village_id";
+                //cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'='Duplicate'  " + CommunityParam + " group by fm.village_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_6('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -6091,12 +6189,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.village_id ";
+                //cmdInner.CommandText = "select count(member_id),fm.village_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.village_id ";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_7('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
@@ -6129,12 +6229,14 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select count(member_id),village_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by village_id";
+                //cmdInner.CommandText = "select count(member_id),village_id from family_member_master fm where resident_status_details->>'status'='Visitor' " + CommunityParam + " group by village_id";
+
+                cmdInner.CommandText = "SELECT * FROM public.getfieldverificationvillagewise_8('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
-                VMPopulationKPIDistrictWise SList = new VMPopulationKPIDistrictWise();
+                VMGetfieldverificationvillagewiseModel SList = new VMGetfieldverificationvillagewiseModel();
 
 
 
