@@ -405,11 +405,9 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [Route("FilterAlls")]
+        [Route("FilterAll")]
         public void Filterforall(FilterpayloadModel F)
         {
-
-
             if (F.district_id != "")
             {
                 string Disparam = "";
@@ -433,7 +431,7 @@ namespace PHRLockerAPI.Controllers
                         i++;
                     }
 
-                    Disparam = "and" + Disparam;
+                    Disparam = "and " + Disparam;
 
                 }
                 else
@@ -761,27 +759,384 @@ namespace PHRLockerAPI.Controllers
             }
         }
 
+        //[HttpGet]
+        //[Route("FilterAlls")]
+        //public void Filterforall(FilterpayloadModel F)
+        //{
 
 
-        [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
-        [OutputCache(Duration = 30 * 60)]
-        [Route("GetDrugdistrict")]
-        public async Task<IEnumerable<Familiesstreetunallocated>> GetDrugdistricttest([FromQuery] FilterpayloadModel F)
-        {
+        //    if (F.district_id != "")
+        //    {
+        //        string Disparam = "";
 
-            Filterforall(F);
+        //        if (F.district_id.Contains(","))
+        //        {
+        //            string[] DistrictValue = F.district_id.Split(",");
 
-            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+        //            int i = 0;
 
-            var query = "SELECT * from public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+        //            foreach (var v in DistrictValue)
+        //            {
+        //                if (i == (DistrictValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.district_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.district_id = '" + v + "') or";
+        //                }
+        //                i++;
+        //            }
 
-            using (var connection = context.CreateConnection())
-            {
-                var OBJ = await connection.QueryAsync<Familiesstreetunallocated>(query);
-                return OBJ.ToList();
-            }
-        }
+        //            Disparam = "and" + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (fm.district_id = '" + F.district_id + "')";
+        //        }
+
+
+        //        CommunityParam = Disparam;
+
+        //    }
+        //    if (F.hud_id != "")
+        //    {
+
+
+        //        string Disparam = "";
+
+        //        if (F.hud_id.Contains(","))
+        //        {
+        //            int i = 0;
+
+        //            string[] HudValue = F.hud_id.Split(",");
+
+        //            foreach (var v in HudValue)
+        //            {
+        //                if (i == (HudValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.hud_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.hud_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (fm.hud_id = '" + F.hud_id + "')";
+        //        }
+
+
+        //        CommunityParam = CommunityParam + Disparam;
+        //    }
+        //    if (F.block_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.block_id.Contains(","))
+        //        {
+        //            int i = 0;
+        //            string[] BlockValue = F.block_id.Split(",");
+
+        //            foreach (var v in BlockValue)
+        //            {
+        //                if (i == (BlockValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.block_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.block_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (fm.block_id = '" + F.block_id + "')";
+        //        }
+
+        //        CommunityParam = CommunityParam + Disparam;
+
+        //    }
+        //    if (F.facility_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.facility_id.Contains(","))
+        //        {
+
+        //            int i = 0;
+
+        //            string[] FacilityValue = F.facility_id.Split(",");
+
+        //            foreach (var v in FacilityValue)
+        //            {
+        //                if (i == (FacilityValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(fm.facility_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(fm.facility_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (fm.facility_id = '" + F.facility_id + "')";
+        //        }
+
+
+
+        //        CommunityParam = CommunityParam + Disparam;
+        //    }
+        //    if (F.indistrict_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.indistrict_id.Contains(","))
+        //        {
+        //            int i = 0;
+
+        //            string[] indistrictValue = F.indistrict_id.Split(",");
+
+        //            foreach (var v in indistrictValue)
+        //            {
+        //                if (i == (indistrictValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(FR.district_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(FR.district_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (FR.district_id = '" + F.indistrict_id + "')";
+        //        }
+
+        //        InstitutionParam = Disparam;
+
+        //    }
+        //    if (F.inhud_id != "")
+        //    {
+
+        //        string Disparam = "";
+
+        //        if (F.inhud_id.Contains(","))
+        //        {
+        //            int i = 0;
+
+        //            string[] inhudValue = F.inhud_id.Split(",");
+
+        //            foreach (var v in inhudValue)
+        //            {
+        //                if (i == (inhudValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(FR.hud_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(FR.hud_id = '" + v + "') or";
+        //                }
+
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (FR.hud_id = '" + F.inhud_id + "')";
+        //        }
+
+
+        //        InstitutionParam = InstitutionParam + Disparam;
+        //    }
+        //    if (F.inblock_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.inblock_id.Contains(","))
+        //        {
+
+        //            int i = 0;
+
+        //            string[] inblockValue = F.inblock_id.Split(",");
+
+        //            foreach (var v in inblockValue)
+        //            {
+        //                if (i == (inblockValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(FR.block_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(FR.block_id = '" + v + "') or";
+        //                }
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (FR.block_id = '" + F.inblock_id + "')";
+        //        }
+
+        //        InstitutionParam = InstitutionParam + Disparam;
+        //    }
+        //    if (F.infacility_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.infacility_id.Contains(","))
+        //        {
+        //            int i = 0;
+
+        //            string[] infacilityValue = F.infacility_id.Split(",");
+
+        //            foreach (var v in infacilityValue)
+        //            {
+        //                if (i == (infacilityValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(FR.facility_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(FR.facility_id = '" + v + "') or";
+        //                }
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (FR.facility_id = '" + F.infacility_id + "')";
+        //        }
+
+        //        InstitutionParam = InstitutionParam + Disparam;
+        //    }
+        //    if (F.directorate_id != "")
+        //    {
+        //        string Disparam = "";
+
+        //        if (F.directorate_id.Contains(","))
+        //        {
+        //            int i = 0;
+
+        //            string[] indirectorateValue = F.directorate_id.Split(",");
+
+        //            foreach (var v in indirectorateValue)
+        //            {
+        //                if (i == (indirectorateValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(FR.directorate_id = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(FR.directorate_id = '" + v + "') or";
+        //                }
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (FR.directorate_id = '" + F.directorate_id + "')";
+        //        }
+
+
+        //        InstitutionParam = InstitutionParam + Disparam;
+        //    }
+        //    if (F.role != "")
+        //    {
+
+        //        string Disparam = "";
+
+        //        if (F.role.Contains(","))
+        //        {
+        //            int i = 0;
+
+        //            string[] inroleValue = F.role.Split(",");
+
+        //            foreach (var v in inroleValue)
+        //            {
+        //                if (i == (inroleValue.Length - 1))
+        //                {
+        //                    Disparam = Disparam + "(UM.role = '" + v + "')";
+        //                }
+        //                else
+        //                {
+        //                    Disparam = Disparam + "(UM.role = '" + v + "') or";
+        //                }
+        //                i++;
+        //            }
+
+        //            Disparam = "and " + Disparam;
+
+        //        }
+        //        else
+        //        {
+        //            Disparam = "and (UM.role = '" + F.role + "')";
+        //        }
+
+        //        InstitutionParam = InstitutionParam + Disparam;
+        //    }
+        //}
+
+
+
+        //[HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        //[Route("GetDrugdistrict")]
+        //public async Task<IEnumerable<Familiesstreetunallocated>> GetDrugdistricttest([FromQuery] FilterpayloadModel F)
+        //{
+
+        //    Filterforall(F);
+
+        //    //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+
+        //    var query = "SELECT * from public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+
+        //    using (var connection = context.CreateConnection())
+        //    {
+        //        var OBJ = await connection.QueryAsync<Familiesstreetunallocated>(query);
+        //        return OBJ.ToList();
+        //    }
+        //}
 
 
         [HttpGet]
@@ -816,7 +1171,7 @@ namespace PHRLockerAPI.Controllers
         {
             Filterforall(F);
             string query = "SELECT * FROM public.GetDrugBlock(@CommunityParam, @InstitutionParam)";
-            
+
             var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
             List<GetDrugBlock> RList = new List<GetDrugBlock>();
 
@@ -829,7 +1184,8 @@ namespace PHRLockerAPI.Controllers
                     RList.Add(result);
                 }
             }
-
+            return RList;
+        }
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
@@ -2150,8 +2506,12 @@ namespace PHRLockerAPI.Controllers
 
                 foreach (var aa in RList)
                 {
-                    aa.CountPer = Percentage_Cal(ReuseCount, int.Parse(aa.RoleCount));
+                    if (aa.RoleCount != null)
+                    {
+                        aa.CountPer = Percentage_Cal(ReuseCount, int.Parse(aa.RoleCount));
+                    }
                 }
+
 
                 return RList;
             }
