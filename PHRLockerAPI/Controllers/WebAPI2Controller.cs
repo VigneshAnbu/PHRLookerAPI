@@ -23,6 +23,7 @@ using static System.Net.Mime.MediaTypeNames;
 namespace PHRLockerAPI.Controllers
 {
     //[Route("api/[controller]")]
+    
     [ApiController]
     public class WebAPI2Controller : ControllerBase
     {
@@ -1150,7 +1151,7 @@ namespace PHRLockerAPI.Controllers
 
             var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
             getDrugListModelList VM = new getDrugListModelList();
-           
+
 
             using (var connection = context.CreateConnection())
             {
@@ -1165,6 +1166,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDrugBlock")]
 
         public async Task<List<GetDrugBlock>> getBlock([FromQuery] FilterpayloadModel F)
@@ -1374,6 +1377,8 @@ namespace PHRLockerAPI.Controllers
         //    return VM;
         //}
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDistrictScreenAgeWise")]
         public VMCommunityTriage getdistrictscreening()
         {
@@ -1452,6 +1457,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetHUDScreenAgeWise")]
         public VMCommunityTriage gethudscreening()
         {
@@ -1525,6 +1532,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetDistrictdrugAgeWise")]
         public VMCommunityTriage getdistrictdrug()
         {
@@ -1603,6 +1612,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetHUDdrugAgeWise")]
         public VMCommunityTriage gethuddrug()
         {
@@ -2495,29 +2506,29 @@ namespace PHRLockerAPI.Controllers
             {
                 Filterforall(F);
 
-<<<<<<< Updated upstream
+                //<<<<<<< Updated upstream
                 string query = "SELECT * FROM public.rolewisescreening(@CommunityParam, @InstitutionParam)";
 
                 var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
-=======
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-            VMCommunityTriage VM = new VMCommunityTriage();
-            string TotalPopulation = "0";
-            con.Open();
+                //=======
+                NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+                VMCommunityTriage VM = new VMCommunityTriage();
+                string TotalPopulation = "0";
+                con.Open();
 
-            Filterforall(F);
+                Filterforall(F);
 
-            NpgsqlCommand cmd = new NpgsqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  (select tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from (SELECT jsonb_array_elements(b.update_register) AS arruser,screening_id FROM   public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id) tbl inner join user_master um on cast(tbl.user_id as uuid)=um.user_id inner join user_role_Master urm on urm.role_id=um.role where tbl.user_id!='system' group by role_name order by desigcount desc limit 10";
+                NpgsqlCommand cmd = new NpgsqlCommand();
+                cmd.Connection = con;
+                cmd.CommandType = CommandType.Text;
+                //cmd.CommandText = "select role_name,sum(userCount) desigcount from  (select tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from (SELECT jsonb_array_elements(b.update_register) AS arruser,screening_id FROM   public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id) tbl inner join user_master um on cast(tbl.user_id as uuid)=um.user_id inner join user_role_Master urm on urm.role_id=um.role where tbl.user_id!='system' group by role_name order by desigcount desc limit 10";
 
-            //cmd.CommandText = "select role_name,sum(userCount) desigcount from  \r\n(select tbl.family_id,tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from \r\n(SELECT jsonb_array_elements(b.update_register) AS arruser,family_id,screening_id \r\nFROM public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id,tbl.family_id) tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "\r\ninner join user_master um on cast(tbl.user_id as uuid)= um.user_id \r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ninner join user_role_Master urm on urm.role_id = um.role \r\nwhere tbl.user_id != 'system' group by role_name order by desigcount desc limit 10";
+                //cmd.CommandText = "select role_name,sum(userCount) desigcount from  \r\n(select tbl.family_id,tbl.arruser->>'user_id' as user_id,count(screening_id)as userCount from \r\n(SELECT jsonb_array_elements(b.update_register) AS arruser,family_id,screening_id \r\nFROM public.health_screening b WHERE  jsonb_typeof(b.update_register) = 'array') tbl  group by user_id,tbl.family_id) tbl \r\ninner join family_master fm on tbl.family_id=fm.family_id  " + CommunityParam + "\r\ninner join user_master um on cast(tbl.user_id as uuid)= um.user_id \r\nINNER JOIN FACILITY_REGISTRY FR ON FR.FACILITY_ID = UM.FACILITY_ID  " + InstitutionParam + "\r\ninner join user_role_Master urm on urm.role_id = um.role \r\nwhere tbl.user_id != 'system' group by role_name order by desigcount desc limit 10";
 
-            cmd.CommandText = "SELECT * FROM public.rolewisescreening('" + CommunityParam + "', '" + InstitutionParam + "')";
->>>>>>> Stashed changes
+                cmd.CommandText = "SELECT * FROM public.rolewisescreening('" + CommunityParam + "', '" + InstitutionParam + "')";
+                //>>>>>>> Stashed changes
 
-                var results = connection.Query<RoleReport>(query,parameters);
+                var results = connection.Query<RoleReport>(query, parameters);
 
                 List<RoleReport> RList = results.ToList();
                 int ReuseCount = RList.Sum(r => int.Parse(r.RoleCount ?? "0"));
@@ -2554,10 +2565,10 @@ namespace PHRLockerAPI.Controllers
         {
             Filterforall(F);
             string query = "SELECT * FROM public.getdistrictmtm(@CommunityParam, @InstitutionParam)";
-            
+
             var parameters = new { CommunityParam = CommunityParam, InstitutionParam = InstitutionParam };
             getDrugListModelList VM = new getDrugListModelList();
-          
+
 
             using (var connection = context.CreateConnection())
             {
@@ -2566,9 +2577,11 @@ namespace PHRLockerAPI.Controllers
                 return VM;
             }
         }
-     
 
-    [HttpPost]
+
+        [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gethudmtm")]
         public VMCommunityTriage gethudmtm(FilterpayloadModel F)
         {
@@ -2611,6 +2624,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getblockmtm")]
         public async Task<List<getblockmtm>> getblockmtm([FromQuery] FilterpayloadModel F)
         {

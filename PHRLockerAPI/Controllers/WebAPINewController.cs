@@ -406,6 +406,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getadmincount")]
         public VMadminapi GetAdminCounts(Adminapimodel A)
         {
@@ -925,6 +927,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetChart")]
         public VMMtmPerformance GetChartDetails(FilterpayloadModel F)
         {
@@ -1988,6 +1992,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getdistrictpbs")]
        
         public async Task<Getdistrictpbs> districtpbs(FilterpayloadModel F)
@@ -2094,6 +2100,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Gethudpbs")]
         public async Task<Gethudpbs> hudpbs(FilterpayloadModel F) { 
         
@@ -2198,6 +2206,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getblockpbs")]
         public async Task<Getblockpbs> blockpbs(FilterpayloadModel F)
         {
@@ -2278,6 +2288,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getvillagepbs")]
         public async Task<Getvillagepbs> villagepbs(FilterpayloadModel F)
         {
@@ -3536,6 +3548,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("Getpopulationkpidashboard")]
         public async  Task<VMPopulationKPIModel> GetPopulationKPI()
         {
@@ -3616,8 +3630,9 @@ namespace PHRLockerAPI.Controllers
             return VM;
         }
 
-
-
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetKPIDistrictWise")]
         public async Task<List<GetKPIDistrictWise>> GetPopulationKPIDistrictWise()
         {
@@ -4558,6 +4573,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationFamilyMembermonthwise")]
         public FVFamilyMemberPopulationModel GetFieldVFamilyMembermonthwise(FilterpayloadModel F)
         {
@@ -6270,6 +6287,8 @@ namespace PHRLockerAPI.Controllers
         /*Looker Filter*/
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getdistrictmasterlooker")]
         public VMCommunityTriage getdistrictmaster()
         {
@@ -6306,6 +6325,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gethudmasterlooker")]
         public VMCommunityTriage gethudmaster()
         {
@@ -6341,6 +6362,8 @@ namespace PHRLockerAPI.Controllers
             return VM;
         }
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getblockmasterlooker")]
         public VMCommunityTriage getblockmaster()
         {
@@ -6379,6 +6402,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getrolemasterlooker")]
         public List<RoleModel> getRolemaster()
         {
@@ -6412,6 +6437,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getdirectoratemasterlooker")]
         public List<DirectorateModel> getdirectoratemaster()
         {
@@ -6445,6 +6472,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getfacilitymasterlooker")]
         public List<FacilityModel> getfacilitymaster(string facility_name)
         {
@@ -6477,6 +6506,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getvillagemasterlooker")]
         public List<VillageMasterModel> getvillagemaster(string village_name)
         {

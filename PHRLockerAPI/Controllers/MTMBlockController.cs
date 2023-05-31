@@ -35,6 +35,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gethtblock")]
         public async Task<List<gethtblockModel>> getht()
         {
@@ -49,6 +51,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getdtblock")]
         public async Task<List<getdtblockModel>> getdt()
         {
@@ -63,6 +67,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gethtdtblock")]
         public async Task<List<gethtdtBlockModel>> gethtdt()
         {
@@ -74,7 +80,11 @@ namespace PHRLockerAPI.Controllers
                 return results.ToList();
             }
         }
+
+
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getpallativeblock")]
         public async Task<List<getpallativeblock>> getpallative()
         {
@@ -88,6 +98,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getphysioblock")]
         public async Task<List<getphysioblock>> getphysio()
         {
@@ -101,6 +113,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getcapdblock")]
         public async Task<List<getcapdblock>> getcapd()
         {
@@ -114,6 +128,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("mtmkpiscreeningblock")]
         public async Task<List<mtmkpiscreeningblock>> mtmkpiscreening()
         {

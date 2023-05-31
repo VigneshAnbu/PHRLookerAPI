@@ -34,6 +34,8 @@ namespace PHRLockerAPI.Controllers
         string tdate = "2040-12-31";
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getdistrictmaster")]
         public VMCommunityTriage getdistrictmaster()
         {
@@ -70,6 +72,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gethudmaster")]
         public VMCommunityTriage gethudmaster()
         {
@@ -105,6 +109,8 @@ namespace PHRLockerAPI.Controllers
             return VM;
         }
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getblockmaster")]
         public getblockmasterModel getblockmaster()
         {
@@ -157,6 +163,8 @@ namespace PHRLockerAPI.Controllers
             return datestr;
         }
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getwebdashboard")]
         public VMCommunityTriage getwebdashboard(string? fromdate, string? todate)
         {
@@ -316,6 +324,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gethudbydistrict")]
         public VMCommunityTriage gethudbydistrict(string? districtid, string? fromdate, string? todate)
         {
@@ -472,6 +482,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getblockbyhud")]
         public VMCommunityTriage getblockbyhud(string? hudid, string? fromdate, string? todate)
         {
@@ -1071,6 +1083,8 @@ namespace PHRLockerAPI.Controllers
         }    
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getwebpopulation")]
         public Object getwebpopulation(string? districtid, string? hudid, string? blockid, string? fromdate, string? todate)
         {
@@ -1178,6 +1192,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getwebagewise")]
         public Object getwebagewise(string? districtid, string? hudid, string? blockid, string? fromdate, string? todate)
         {
@@ -1407,6 +1423,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getmtmkidistrict")]
         public async Task<List<getmtmkidistrictModel>> getmtmkidistrict()
         {
@@ -1420,6 +1438,8 @@ namespace PHRLockerAPI.Controllers
 
         }
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getht")]
         public async Task<List<gethtModel>> getht(List<getmtmkidistrictModel> RList)
         {
@@ -1443,6 +1463,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getdt")]
         public async Task<List<getdtModel>> getdt(List<getmtmkidistrictModel> RList)
         {
@@ -1468,6 +1490,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("gethtdt")]
         public async  Task<List<getHtDtModel>> gethtdt(List<getmtmkidistrictModel> RList)
         {
@@ -1492,6 +1516,8 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getpallative")]
         public async Task<List<getPalliativeModel>> getpallative(List<getmtmkidistrictModel> RList)
         {
@@ -1514,6 +1540,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getphysio")]
         public async Task<List<getPhysioModel>> getphysio(List<getmtmkidistrictModel> RList)
         {
@@ -1536,6 +1564,8 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpPost]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("getcapd")]
         public async Task<List<getCapdModel>> getcapd(List<getmtmkidistrictModel> RList)
         {
@@ -1556,7 +1586,10 @@ namespace PHRLockerAPI.Controllers
                 return capdList;
             }
         }
+        
         [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
         [Route("mtmkpiscreening")]
         public async Task<List<mtmkpiscreening>> mtmkpiscreening()
         {
