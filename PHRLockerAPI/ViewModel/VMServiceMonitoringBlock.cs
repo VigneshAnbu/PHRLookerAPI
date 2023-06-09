@@ -1,0 +1,35 @@
+﻿namespace PHRLockerAPI.ViewModel
+{
+    public class VMServiceMonitoringBlock
+    {
+
+        public string block_name { get; set; }
+
+        public Guid block_id { get; set; }
+
+        public string hud_name { get; set; }
+
+        public string hud_gid { get; set; }
+
+
+        public string district_name { get; set; }
+
+        public string district_gid { get; set; }
+
+        public string totalscreening { get; set; }
+
+        public string totallabtest { get; set; }
+
+        public string labtest30 { get; set; }
+
+        public string screeningperuser { get; set; }
+
+        public string streetswithundelivered { get; set; }
+
+        public string streetswithundelivered90 { get; set; }
+
+        public string streetswithservicesdelivered { get; set; }
+
+        public string streetswithnoscreenings90 { get; set; }
+    }
+}

@@ -19,6 +19,21 @@ using System.Text.RegularExpressions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.CodeAnalysis.Semantics;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+
+using PHRLockerAPI;
+using PHRLockerAPI.DBContext;
+//using PHRLockerAPI.DBContext;
+using PHRLockerAPI.Intfa;
+using PHRLockerAPI.Dto;
 
 namespace PHRLockerAPI.Controllers
 {
@@ -33,9 +48,10 @@ namespace PHRLockerAPI.Controllers
         string InstitutionParam = "";
 
 
+
         private readonly DapperContext context;
 
-        public WebAPINewController(DapperContext context,IConfiguration configuration)
+        public WebAPINewController(DapperContext context, IConfiguration configuration)
 
         {
             this.context = context;
@@ -1303,7 +1319,7 @@ namespace PHRLockerAPI.Controllers
 
         //    con.Close();
         //    //VM.AgeList = RListAge;
-            
+
 
         //    return VM;
 
@@ -1364,9 +1380,9 @@ namespace PHRLockerAPI.Controllers
 
         //    con.Close();
 
-            
+
         //    VM.WeekList = RListWeek;
-            
+
 
         //    return RListWeek;
 
@@ -1705,6 +1721,7 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
+        [Authorize]
         [Route("GetChart9")]
 
         public async Task<IEnumerable<DrugModel>> GetChartDetails9([FromQuery] FilterpayloadModel F)
@@ -1767,6 +1784,7 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
+        [Authorize]
         [Route("GetOPDashboard")]
         public List<VMOPDashboardFacility> GetOPdasdhboard()
         {
@@ -1995,7 +2013,7 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("Getdistrictpbs")]
-       
+
         public async Task<Getdistrictpbs> districtpbs(FilterpayloadModel F)
         {
             Getdistrictpbs VM = new Getdistrictpbs();
@@ -2103,11 +2121,12 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("Gethudpbs")]
-        public async Task<Gethudpbs> hudpbs(FilterpayloadModel F) { 
-        
+        public async Task<Gethudpbs> hudpbs(FilterpayloadModel F)
+        {
+
             Filterforall(F);
 
-             var parameters = new { CommunityParam = CommunityParam };
+            var parameters = new { CommunityParam = CommunityParam };
             string query = "select * from public.Gethudpbs(@CommunityParam)";
             Gethudpbs VM = new Gethudpbs();
             List<Gethudpbs> RList = new List<Gethudpbs>();
@@ -2123,7 +2142,7 @@ namespace PHRLockerAPI.Controllers
                 }
             }
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-           
+
             con.Open();
             if (RList.Count > 0)
             {
@@ -2230,7 +2249,7 @@ namespace PHRLockerAPI.Controllers
                 }
             }
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-      
+
             con.Open();
             if (RList.Count > 0)
             {
@@ -3551,12 +3570,12 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("Getpopulationkpidashboard")]
-        public async  Task<VMPopulationKPIModel> GetPopulationKPI()
+        public async Task<VMPopulationKPIModel> GetPopulationKPI()
         {
 
-           
+
             VMPopulationKPIModel VM = new VMPopulationKPIModel();
-            
+
             using (var connection = _context.CreateConnection())
             {
                 string query = "select * from public.Getpopulationkpidashboard_totPop() ";
@@ -3565,7 +3584,7 @@ namespace PHRLockerAPI.Controllers
 
             }
 
-           
+
             using (var connection = _context.CreateConnection())
             {
                 string query = "select * from public.Getpopulationkpidashboard_VerPop() ";
@@ -3640,8 +3659,8 @@ namespace PHRLockerAPI.Controllers
             GetKPIDistrictWise VM = new GetKPIDistrictWise();
 
             string query = "select * from public.GetKPIDistrictWise()";
-         
-            
+
+
             List<GetKPIDistrictWise> RList = new List<GetKPIDistrictWise>();
             using (var connection = _context.CreateConnection())
             {
@@ -3709,7 +3728,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString() ))
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].verified_population = drInner["count"].ToString();
                         }
@@ -3746,7 +3765,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id ==Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].unverified_population = drInner["count"].ToString();
                         }
@@ -3783,7 +3802,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].resident_population = drInner["count"].ToString();
                         }
@@ -3820,7 +3839,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].migrated_population = drInner["count"].ToString();
                         }
@@ -3858,7 +3877,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].nontraceable = drInner["count"].ToString();
                         }
@@ -3895,7 +3914,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].duplicate = drInner["count"].ToString();
                         }
@@ -3932,7 +3951,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id == Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].death = drInner["count"].ToString();
                         }
@@ -3969,7 +3988,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id ==Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].consent = drInner["count"].ToString();
                         }
@@ -4006,7 +4025,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].district_id ==Guid.Parse( drInner["district_id"].ToString()) )
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
                         {
                             RList[i].allocated_streets = drInner["count"].ToString();
                         }
@@ -4073,7 +4092,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()) )
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
                         {
                             RList[i].total_population = drInner["count"].ToString();
                         }
@@ -4567,8 +4586,8 @@ namespace PHRLockerAPI.Controllers
                 VM.VerifiedPopulation = drVerified["count"].ToString();
             }
             con.Close();
-                return VM;
-            }
+            return VM;
+        }
 
 
 
@@ -5870,7 +5889,7 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationvillageWise")]
-        public List<VMGetfieldverificationvillagewiseModel> GetfieldverificationvillageWise([FromQuery]FilterpayloadModel F)
+        public List<VMGetfieldverificationvillagewiseModel> GetfieldverificationvillageWise([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMGetfieldverificationvillagewiseModel VM = new VMGetfieldverificationvillagewiseModel();
@@ -6918,7 +6937,7 @@ namespace PHRLockerAPI.Controllers
         public async Task<IEnumerable<DataQuality>> Getstreetswithfacilityunallocated([FromQuery] FilterpayloadModel F)
         {
 
-            Filterforall(F);            
+            Filterforall(F);
 
             var query = "SELECT * from public.Getstreetswithfacilityunallocated()";
 
@@ -6964,7 +6983,7 @@ namespace PHRLockerAPI.Controllers
         public async Task<IEnumerable<DataQuality>> Getshopswithnomappinfstreets([FromQuery] FilterpayloadModel F)
         {
 
-            Filterforall(F);            
+            Filterforall(F);
 
             var query = "SELECT * from public.Getshopswithnomappinfstreets()";
 
@@ -7308,6 +7327,1010 @@ namespace PHRLockerAPI.Controllers
         //    return CountValue;
         //}
 
+
+        [HttpGet]
+   
+        [Route("LoginForm")]
+        public async Task<string> LoginFlow([FromQuery] loginmodel L)
+        {
+            var query = "select * from public.lookeruser where mobile='" + L.mobile + "' and password='" + L.password + "'";
+
+            string ResponseMessage = "";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<loginmodel>(query);
+
+                var res = OBJ.ToList();
+
+                if (res.Count > 0)
+                {
+                    ResponseMessage = "Valid";
+
+                    
+
+                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secretkey for oyasys phr to hims integration"));
+                    var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha512Signature);
+                    var tokeOptions = new JwtSecurityToken(
+                        issuer: "http://142.132.206.93:9060/",
+                        audience: "http://142.132.206.93:9060/",
+                        claims: new List<Claim>(),
+                        expires: DateTime.Now.AddMinutes(5),
+                        signingCredentials: signinCredentials
+                    );
+                    var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+                    return tokenString ;
+
+                }
+                else
+                {
+                    ResponseMessage = "Invalid";
+                }
+            }
+
+            return ResponseMessage;
+        }
+
+
+
+        /*Service Monitoring Start*/
+        [HttpGet]
+        [Route("getDrugQuantity")]
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getDrugQuantity()
+        {
+
+            var query = "SELECT * from public.ServiceMon_DrugQuantity()";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<ServiceMonitoringModelcs>(query);
+                return OBJ.ToList();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("getLabTestsinlast")]
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getLabTestsinlast()
+        {
+
+            var query = "SELECT * from public.ServiceMon_LabTest()";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<ServiceMonitoringModelcs>(query);
+                return OBJ.ToList();
+            }
+        }
+
+
+        [HttpGet]
+        [Route("getStreetswithundelivered")]
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getStreetswithundelivered()
+        {
+
+            var query = "SELECT * from public.ServiceMon_Streetswithundelivered()";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<ServiceMonitoringModelcs>(query);
+                return OBJ.ToList();
+            }
+        }
+
+        [HttpGet]
+        [Route("getServiceMon_Noofstreetswithservicesdelivered")]
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getServiceMon_Noofstreetswithservicesdelivered()
+        {
+
+            var query = "SELECT * from public.ServiceMon_Noofstreetswithservicesdelivered()";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<ServiceMonitoringModelcs>(query);
+                return OBJ.ToList();
+            }
+        }
+
+        [HttpGet]
+        [Route("getservicemon_streetswithundelivered90")]
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getservicemon_streetswithundelivered90()
+        {
+
+            var query = "SELECT * from public.servicemon_streetswithundelivered90()";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<ServiceMonitoringModelcs>(query);
+                return OBJ.ToList();
+            }
+        }
+
+        [HttpGet]
+        [Route("getServiceMon_ScreeningPeruser")]
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getServiceMon_ScreeningPeruser()
+        {
+
+            var query = "SELECT * from public.ServiceMon_ScreeningPeruser()";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<ServiceMonitoringModelcs>(query);
+                return OBJ.ToList();
+            }
+        }
+
+        [HttpGet]
+        [Route("getServiceMon_StreetwithScreeningcount")]
+        public async Task<IEnumerable<StreetsScreeningCountModel>> getServiceMon_StreetwithScreeningcount()
+        {
+
+            var query = "SELECT * from public.ServiceMon_StreetwithScreeningcount()";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<StreetsScreeningCountModel>(query);
+                return OBJ.ToList();
+            }
+        }
+
+        /*District*/
+
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("GetServicesMonitoringDistrictWise")]
+        public async Task<List<VMServiceMonitoringDistrict>> GetServicesMonitoringDistrictWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            VMServiceMonitoringDistrict VM = new VMServiceMonitoringDistrict();
+
+            string query = "select * from public.GetKPIDistrictWise()";
+
+
+            List<VMServiceMonitoringDistrict> RList = new List<VMServiceMonitoringDistrict>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<VMServiceMonitoringDistrict>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_totalscreening_D()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].totalscreening = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_totallab_D()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].totallabtest = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_labtest_d()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].labtest30 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_d()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].screeningperuser = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_d()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].streetswithundelivered = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_d()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].streetswithundelivered90 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_d()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].streetswithnoscreenings90 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_d()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].district_id == Guid.Parse(drInner["district_id"].ToString()))
+                        {
+                            RList[i].streetswithservicesdelivered = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+
+
+            return RList;
+        }
+
+
+        /*HUD*/
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("GetServicesMonitoringHUDWise")]
+        public async Task<List<VMServiceMonitoringHUD>> GetServicesMonitoringHUDWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            VMServiceMonitoringHUD VM = new VMServiceMonitoringHUD();
+
+            string query = "select * from public.getkpihudwise()";
+
+
+            List<VMServiceMonitoringHUD> RList = new List<VMServiceMonitoringHUD>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<VMServiceMonitoringHUD>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_totalscreening_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalscreening = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_totallab_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totallabtest = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_labtest_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].labtest30 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].screeningperuser = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].streetswithundelivered = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].streetswithundelivered90 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].streetswithnoscreenings90 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_h()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].streetswithservicesdelivered = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+
+            return RList;
+        }
+
+
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("GetServicesMonitoringBlockWise")]
+        public async Task<List<VMServiceMonitoringBlock>> GetServicesMonitoringBlockWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            VMServiceMonitoringBlock VM = new VMServiceMonitoringBlock();
+
+            string query = "select * from public.getblockmaster()";
+
+
+            List<VMServiceMonitoringBlock> RList = new List<VMServiceMonitoringBlock>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<VMServiceMonitoringBlock>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_totalscreening_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalscreening = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_totallab_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totallabtest = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_labtest_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].labtest30 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].screeningperuser = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].streetswithundelivered = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].streetswithundelivered90 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].streetswithnoscreenings90 = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_b()";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].streetswithservicesdelivered = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+
+            return RList;
+        }
+
+
+        /*Service Monitoring End*/
 
     }
 }
