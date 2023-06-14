@@ -8382,5 +8382,9 @@ namespace PHRLockerAPI.Controllers
 
         /*Service Monitoring End*/
 
+        /*Rural vs Urban Start*/
+
+        /*Rural vs Urban End*/
+
     }
 }
