@@ -4567,7 +4567,7 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetfieldverificationTotalVerified")]
-        public FVTotalPopulationModel GetFieldVTotalVerified(FilterpayloadModel F)
+        public FVTotalPopulationModel GetFieldVTotalVerified([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
@@ -8331,6 +8331,10 @@ namespace PHRLockerAPI.Controllers
 
 
         /*Service Monitoring End*/
+
+        /*Rural vs Urban Start*/
+
+        /*Rural vs Urban End*/
 
     }
 }
