@@ -5148,7 +5148,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise(@LocalParam)";
                 cmdInner.Parameters.AddWithValue("LocalParam", LocalParam);
                 //cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise('" + LocalParam + "')";
-    
+
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
 
@@ -7379,7 +7379,7 @@ namespace PHRLockerAPI.Controllers
 
 
         [HttpGet]
-   
+
         [Route("LoginForm")]
         public async Task<string> LoginFlow([FromQuery] loginmodel L)
         {
@@ -7397,7 +7397,7 @@ namespace PHRLockerAPI.Controllers
                 {
                     ResponseMessage = "Valid";
 
-                    
+
 
                     var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secretkey for oyasys phr to hims integration"));
                     var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha512Signature);
@@ -7409,7 +7409,7 @@ namespace PHRLockerAPI.Controllers
                         signingCredentials: signinCredentials
                     );
                     var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-                    return tokenString ;
+                    return tokenString;
 
                 }
                 else

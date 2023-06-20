@@ -39,4 +39,5 @@ namespace PHRLockerAPI.Models
         [FromQuery(Name = "role")]
         public string ? role { get; set; } = "";
     }
+
 }
