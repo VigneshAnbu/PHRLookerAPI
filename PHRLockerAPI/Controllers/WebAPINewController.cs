@@ -9104,6 +9104,2010 @@ namespace PHRLockerAPI.Controllers
         }
 
 
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("getruralurban_hudWise")]
+        public async Task<List<RuralUrbanHudModel>> getruralurban_hudWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            RuralUrbanHudModel VM = new RuralUrbanHudModel();
+
+            string query = "select * from public.getkpihudwise()";
+
+
+            List<RuralUrbanHudModel> RList = new List<RuralUrbanHudModel>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<RuralUrbanHudModel>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalpopulation('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalscreening('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalscreening_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totaldrugs('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totaldrug_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_mtmbeneficiary('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalmtm_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalpopulation('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalscreening('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalscreening_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totaldrugs('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totaldrug_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_mtmbeneficiary('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalmtm_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalpopulation('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalscreening('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalscreening_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totaldrugs('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totaldrug_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_mtmbeneficiary('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalmtm_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalpopulation('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalscreening('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalscreening_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totaldrugs('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totaldrug_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_mtmbeneficiary('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalmtm_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalpopulation('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totalscreening('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalscreening_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_totaldrugs('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totaldrug_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanhud_mtmbeneficiary('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].hud_id == Guid.Parse(drInner["hud_id"].ToString()))
+                        {
+                            RList[i].totalmtm_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            return RList;
+        }
+
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("getruralurban_blockWise")]
+        public async Task<List<RuralUrbanBlockModel>> getruralurban_blockWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            RuralUrbanBlockModel VM = new RuralUrbanBlockModel();
+
+            string query = "select * from public.getkpihudwise()";
+
+
+            List<RuralUrbanBlockModel> RList = new List<RuralUrbanBlockModel>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<RuralUrbanBlockModel>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalpopulation('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalscreening('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalscreening_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totaldrugs('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totaldrug_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_mtmbeneficiary('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalmtm_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalpopulation('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalscreening('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalscreening_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totaldrugs('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totaldrug_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_mtmbeneficiary('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalmtm_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalpopulation('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalscreening('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalscreening_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totaldrugs('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totaldrug_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_mtmbeneficiary('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalmtm_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalpopulation('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalscreening('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalscreening_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totaldrugs('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totaldrug_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_mtmbeneficiary('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalmtm_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalpopulation('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totalscreening('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalscreening_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_totaldrugs('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totaldrug_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanblock_mtmbeneficiary('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].totalmtm_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            return RList;
+        }
+
+
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("getruralurban_VillageWise")]
+        public async Task<List<RuralUrbanVillageModel>> getruralurban_VillageWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            RuralUrbanVillageModel VM = new RuralUrbanVillageModel();
+
+            string query = "select * from public.getvillagelist()";
+
+
+            List<RuralUrbanVillageModel> RList = new List<RuralUrbanVillageModel>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<RuralUrbanVillageModel>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalpopulation('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalscreening('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalscreening_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totaldrugs('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totaldrug_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_mtmbeneficiary('CO')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalmtm_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalpopulation('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalscreening('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalscreening_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totaldrugs('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totaldrug_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_mtmbeneficiary('MP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalmtm_mp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalpopulation('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_co = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalscreening('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalscreening_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totaldrugs('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totaldrug_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_mtmbeneficiary('VP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalmtm_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalpopulation('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalscreening('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalscreening_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totaldrugs('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totaldrug_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_mtmbeneficiary('OT')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalmtm_other = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalpopulation('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalpopulation_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totalscreening('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalscreening_vp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_totaldrugs('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totaldrug_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+                cmdInner.CommandText = "select * from public.getruralurbanvillage_mtmbeneficiary('TP')";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].totalmtm_tp = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            return RList;
+        }
+
 
         /*Rural vs Urban End*/
 

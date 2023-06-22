@@ -1,7 +1,15 @@
 ﻿namespace PHRLockerAPI.Models
 {
-    public class districtscreeningcountmodel
+    public class blockscreeningcountmodel
     {
+        public string block_name { get; set; }
+
+        public string block_id { get; set; }
+        public string block_gid { get; set; }
+        public string hud_name { get; set; }
+
+        public string hud_id { get; set; }
+        public string hud_gid { get; set; }
         public string district_name { get; set; }
 
         public string district_id { get; set; }
@@ -30,9 +38,7 @@
         public string drugissued { get; set; }
         public string scrpercentage { get; set; }
 
-        public List<districtscreeningcountmodel> DistrictWise { get; set; }
-
-        public string dmconfirmed { get; set; }
+        public List<blockscreeningcountmodel> hudWise { get; set; }
 
     }
 }

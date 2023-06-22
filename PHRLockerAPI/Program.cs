@@ -104,10 +104,6 @@ app.MapPost("/security/createToken",
     return Results.Unauthorized();
 });
 
-
-
-
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
