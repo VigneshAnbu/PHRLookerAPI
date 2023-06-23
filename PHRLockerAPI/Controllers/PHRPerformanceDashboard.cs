@@ -444,38 +444,41 @@ namespace PHRLockerAPI.Controllers
 
         }
 
-        /*        [HttpGet]
-                [ResponseCache(Duration = 30 * 60)]
-                [OutputCache(Duration = 30 * 60)]
-                [Route("GetScreenedOnlyOnceAndMultipleTimesPhrPer")]
-                public VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel getscreenedonlyonceandmultipletimesphrper([FromQuery] FilterpayloadModel F)
-                {
-                    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-                    VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel VM = new VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel();
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
+        [Route("GetScreenedOnlyOnceAndMultipleTimesPhrPer")]
+        public VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel getscreenedonlyonceandmultipletimesphrper([FromQuery] FilterpayloadModel F)
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel VM = new VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel();
 
-                    Filterforall(F);
+            Filterforall(F);
 
-                    con.Open();
+            con.Open();
 
-                    NpgsqlCommand cmdInner = new NpgsqlCommand();
-                    cmdInner.Connection = con;
-                    cmdInner.CommandType = CommandType.Text;
+            NpgsqlCommand cmdInner = new NpgsqlCommand();
+            cmdInner.Connection = con;
+            cmdInner.CommandType = CommandType.Text;
 
-                    cmdInner.CommandText = "select \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend as test, count(*) as counts, dayss\r\nfrom \r\n(select b.family_id, tbl.member_id, dayss from\r\n(select member_id, count(*) as countss, date_trunc('day', last_update_date) \r\n as dayss from  health_screening where last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  last_update_date < date_trunc('day', NOW()) \r\n GROUP BY member_id, date_trunc('day', last_update_date)) as tbl \r\n left JOIN health_screening b on tbl.member_id = b.member_id \r\n and date_trunc('day', last_update_date) != date_trunc('day', dayss)) as tbls group by \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend, dayss order by dayss desc\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "select \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend as test, count(*) as counts, dayss\r\nfrom \r\n(select b.family_id, tbl.member_id, dayss from\r\n(select member_id, count(*) as countss, date_trunc('day', last_update_date) \r\n as dayss from  health_screening where last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  last_update_date < date_trunc('day', NOW()) \r\n GROUP BY member_id, date_trunc('day', last_update_date)) as tbl \r\n left JOIN health_screening b on tbl.member_id = b.member_id \r\n and date_trunc('day', last_update_date) != date_trunc('day', dayss)) as tbls group by \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend, dayss order by dayss desc\r\n " + CommunityParam + "";
 
-                    NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+            NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
-                    while (drInner.Read())
-                    {
-                        VM.Population_Given_Consent = drInner["repeated"].ToString();
+            while (drInner.Read())
+            {
+                VM.Test = drInner["test"].ToString();
+                VM.Count = drInner["counts"].ToString();
+                VM.Days = drInner["dayss"].ToString();
 
-                    }
 
-                    con.Close();
+            }
 
-                    return VM;
+            con.Close();
 
-                }*/
+            return VM;
+
+        }
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
@@ -617,39 +620,39 @@ namespace PHRLockerAPI.Controllers
 
         }
 
-        /*        [HttpGet]
-                [ResponseCache(Duration = 30 * 60)]
-                [OutputCache(Duration = 30 * 60)]
-                [Route("GetScreenedLastSevenDaysPhrPer")]
-                public VMGetScreenedLastSevenDaysPhrPerModel getscreenedlastsevendaysphrper([FromQuery] FilterpayloadModel F)
-                {
-                    NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
-                    VMGetScreenedLastSevenDaysPhrPerModel VM = new VMGetScreenedLastSevenDaysPhrPerModel();
+        [HttpGet]
+        [ResponseCache(Duration = 30 * 60)]
+        [OutputCache(Duration = 30 * 60)]
+        [Route("GetScreenedLastSevenDaysPhrPer")]
+        public VMGetScreenedLastSevenDaysPhrPerModel getscreenedlastsevendaysphrper([FromQuery] FilterpayloadModel F)
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            VMGetScreenedLastSevenDaysPhrPerModel VM = new VMGetScreenedLastSevenDaysPhrPerModel();
 
-                    Filterforall(F);
+            Filterforall(F);
 
-                    con.Open();
+            con.Open();
 
-                    NpgsqlCommand cmdInner = new NpgsqlCommand();
-                    cmdInner.Connection = con;
-                    cmdInner.CommandType = CommandType.Text;
+            NpgsqlCommand cmdInner = new NpgsqlCommand();
+            cmdInner.Connection = con;
+            cmdInner.CommandType = CommandType.Text;
 
-                    cmdInner.CommandText = "select count(member_id) as count , date_trunc('day', last_update_date) as dayss from health_screening where last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  last_update_date < date_trunc('day', NOW()) GROUP BY date_trunc('day', last_update_date)\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "select count(member_id) as count , date_trunc('day', last_update_date) as dayss from health_screening where last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  last_update_date < date_trunc('day', NOW()) GROUP BY date_trunc('day', last_update_date)\r\n " + CommunityParam + "";
 
-                    NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+            NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
-                    while (drInner.Read())
-                    {
-                        VM.Last_Seven_Days = drInner["dayss"].ToString();
-                        VM.Count = drInner["count"].ToString();
+            while (drInner.Read())
+            {
+                VM.Last_Seven_Days = drInner["dayss"].ToString();
+                VM.Count = drInner["count"].ToString();
 
-                    }
+            }
 
-                    con.Close();
+            con.Close();
 
-                    return VM;
+            return VM;
 
-                }*/
+        }
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
@@ -2001,8 +2004,8 @@ namespace PHRLockerAPI.Controllers
                 SList.Block_Gid = drInner["block_gid"].ToString();
                 SList.Village_Name = drInner["village_name"].ToString();
                 SList.Village_Gid = drInner["village_gid"].ToString();
-                SList.PHC = drInner["phc"].ToString();
-                SList.HSC = drInner["hsc"].ToString();
+                SList.phc = drInner["phc"].ToString();
+                SList.hsc = drInner["hsc"].ToString();
 
 
                 RList.Add(SList);
@@ -2030,7 +2033,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].MLHP_Individual_Screening = drInner1["count"].ToString();
+                        RList[i].mlhp_Individual_Screening = drInner1["count"].ToString();
                     }
 
                 }
@@ -2060,7 +2063,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].MLHP_Total_Screening = drInner1["count"].ToString();
+                        RList[i].mlhp_Total_Screening = drInner1["count"].ToString();
 
                     }
 
@@ -2091,7 +2094,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].MLHP_Individual_Drugs = drInner1["count"].ToString();
+                        RList[i].mlhp_Individual_Drugs = drInner1["count"].ToString();
                     }
 
                 }
@@ -2120,7 +2123,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].MLHP_Population_Verified = drInner1["count"].ToString();
+                        RList[i].mlhp_Population_Verified = drInner1["count"].ToString();
                     }
 
                 }
@@ -2148,7 +2151,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].WHV_Population_Verified = drInner1["count"].ToString();
+                        RList[i].whv_Population_Verified = drInner1["count"].ToString();
                     }
 
                 }
@@ -2176,7 +2179,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].WHV_Total_Screening = drInner1["count"].ToString();
+                        RList[i].whv_Total_Screening = drInner1["count"].ToString();
 
                     }
 
@@ -2205,7 +2208,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].WHV_Individual_Screened = drInner1["count"].ToString();
+                        RList[i].whv_Individual_Screened = drInner1["count"].ToString();
                     }
 
                 }
@@ -2233,7 +2236,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].WHV_Individual_Drugs = drInner1["count"].ToString();
+                        RList[i].whv_Individual_Drugs = drInner1["count"].ToString();
                     }
 
                 }
@@ -2261,7 +2264,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DPH_Population_Verified = drInner1["count"].ToString();
+                        RList[i].dph_Population_Verified = drInner1["count"].ToString();
                     }
 
                 }
@@ -2289,7 +2292,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DPH_Total_Screening = drInner1["count"].ToString();
+                        RList[i].dph_Total_Screening = drInner1["count"].ToString();
                     }
 
                 }
@@ -2317,7 +2320,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DPH_Individual_Screening = drInner1["count"].ToString();
+                        RList[i].dph_Individual_Screening = drInner1["count"].ToString();
                     }
 
                 }
@@ -2346,7 +2349,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DPH_Individual_Drugs = drInner1["count"].ToString();
+                        RList[i].dph_Individual_Drugs = drInner1["count"].ToString();
                     }
 
                 }
@@ -2374,7 +2377,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DMS_Population_Verified = drInner1["count"].ToString();
+                        RList[i].dms_Population_Verified = drInner1["count"].ToString();
                     }
 
                 }
@@ -2402,7 +2405,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DMS_Total_Screening = drInner1["count"].ToString();
+                        RList[i].dms_Total_Screening = drInner1["count"].ToString();
                     }
 
                 }
@@ -2430,7 +2433,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DMS_Individual_Drugs = drInner1["count"].ToString();
+                        RList[i].dms_Individual_Drugs = drInner1["count"].ToString();
                     }
 
                 }
@@ -2458,7 +2461,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DMS_Individual_Screening = drInner1["count"].ToString();
+                        RList[i].dms_Individual_Screening = drInner1["count"].ToString();
                     }
 
                 }
@@ -2486,7 +2489,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DME_Total_Screening = drInner1["count"].ToString();
+                        RList[i].dme_Total_Screening = drInner1["count"].ToString();
                     }
 
                 }
@@ -2514,7 +2517,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DME_Individual_Drugs = drInner1["count"].ToString();
+                        RList[i].dme_Individual_Drugs = drInner1["count"].ToString();
                     }
 
                 }
@@ -2542,7 +2545,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DME_Individual_Screening = drInner1["count"].ToString();
+                        RList[i].dme_Individual_Screening = drInner1["count"].ToString();
                     }
 
                 }
@@ -2570,7 +2573,7 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].DME_Population_Verified = drInner1["count"].ToString();
+                        RList[i].dme_Population_Verified = drInner1["count"].ToString();
                     }
 
                 }
@@ -2620,8 +2623,8 @@ namespace PHRLockerAPI.Controllers
                 SList.Village_Name = drInner["village_name"].ToString();
                 SList.Village_Gid = drInner["village_gid"].ToString();
                 SList.User_Facility_Type = drInner["userfacilitytype"].ToString();
-                SList.PHC = drInner["phc"].ToString();
-                SList.HSC = drInner["hsc"].ToString();
+                SList.phc = drInner["phc"].ToString();
+                SList.hsc = drInner["hsc"].ToString();
 
 
                 RList.Add(SList);
@@ -2649,7 +2652,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].DPH_Mtm_Updated = drInner1["dphmtmupdated"].ToString();
+                        RList[i].dph_Mtm_Updated = drInner1["dphmtmupdated"].ToString();
                     }
 
                 }
@@ -2679,7 +2682,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].DMS_Mtm_Updated = drInner1["dmsmtmupdated"].ToString();
+                        RList[i].dms_Mtm_Updated = drInner1["dmsmtmupdated"].ToString();
 
                     }
 
@@ -2710,7 +2713,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].DME_Mtm_Updated = drInner1["dmemtmupdated"].ToString();
+                        RList[i].dme_Mtm_Updated = drInner1["dmemtmupdated"].ToString();
                     }
 
                 }
@@ -2768,7 +2771,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].WHV_Mtm_Updated = drInner1["whvmtmupdated"].ToString();
+                        RList[i].whv_Mtm_Updated = drInner1["whvmtmupdated"].ToString();
                     }
 
                 }
@@ -2797,7 +2800,7 @@ namespace PHRLockerAPI.Controllers
                     for (int i = 0; i < RList.Count; i++)
                     {
 
-                        RList[i].MLHP_Mtm_Updated = drInner1["mlhpmtmupdated"].ToString();
+                        RList[i].mlhp_Mtm_Updated = drInner1["mlhpmtmupdated"].ToString();
                     }
 
                 }

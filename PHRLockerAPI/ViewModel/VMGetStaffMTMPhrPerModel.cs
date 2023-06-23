@@ -21,21 +21,21 @@
         public string User_Facility_Type { get; set; }
 
 
-        public string PHC { get; set; }
+        public string phc { get; set; }
 
-        public string HSC { get; set; }
+        public string hsc { get; set; }
 
-        public string DPH_Mtm_Updated { get; set; }
+        public string dph_Mtm_Updated { get; set; }
 
-        public string DMS_Mtm_Updated { get; set; }
+        public string dms_Mtm_Updated { get; set; }
 
-        public string DME_Mtm_Updated { get; set; }
+        public string dme_Mtm_Updated { get; set; }
 
         public string Palliative_Mtm_Updated { get; set; }
 
-        public string WHV_Mtm_Updated { get; set; }
+        public string whv_Mtm_Updated { get; set; }
 
-        public string MLHP_Mtm_Updated { get; set; }
+        public string mlhp_Mtm_Updated { get; set; }
 
     }
 }

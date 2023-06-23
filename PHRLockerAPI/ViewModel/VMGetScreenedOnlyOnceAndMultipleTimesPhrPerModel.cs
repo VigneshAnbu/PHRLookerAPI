@@ -2,6 +2,9 @@
 {
     public class VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel
     {
-        public string Population_Given_Consent { get; set; }
+        
+        public string Test { get; set; }
+        public string Count { get; set; }
+        public string Days { get; set; }
     }
 }
