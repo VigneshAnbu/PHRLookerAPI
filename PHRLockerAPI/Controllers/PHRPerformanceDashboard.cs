@@ -60,7 +60,7 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("FilterAll")]
-        public void Filterforall(FilterpayloadModel F)  
+        public void Filterforall(FilterpayloadModel F)
         {
             if (F.district_id != "")
             {
@@ -167,7 +167,7 @@ namespace PHRLockerAPI.Controllers
 
                 CommunityParam = CommunityParam + Disparam;
 
-            }
+            } 
         }
 
         [HttpGet]
@@ -448,7 +448,7 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetScreenedOnlyOnceAndMultipleTimesPhrPer")]
-        public VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel getscreenedonlyonceandmultipletimesphrper([FromQuery] FilterpayloadModel F)
+        public VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel[] getscreenedonlyonceandmultipletimesphrper([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel VM = new VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel();
@@ -464,19 +464,26 @@ namespace PHRLockerAPI.Controllers
             cmdInner.CommandText = "select \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend as test, count(*) as counts, dayss\r\nfrom \r\n(select b.family_id, tbl.member_id, dayss from\r\n(select member_id, count(*) as countss, date_trunc('day', last_update_date) \r\n as dayss from  health_screening where last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  last_update_date < date_trunc('day', NOW()) \r\n GROUP BY member_id, date_trunc('day', last_update_date)) as tbl \r\n left JOIN health_screening b on tbl.member_id = b.member_id \r\n and date_trunc('day', last_update_date) != date_trunc('day', dayss)) as tbls group by \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend, dayss order by dayss desc\r\n " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+            List<VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel> RList = new List<VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel>();
 
             while (drInner.Read())
             {
-                VM.Test = drInner["test"].ToString();
-                VM.Count = drInner["counts"].ToString();
-                VM.Days = drInner["dayss"].ToString();
+                var SList = new VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel();
+
+                SList.Test = drInner["test"].ToString();
+                SList.Count = drInner["counts"].ToString();
+                SList.Days = drInner["dayss"].ToString();
+
+                RList.Add(SList);
 
 
             }
 
             con.Close();
 
-            return VM;
+            VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel[] RArray = RList.ToArray();
+
+            return RArray;
 
         }
 
@@ -571,7 +578,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT count(*) FROM family_master AS fm\r\nWHERE family_insurances->'insurance'->0->>'id'  '^\\d+$' and  NOT (family_insurances->'insurance'->0->>'id'  '0')\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(*) FROM family_master AS fm\r\nWHERE family_insurances->'insurance'->0->>'id'~ '^\\d+$' and  NOT (family_insurances->'insurance'->0->>'id'~'0')\r\n " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -624,7 +631,7 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetScreenedLastSevenDaysPhrPer")]
-        public VMGetScreenedLastSevenDaysPhrPerModel getscreenedlastsevendaysphrper([FromQuery] FilterpayloadModel F)
+        public VMGetScreenedLastSevenDaysPhrPerModel[] getscreenedlastsevendaysphrper([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMGetScreenedLastSevenDaysPhrPerModel VM = new VMGetScreenedLastSevenDaysPhrPerModel();
@@ -640,17 +647,24 @@ namespace PHRLockerAPI.Controllers
             cmdInner.CommandText = "select count(member_id) as count , date_trunc('day', last_update_date) as dayss from health_screening where last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  last_update_date < date_trunc('day', NOW()) GROUP BY date_trunc('day', last_update_date)\r\n " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+            List<VMGetScreenedLastSevenDaysPhrPerModel> RList = new List<VMGetScreenedLastSevenDaysPhrPerModel>();
 
             while (drInner.Read())
             {
-                VM.Last_Seven_Days = drInner["dayss"].ToString();
-                VM.Count = drInner["count"].ToString();
+                var SList = new VMGetScreenedLastSevenDaysPhrPerModel();
+
+                SList.Last_Seven_Days = drInner["dayss"].ToString();
+                SList.Count = drInner["count"].ToString();
+
+                RList.Add(SList);
 
             }
 
             con.Close();
 
-            return VM;
+            VMGetScreenedLastSevenDaysPhrPerModel[] RArray = RList.ToArray();
+
+            return RArray;
 
         }
 
