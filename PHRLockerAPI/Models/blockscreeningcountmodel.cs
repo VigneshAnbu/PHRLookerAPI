@@ -40,5 +40,10 @@
 
         public List<blockscreeningcountmodel> hudWise { get; set; }
 
+        public string dmconfirmed { get; set; }
+        public string tc_count { get; set; }
+        public string ref_count { get; set; }
+        public string rc_count { get; set; }
+
     }
 }

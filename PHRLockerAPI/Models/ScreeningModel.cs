@@ -7,6 +7,12 @@ namespace PHRLockerAPI.Models
     public class ScreeningModel
     {
 
+        public string hsc_name { get; set; }
+
+        public string diagnosis_name { get; set; }
+        public string screening_id { get; set; }
+
+        public string drugs { get; set; }
         public string screeningdate { get; set; }
         public string bmi { get; set; }
 
