@@ -331,6 +331,8 @@ namespace PHRLockerAPI.Controllers
                 SList.screening_id = dr["screening_id"].ToString();
                 SList.hsc_name= dr["facility_name"].ToString();
 
+                SList.followupdate = Convert.ToDateTime(SList.screeningdate).ToShortDateString();
+
                 RList.Add(SList);
             }
 

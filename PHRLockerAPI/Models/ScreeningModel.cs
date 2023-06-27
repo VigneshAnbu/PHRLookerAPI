@@ -6,6 +6,7 @@ namespace PHRLockerAPI.Models
 {
     public class ScreeningModel
     {
+        public string followupdate { get; set; }
 
         public string hsc_name { get; set; }
 
