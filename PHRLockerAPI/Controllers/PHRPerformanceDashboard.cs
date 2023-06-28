@@ -2064,7 +2064,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT hs.member_id) AS unqiue_screening\r\nFROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2073,8 +2073,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Unique_Screening = drInner1["count"].ToString();
+                            RList[i].Unique_Screening = drInner1["count"].ToString();
+                        }
                     }
 
                 }
@@ -2094,7 +2097,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_id, avm.village_name,\r\nCOUNT(hs.member_id) AS total_screening\r\nFROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2103,8 +2106,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Total_Screening = drInner1["count"].ToString();
+                            RList[i].Total_Screening = drInner1["count"].ToString();
+                        }
 
                     }
 
@@ -2125,7 +2131,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id WHERE date_part('year',age(fmm.birth_date))>'18' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT hs.member_id) AS unqiue_screening\r\nFROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\nwhere date_part('year',age(fmm.birth_date))>'18'\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2134,8 +2140,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Unique_Screening_Count = drInner1["count"].ToString();
+                            RList[i].Unique_Screening_Count = drInner1["count"].ToString();
+                        }
                     }
 
                 }
@@ -2154,7 +2163,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(*) FROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id WHERE date_part('year',age(fmm.birth_date))>'18' " +  CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) AS populationage\r\nFROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere date_part('year',age(fmm.birth_date))>'18'\r\n" +  CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2163,8 +2172,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Population_Age = drInner1["count"].ToString();
+                            RList[i].Population_Age = drInner1["count"].ToString();
+                        }
                     }
 
                 }
@@ -2192,10 +2204,14 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].Verified_Population = drInner1["verified_population"].ToString();
-                        RList[i].Death_Count = drInner1["death_count"].ToString();
-                        RList[i].Resident_Count = drInner1["resident_count"].ToString();
-                        RList[i].Resident_Verified_Percentage = drInner1["resident_verified_percentage"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
+                            RList[i].Verified_Population = drInner1["verified_population"].ToString();
+                            RList[i].Death_Count = drInner1["death_count"].ToString();
+                            RList[i].Resident_Count = drInner1["resident_count"].ToString();
+                            RList[i].Resident_Verified_Percentage = drInner1["resident_verified_percentage"].ToString();
+
+                        }
                     }
 
                 }
@@ -2214,7 +2230,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT district_name, district_gid, hud_name, hud_gid, block_name, block_gid,village_name,village_gid,\r\nROUND((screening18 * 100.0) / total_screening, 2) AS percentagescreening18\r\nFROM (\r\n  SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid,avm.village_name,avm.village_gid,\r\n         COUNT(*) AS total_screening,\r\n         COUNT(*) FILTER (WHERE date_part('year', age(fmm.birth_date)) >= 18) AS screening18\r\n  FROM address_block_master AS abm\r\n  INNER JOIN family_member_master AS fmm ON abm.block_id = fmm.block_id\r\n  INNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\n  INNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\n  INNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid,avm.village_name,avm.village_gid\r\n) AS merged_data LIMIT 4999";
+                cmdInner.CommandText = "SELECT district_name, district_gid, hud_name, hud_gid, block_name, block_gid,village_name,village_gid,\r\nROUND((screening18 * 100.0) / total_screening, 2) AS percentagescreening18\r\nFROM (\r\n  SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid,avm.village_name,avm.village_gid,\r\n         COUNT(*) AS total_screening,\r\n         COUNT(*) FILTER (WHERE date_part('year', age(fmm.birth_date)) >= 18) AS screening18\r\n  FROM address_block_master AS abm\r\n  INNER JOIN family_member_master AS fmm ON abm.block_id = fmm.block_id\r\n  INNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n  INNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\n  INNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\n  INNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid,avm.village_name,avm.village_gid\r\n) AS merged_data LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2223,7 +2239,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].Percentage_Screening = drInner1["percentagescreening18"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
+
+                            RList[i].Percentage_Screening = drInner1["percentagescreening18"].ToString();
+                        }
 
                     }
 
@@ -2252,9 +2272,13 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].Confirmed_Diabetes_Mellitus = drInner1["confirmed_diabetes_mellitus"].ToString();
-                        RList[i].Controlled_Diabetes_Mellitus = drInner1["controlled_diabetes_mellitus"].ToString();
-                        RList[i].Diabetes_Percentage = drInner1["diabetes_percentage"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
+
+                            RList[i].Confirmed_Diabetes_Mellitus = drInner1["confirmed_diabetes_mellitus"].ToString();
+                            RList[i].Controlled_Diabetes_Mellitus = drInner1["controlled_diabetes_mellitus"].ToString();
+                            RList[i].Diabetes_Percentage = drInner1["diabetes_percentage"].ToString();
+                        }
                     }
 
                 }
@@ -2282,9 +2306,13 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].Confirmed_Hypertension = drInner1["confirmed_hypertension"].ToString();
-                        RList[i].Controlled_Hypertension = drInner1["controlled_hypertension"].ToString();
-                        RList[i].Hypertension_Percentage = drInner1["hypertension_percentage"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
+
+                            RList[i].Confirmed_Hypertension = drInner1["confirmed_hypertension"].ToString();
+                            RList[i].Controlled_Hypertension = drInner1["controlled_hypertension"].ToString();
+                            RList[i].Hypertension_Percentage = drInner1["hypertension_percentage"].ToString();
+                        }
                     }
 
                 }
@@ -2312,9 +2340,13 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].Confirmed_Both = drInner1["confirmed_both"].ToString();
-                        RList[i].Controlled_Both = drInner1["controlled_both"].ToString();
-                        RList[i].Both_Percentage = drInner1["both_percentage"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
+
+                            RList[i].Confirmed_Both = drInner1["confirmed_both"].ToString();
+                            RList[i].Controlled_Both = drInner1["controlled_both"].ToString();
+                            RList[i].Both_Percentage = drInner1["both_percentage"].ToString();
+                        }
                     }
 
                 }
@@ -2391,11 +2423,14 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Palliative_Care_Mtm_Updated = drInner1["palliativecaremtmupdated"].ToString();
-                        RList[i].Physiotherapy_Mtm_Updated = drInner1["physiotherapymtmupdated"].ToString();
-                        RList[i].Capd_Mtm_Updated = drInner1["capdmtmupdated"].ToString();
-                        RList[i].Both_Mtm_Updated = drInner1["bothmtmupdated"].ToString();
+                            RList[i].Palliative_Care_Mtm_Updated = drInner1["palliativecaremtmupdated"].ToString();
+                            RList[i].Physiotherapy_Mtm_Updated = drInner1["physiotherapymtmupdated"].ToString();
+                            RList[i].Capd_Mtm_Updated = drInner1["capdmtmupdated"].ToString();
+                            RList[i].Both_Mtm_Updated = drInner1["bothmtmupdated"].ToString();
+                        }
                     }
 
                 }
@@ -2424,10 +2459,13 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Confirmed_Diabetes_Mellitus = drInner1["confirmed_diabetes_mellitus"].ToString();
-                        RList[i].Confirmed_Both = drInner1["confirmed_both"].ToString();
-                        RList[i].Confirmed_Hypertension = drInner1["confirmed_hypertension"].ToString();
+                            RList[i].Confirmed_Diabetes_Mellitus = drInner1["confirmed_diabetes_mellitus"].ToString();
+                            RList[i].Confirmed_Both = drInner1["confirmed_both"].ToString();
+                            RList[i].Confirmed_Hypertension = drInner1["confirmed_hypertension"].ToString();
+                        }
 
                     }
 
@@ -2457,10 +2495,13 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Controlled_Both = drInner1["controlled_both"].ToString();
-                        RList[i].Controlled_Diabetes_Mellitus = drInner1["controlled_diabetes_mellitus"].ToString();
-                        RList[i].Controlled_Hypertension = drInner1["controlled_hypertension"].ToString();
+                            RList[i].Controlled_Both = drInner1["controlled_both"].ToString();
+                            RList[i].Controlled_Diabetes_Mellitus = drInner1["controlled_diabetes_mellitus"].ToString();
+                            RList[i].Controlled_Hypertension = drInner1["controlled_hypertension"].ToString();
+                        }
                     }
 
                 }
@@ -2527,7 +2568,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = '1b58cec2-2553-4d95-9ac0-9bf194614e9e' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\n\tCOUNT(DISTINCT hs.member_id) AS individual_screening,\r\n    COUNT(hs.member_id) AS total_screening,\r\n    COUNT(CASE WHEN individual_screening.drug_id IS NOT NULL THEN 1 ELSE NULL END) AS individualissueddrug,\r\n    COUNT(CASE WHEN fmm.resident_status_details->>'resident_details' = 'Verified' THEN 1 ELSE NULL END) AS population_verified\r\nFROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nLEFT JOIN (\r\n    SELECT fmm.member_id, (drug_info->>'drug_id')::uuid AS drug_id\r\n    FROM family_member_master AS fmm\r\n    INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n    CROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\n    WHERE jsonb_typeof(hs.drugs) = 'array'\r\n        AND (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master)\r\n) AS individual_screening ON fmm.member_id = individual_screening.member_id\r\nWHERE um.role = '1b58cec2-2553-4d95-9ac0-9bf194614e9e'\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2536,69 +2577,14 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].mlhp_Individual_Screening = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = '1b58cec2-2553-4d95-9ac0-9bf194614e9e' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-
-                        RList[i].mlhp_Total_Screening = drInner1["count"].ToString();
-
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nCROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\nWHERE jsonb_typeof(hs.drugs) = 'array' and um.role = '1b58cec2-2553-4d95-9ac0-9bf194614e9e' \r\nand (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master) " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-
-                        RList[i].mlhp_Individual_Drugs = drInner1["count"].ToString();
+                            RList[i].mlhp_Individual_Screening = drInner1["individual_screening"].ToString();
+                            RList[i].mlhp_Total_Screening = drInner1["total_screening"].ToString();
+                            RList[i].mlhp_Individual_Drugs = drInner1["individualissueddrug"].ToString();
+                            RList[i].mlhp_Population_Verified = drInner1["population_verified"].ToString();
+                        }
                     }
 
                 }
@@ -2617,7 +2603,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = '1b58cec2-2553-4d95-9ac0-9bf194614e9e' and fmm.resident_status_details->>'resident_details'='Verified' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\n\tCOUNT(DISTINCT hs.member_id) AS individual_screening,\r\n    COUNT(hs.member_id) AS total_screening,\r\n    COUNT(CASE WHEN individual_screening.drug_id IS NOT NULL THEN 1 ELSE NULL END) AS individualissueddrug,\r\n    COUNT(CASE WHEN fmm.resident_status_details->>'resident_details' = 'Verified' THEN 1 ELSE NULL END) AS population_verified\r\nFROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nLEFT JOIN (\r\n    SELECT fmm.member_id, (drug_info->>'drug_id')::uuid AS drug_id\r\n    FROM family_member_master AS fmm\r\n    INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n    CROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\n    WHERE jsonb_typeof(hs.drugs) = 'array'\r\n        AND (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master)\r\n) AS individual_screening ON fmm.member_id = individual_screening.member_id\r\nWHERE um.role = '9bd9c87c-dcde-418d-b11e-4ac62838760f'\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2626,8 +2612,14 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].mlhp_Population_Verified = drInner1["count"].ToString();
+                            RList[i].whv_Population_Verified = drInner1["population_verified"].ToString();
+                            RList[i].whv_Total_Screening = drInner1["total_screening"].ToString();
+                            RList[i].whv_Individual_Screened = drInner1["individual_screening"].ToString();
+                            RList[i].whv_Individual_Drugs = drInner1["individualissueddrug"].ToString();
+                        }
                     }
 
                 }
@@ -2646,7 +2638,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = '9bd9c87c-dcde-418d-b11e-4ac62838760f' and fmm.resident_status_details->>'resident_details'='Verified' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\n\tCOUNT(DISTINCT hs.member_id) AS individual_screening,\r\n    COUNT(hs.member_id) AS total_screening,\r\n    COUNT(CASE WHEN individual_screening.drug_id IS NOT NULL THEN 1 ELSE NULL END) AS individualissueddrug,\r\n    COUNT(CASE WHEN fmm.resident_status_details->>'resident_details' = 'Verified' THEN 1 ELSE NULL END) AS population_verified\r\nFROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nLEFT JOIN (\r\n    SELECT fmm.member_id, (drug_info->>'drug_id')::uuid AS drug_id\r\n    FROM family_member_master AS fmm\r\n    INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n    CROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\n    WHERE jsonb_typeof(hs.drugs) = 'array'\r\n        AND (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master)\r\n) AS individual_screening ON fmm.member_id = individual_screening.member_id\r\nWHERE um.role = 'e737b5b2-f7a5-4d14-9340-706bb49b7e2a'\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2655,7 +2647,14 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].whv_Population_Verified = drInner1["count"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
+
+                            RList[i].dph_Population_Verified = drInner1["population_verified"].ToString();
+                            RList[i].dph_Total_Screening = drInner1["total_screening"].ToString();
+                            RList[i].dph_Individual_Screening = drInner1["individual_screening"].ToString();
+                            RList[i].dph_Individual_Drugs = drInner1["individualissueddrug"].ToString();
+                        }
                     }
 
                 }
@@ -2674,7 +2673,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = '9bd9c87c-dcde-418d-b11e-4ac62838760f' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\n\tCOUNT(DISTINCT hs.member_id) AS individual_screening,\r\n    COUNT(hs.member_id) AS total_screening,\r\n    COUNT(CASE WHEN individual_screening.drug_id IS NOT NULL THEN 1 ELSE NULL END) AS individualissueddrug,\r\n    COUNT(CASE WHEN fmm.resident_status_details->>'resident_details' = 'Verified' THEN 1 ELSE NULL END) AS population_verified\r\nFROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nLEFT JOIN (\r\n    SELECT fmm.member_id, (drug_info->>'drug_id')::uuid AS drug_id\r\n    FROM family_member_master AS fmm\r\n    INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n    CROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\n    WHERE jsonb_typeof(hs.drugs) = 'array'\r\n        AND (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master)\r\n) AS individual_screening ON fmm.member_id = individual_screening.member_id\r\nWHERE um.role = 'a679fa29-90c9-414a-9489-45b4ceb96072'\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2683,8 +2682,14 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].whv_Total_Screening = drInner1["count"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
+                            RList[i].dms_Population_Verified = drInner1["population_verified"].ToString();
+                            RList[i].dms_Total_Screening = drInner1["total_screening"].ToString();
+                            RList[i].dms_Individual_Drugs = drInner1["individualissueddrug"].ToString();
+                            RList[i].dms_Individual_Screening = drInner1["individual_screening"].ToString();
+                        }
                     }
 
                 }
@@ -2703,7 +2708,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = '9bd9c87c-dcde-418d-b11e-4ac62838760f' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\n\tCOUNT(DISTINCT hs.member_id) AS individual_screening,\r\n    COUNT(hs.member_id) AS total_screening,\r\n    COUNT(CASE WHEN individual_screening.drug_id IS NOT NULL THEN 1 ELSE NULL END) AS individualissueddrug,\r\n    COUNT(CASE WHEN fmm.resident_status_details->>'resident_details' = 'Verified' THEN 1 ELSE NULL END) AS population_verified\r\nFROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nLEFT JOIN (\r\n    SELECT fmm.member_id, (drug_info->>'drug_id')::uuid AS drug_id\r\n    FROM family_member_master AS fmm\r\n    INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n    CROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\n    WHERE jsonb_typeof(hs.drugs) = 'array'\r\n        AND (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master)\r\n) AS individual_screening ON fmm.member_id = individual_screening.member_id\r\nWHERE um.role = 'ead9610b-9ce3-418d-b747-747cdba3655e'\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -2712,372 +2717,14 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
-                        RList[i].whv_Individual_Screened = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nCROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\nWHERE jsonb_typeof(hs.drugs) = 'array' and um.role = '9bd9c87c-dcde-418d-b11e-4ac62838760f' \r\nand (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master) " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].whv_Individual_Drugs = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'e737b5b2-f7a5-4d14-9340-706bb49b7e2a' and fmm.resident_status_details->>'resident_details'='Verified' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dph_Population_Verified = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'e737b5b2-f7a5-4d14-9340-706bb49b7e2a' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dph_Total_Screening = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'e737b5b2-f7a5-4d14-9340-706bb49b7e2a' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dph_Individual_Screening = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nCROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\nWHERE jsonb_typeof(hs.drugs) = 'array' and um.role = 'e737b5b2-f7a5-4d14-9340-706bb49b7e2a' \r\nand (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master) " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dph_Individual_Drugs = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'a679fa29-90c9-414a-9489-45b4ceb96072' and fmm.resident_status_details->>'resident_details'='Verified' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dms_Population_Verified = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'a679fa29-90c9-414a-9489-45b4ceb96072' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dms_Total_Screening = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nCROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\nWHERE jsonb_typeof(hs.drugs) = 'array' and um.role = 'a679fa29-90c9-414a-9489-45b4ceb96072' \r\nand (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master) " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dms_Individual_Drugs = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'a679fa29-90c9-414a-9489-45b4ceb96072' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dms_Individual_Screening = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'ead9610b-9ce3-418d-b747-747cdba3655e' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dme_Total_Screening = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\nCROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\nWHERE jsonb_typeof(hs.drugs) = 'array' and um.role = 'ead9610b-9ce3-418d-b747-747cdba3655e' \r\nand (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master) " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dme_Individual_Drugs = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(DISTINCT fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'ead9610b-9ce3-418d-b747-747cdba3655e' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dme_Individual_Screening = drInner1["count"].ToString();
-                    }
-
-                }
-
-            }
-
-            con.Close();
-
-            con.Open();
-
-
-            if (RList.Count > 0)
-            {
-
-                NpgsqlCommand cmdInner = new NpgsqlCommand();
-                cmdInner.Connection = con;
-                cmdInner.CommandType = CommandType.Text;
-
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(fmm.member_id) FROM family_member_master AS fmm\r\nINNER JOIN facility_registry fr ON fmm.facility_id = fr.facility_id\r\nINNER JOIN user_master um ON fr.facility_id = um.facility_id\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nwhere um.role = 'ead9610b-9ce3-418d-b747-747cdba3655e' and fmm.resident_status_details->>'resident_details'='Verified' " + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
-
-                NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
-
-                while (drInner1.Read())
-                {
-
-                    for (int i = 0; i < RList.Count; i++)
-                    {
-                        RList[i].dme_Population_Verified = drInner1["count"].ToString();
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
+
+                            RList[i].dme_Total_Screening = drInner1["total_screening"].ToString();
+                            RList[i].dme_Individual_Drugs = drInner1["individualissueddrug"].ToString();
+                            RList[i].dme_Individual_Screening = drInner1["individual_screening"].ToString();
+                            RList[i].dme_Population_Verified = drInner1["population_verified"].ToString();
+                        }
                     }
 
                 }
@@ -3155,8 +2802,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].dph_Mtm_Updated = drInner1["dphmtmupdated"].ToString();
+                            RList[i].dph_Mtm_Updated = drInner1["dphmtmupdated"].ToString();
+                        }
                     }
 
                 }
@@ -3185,8 +2835,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].dms_Mtm_Updated = drInner1["dmsmtmupdated"].ToString();
+                            RList[i].dms_Mtm_Updated = drInner1["dmsmtmupdated"].ToString();
+                        }
 
                     }
 
@@ -3216,8 +2869,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].dme_Mtm_Updated = drInner1["dmemtmupdated"].ToString();
+                            RList[i].dme_Mtm_Updated = drInner1["dmemtmupdated"].ToString();
+                        }
                     }
 
                 }
@@ -3245,8 +2901,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].Palliative_Mtm_Updated = drInner1["palliativecaremtmupdated"].ToString();
+                            RList[i].Palliative_Mtm_Updated = drInner1["palliativecaremtmupdated"].ToString();
+                        }
                     }
 
                 }
@@ -3274,8 +2933,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].whv_Mtm_Updated = drInner1["whvmtmupdated"].ToString();
+                            RList[i].whv_Mtm_Updated = drInner1["whvmtmupdated"].ToString();
+                        }
                     }
 
                 }
@@ -3303,8 +2965,11 @@ namespace PHRLockerAPI.Controllers
 
                     for (int i = 0; i < RList.Count; i++)
                     {
+                        if (RList[i].Village_Gid == drInner1["village_gid"].ToString())
+                        {
 
-                        RList[i].mlhp_Mtm_Updated = drInner1["mlhpmtmupdated"].ToString();
+                            RList[i].mlhp_Mtm_Updated = drInner1["mlhpmtmupdated"].ToString();
+                        }
                     }
 
                 }
