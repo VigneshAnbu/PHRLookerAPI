@@ -2097,7 +2097,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_id, avm.village_name,\r\nCOUNT(hs.member_id) FROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
+                cmdInner.CommandText = "SELECT adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid,\r\nCOUNT(hs.member_id) FROM family_member_master AS fmm\r\nINNER JOIN address_district_master AS adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master AS ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master AS abm ON fmm.block_id = abm.block_id\r\nINNER JOIN address_village_master AS avm ON fmm.village_id = avm.village_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n" + CommunityParam + " GROUP BY adm.district_name, adm.district_gid, ahm.hud_name, ahm.hud_gid, abm.block_name, abm.block_gid, avm.village_name, avm.village_gid LIMIT 4999";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
