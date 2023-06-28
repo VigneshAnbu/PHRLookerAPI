@@ -38,6 +38,16 @@ namespace PHRLockerAPI.Models
 
         [FromQuery(Name = "role")]
         public string ? role { get; set; } = "";
+
+        [FromQuery(Name = "block_type")]
+        public string? block_type { get; set; } = "";
+
+        [FromQuery(Name = "age")]
+        public string? age { get; set; } = "";
+
+        [FromQuery(Name = "gender")]
+        public string? gender { get; set; } = "";
+
     }
 
 }
