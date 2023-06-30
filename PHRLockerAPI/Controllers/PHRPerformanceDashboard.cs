@@ -620,12 +620,14 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if(InstitutionParam != "")
+            if(CommunityParam != "")
             {
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON fm.family_id = fmm.family_id ";
+
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON fm.family_id = fmm.family_id " + InstitutionParam + " ";
+            InstitutionParam = InstitutionParams;
+
             }
+
 
             con.Open();
 
@@ -633,7 +635,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(fm.family_id) FROM family_master as fm " + InstitutionParams + " " + InstitutionParam + " WHERE fm.reside_status IN ('Permanent','Temporary','Migrated')\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(fm.family_id) FROM family_master as fm " + InstitutionParam + " WHERE fm.reside_status IN ('Permanent','Temporary','Migrated')\r\n " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -693,11 +695,12 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON fm.family_id = fmm.family_id ";
+
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON fm.family_id = fmm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
+
             }
 
 
@@ -707,7 +710,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(fm.family_id) FROM public.family_master as fm " + InstitutionParams + " " + InstitutionParam + " WHERE fm.reside_status = 'Permanent'\r\n" + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(fm.family_id) FROM public.family_master as fm " + InstitutionParam + " WHERE fm.reside_status = 'Permanent'\r\n" + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -800,11 +803,12 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hs.member_id = fmm.member_id ";
+
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hs.member_id = fmm.member_id "+ InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
+
             }
 
             con.Open();
@@ -813,7 +817,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "select \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend as test, count(*) as counts, dayss\r\nfrom \r\n(select b.family_id, tbl.member_id, dayss from\r\n(select hs.member_id, count(*) as countss, date_trunc('day', hs.last_update_date) \r\n as dayss from  health_screening as hs " + InstitutionParams + " " + InstitutionParam + " where hs.last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  hs.last_update_date < date_trunc('day', NOW()) " + CommunityParam + " GROUP BY hs.member_id, date_trunc('day', hs.last_update_date)) as tbl \r\n left JOIN health_screening b on tbl.member_id = b.member_id \r\n and date_trunc('day', last_update_date) != date_trunc('day', dayss)) as tbls group by \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend, dayss order by dayss desc";
+            cmdInner.CommandText = "select \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend as test, count(*) as counts, dayss\r\nfrom \r\n(select b.family_id, tbl.member_id, dayss from\r\n(select hs.member_id, count(*) as countss, date_trunc('day', hs.last_update_date) \r\n as dayss from  health_screening as hs " + InstitutionParam + " where hs.last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  hs.last_update_date < date_trunc('day', NOW()) " + CommunityParam + " GROUP BY hs.member_id, date_trunc('day', hs.last_update_date)) as tbl \r\n left JOIN health_screening b on tbl.member_id = b.member_id \r\n and date_trunc('day', last_update_date) != date_trunc('day', dayss)) as tbls group by \r\ncase \r\nwhen family_id is not null then 'repeated'\r\nwhen family_id is null then 'firstTime'\r\nend, dayss order by dayss desc";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             List<VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel> RList = new List<VMGetScreenedOnlyOnceAndMultipleTimesPhrPerModel>();
@@ -924,12 +928,15 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON fm.family_id = fmm.family_id ";
+
+            
+                string InstitutionParams = " INNER JOIN family_member_master as fmm ON fm.family_id = fmm.family_id "+ InstitutionParam + "";
+                InstitutionParam = InstitutionParams;
             }
+
+
 
             con.Open();
 
@@ -937,7 +944,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT count(*) FROM family_master as fm " + InstitutionParams + " " + InstitutionParam + " WHERE fm.family_insurances->'insurance'->0->>'id'~ '^\\d+$' AND NOT(fm.family_insurances->'insurance'->0->>'id'~'0')\r\n" + CommunityParam + "";
+            cmdInner.CommandText = "SELECT count(*) FROM family_master as fm " + InstitutionParam + " WHERE fm.family_insurances->'insurance'->0->>'id'~ '^\\d+$' AND NOT(fm.family_insurances->'insurance'->0->>'id'~'0')\r\n" + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -964,14 +971,14 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if(InstitutionParam != "")
+            if(CommunityParam != "")
             {
 
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id";
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id "+ InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
 
             }
+
 
             con.Open();
 
@@ -979,7 +986,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(hh.medical_history_id) FROM health_history as hh " + InstitutionParams + " " + InstitutionParam + " WHERE hh.congenital_anomaly = 'True'\r\n" + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(hh.medical_history_id) FROM health_history as hh " + InstitutionParam + " WHERE hh.congenital_anomaly = 'True'\r\n" + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1006,14 +1013,12 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
-
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id";
-
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id "+ InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
             }
+
 
             con.Open();
 
@@ -1021,7 +1026,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "select count(hs.member_id) as count , date_trunc('day', hs.last_update_date) as dayss \r\nfrom health_screening as hs " + InstitutionParams + " " + InstitutionParam + " WHERE hs.last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  hs.last_update_date < date_trunc('day', NOW()) " + CommunityParam + " GROUP BY date_trunc('day', hs.last_update_date)\r\n";
+            cmdInner.CommandText = "select count(hs.member_id) as count , date_trunc('day', hs.last_update_date) as dayss \r\nfrom health_screening as hs " + InstitutionParam + " WHERE hs.last_update_date >= date_trunc('day'\r\n, NOW()) - INTERVAL '7 day' AND  hs.last_update_date < date_trunc('day', NOW()) " + CommunityParam + " GROUP BY date_trunc('day', hs.last_update_date)\r\n";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             List<VMGetScreenedLastSevenDaysPhrPerModel> RList = new List<VMGetScreenedLastSevenDaysPhrPerModel>();
@@ -1130,12 +1135,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
 
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id";
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id "+ InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
 
             }
 
@@ -1145,7 +1149,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(hh.medical_history_id) FROM health_history as hh " + InstitutionParams + " " + InstitutionParam + "  WHERE hh.disability_details->>'udid' is not null " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(hh.medical_history_id) FROM health_history as hh " + InstitutionParam + "  WHERE hh.disability_details->>'udid' is not null " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1172,14 +1176,12 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
-
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id";
-
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id "+ InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
             }
+
 
             con.Open();
 
@@ -1187,7 +1189,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(hh.medical_history_id) FROM health_history as hh " + InstitutionParams + " " + InstitutionParam + " WHERE hh.disability = 'True' AND hh.mtm_beneficiary->>'avail_service' = 'yes'  " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(hh.medical_history_id) FROM health_history as hh " + InstitutionParam + " WHERE hh.disability = 'True' AND hh.mtm_beneficiary->>'avail_service' = 'yes'  " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1258,14 +1260,13 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
-
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id";
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id "+ InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
 
             }
+
 
             con.Open();
 
@@ -1273,7 +1274,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(disease_info->>'drug_id') \r\nFROM health_screening AS hs\r\nCROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS disease_info " + InstitutionParams + " " + InstitutionParam + " WHERE jsonb_typeof(hs.drugs) = 'array' \r\n  AND (disease_info->>'drug_id') IS NOT NULL\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(disease_info->>'drug_id') \r\nFROM health_screening AS hs\r\nCROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS disease_info " + InstitutionParam + " WHERE jsonb_typeof(hs.drugs) = 'array' \r\n  AND (disease_info->>'drug_id') IS NOT NULL\r\n " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1300,12 +1301,10 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
-
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id";
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hh.family_id = fmm.family_id "+ InstitutionParam + "";
+            InstitutionParam = InstitutionParams;
 
             }
 
@@ -1315,7 +1314,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(DISTINCT hh.member_id) FROM health_history as hh " + InstitutionParams + " " + InstitutionParam + " WHERE hh.mtm_beneficiary->>'avail_service' = 'yes'\r\nOR hh.mtm_beneficiary->>'diabetes_mellitus' = 'yes'\r\nOR hh.mtm_beneficiary->>'dialysis_capd' = 'yes'\r\nOR hh.mtm_beneficiary->>'dialysis_capd' = 'yes'\r\nOR hh.mtm_beneficiary->>'palliative_care' = 'yes'\r\nOR hh.mtm_beneficiary->>'physiotherapy' = 'yes'\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT COUNT(DISTINCT hh.member_id) FROM health_history as hh " + InstitutionParam + " WHERE hh.mtm_beneficiary->>'avail_service' = 'yes'\r\nOR hh.mtm_beneficiary->>'diabetes_mellitus' = 'yes'\r\nOR hh.mtm_beneficiary->>'dialysis_capd' = 'yes'\r\nOR hh.mtm_beneficiary->>'dialysis_capd' = 'yes'\r\nOR hh.mtm_beneficiary->>'palliative_care' = 'yes'\r\nOR hh.mtm_beneficiary->>'physiotherapy' = 'yes'\r\n " + CommunityParam + "";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1576,10 +1575,16 @@ namespace PHRLockerAPI.Controllers
 
             string CommaParam = "";
 
-            if (InstitutionParam != "")
+            if (CommunityParam != "" && InstitutionParam == "")
             {
 
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON b.member_id = fmm.member_id";
+                InstitutionParams = " INNER JOIN family_member_master as fmm ON b.member_id = fmm.member_id,";
+
+            }
+            else if (CommunityParam != "" && InstitutionParam != "")
+            {
+
+                InstitutionParams = " INNER JOIN family_member_master as fmm ON b.member_id = fmm.member_id";
 
             }
             else
@@ -1590,7 +1595,7 @@ namespace PHRLockerAPI.Controllers
             if (InstitutionParam != "")
             {
 
-                InstitutionPara += " INNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id,";
+                InstitutionPara = " INNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id,";
 
             }
 
@@ -1740,12 +1745,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
 
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id";
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id "+InstitutionParam+"";
+            InstitutionParam = InstitutionParams;
 
             }
 
@@ -1755,7 +1759,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT (lab_info->>'test_name') as labTestName, COUNT(*) AS lab_test_count\r\nFROM health_screening as hs " + InstitutionParams + " " + InstitutionParam + " CROSS JOIN LATERAL jsonb_array_elements(hs.lab_test) AS lab_info\r\nWHERE jsonb_typeof(hs.lab_test) = 'array' and (lab_info->>'test_id')::uuid IN (SELECT lab_test_id FROM health_lab_tests_master) " + CommunityParam + " GROUP BY labTestName order by lab_test_count Desc";
+            cmdInner.CommandText = "SELECT (lab_info->>'test_name') as labTestName, COUNT(*) AS lab_test_count\r\nFROM health_screening as hs " + InstitutionParam + " CROSS JOIN LATERAL jsonb_array_elements(hs.lab_test) AS lab_info\r\nWHERE jsonb_typeof(hs.lab_test) = 'array' and (lab_info->>'test_id')::uuid IN (SELECT lab_test_id FROM health_lab_tests_master) " + CommunityParam + " GROUP BY labTestName order by lab_test_count Desc";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             List<VMGetLabTestPhrPerModel> RList = new List<VMGetLabTestPhrPerModel>();
@@ -1875,10 +1879,16 @@ namespace PHRLockerAPI.Controllers
 
             string CommaParam = "";
 
-            if (InstitutionParam != "")
+            if (CommunityParam != "" && InstitutionParam == "")
             {
 
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id";
+                InstitutionParams = " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id,";
+
+            }
+            else if (CommunityParam != "" && InstitutionParam != "")
+            {
+
+               InstitutionParams = " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id";
 
             }
             else
@@ -1889,7 +1899,7 @@ namespace PHRLockerAPI.Controllers
             if(InstitutionParam != "")
             {
 
-                InstitutionPara += " INNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id,";
+                InstitutionPara = " INNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id,";
 
             }
 
@@ -1933,12 +1943,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            string InstitutionParams = "";
-
-            if (InstitutionParam != "")
+            if(CommunityParam != "")
             {
 
-                InstitutionParams += " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id";
+            string InstitutionParams = " INNER JOIN family_member_master as fmm ON hs.family_id = fmm.family_id "+InstitutionParam+"";
+            InstitutionParam = InstitutionParams;
 
             }
 
@@ -1948,7 +1957,7 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT (drug_info->>'drug_name') as drugName, COUNT(*) AS drug_count\r\nFROM health_screening as hs " + InstitutionParams + " " + InstitutionParam + " CROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\nWHERE jsonb_typeof(hs.drugs) = 'array' and (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master) " + CommunityParam + " GROUP BY drugName order by drug_count Desc";
+            cmdInner.CommandText = "SELECT (drug_info->>'drug_name') as drugName, COUNT(*) AS drug_count\r\nFROM health_screening as hs " + InstitutionParam + " CROSS JOIN LATERAL jsonb_array_elements(hs.drugs) AS drug_info\r\nWHERE jsonb_typeof(hs.drugs) = 'array' and (drug_info->>'drug_id')::uuid IN (SELECT drug_id FROM health_drugs_master) " + CommunityParam + " GROUP BY drugName order by drug_count Desc";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
             List<VMGetDrugsIssuedPhrPerModel> RList = new List<VMGetDrugsIssuedPhrPerModel>();

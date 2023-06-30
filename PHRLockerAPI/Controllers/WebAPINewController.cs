@@ -83,11 +83,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (DistrictValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fm.district_id = '" + v + "')";
+                            Disparam = Disparam + "(fm.district_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fm.district_id = '" + v + "') or";
+                            Disparam = Disparam + "(fm.district_id = ''" + v + "'') or";
                         }
                         i++;
                     }
@@ -97,7 +97,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fm.district_id = '" + F.district_id + "')";
+                    Disparam = "and (fm.district_id = ''" + F.district_id + "'')";
                 }
 
 
@@ -120,11 +120,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (HudValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fm.hud_id = '" + v + "')";
+                            Disparam = Disparam + "(fm.hud_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fm.hud_id = '" + v + "') or";
+                            Disparam = Disparam + "(fm.hud_id = ''" + v + "'') or";
                         }
 
                         i++;
@@ -135,7 +135,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fm.hud_id = '" + F.hud_id + "')";
+                    Disparam = "and (fm.hud_id = ''" + F.hud_id + "'')";
                 }
 
 
@@ -154,11 +154,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (BlockValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fm.block_id = '" + v + "')";
+                            Disparam = Disparam + "(fm.block_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fm.block_id = '" + v + "') or";
+                            Disparam = Disparam + "(fm.block_id = ''" + v + "'') or";
                         }
 
                         i++;
@@ -169,10 +169,49 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fm.block_id = '" + F.block_id + "')";
+                    Disparam = " and (fm.block_id = ''" + F.block_id + "'')";
                 }
 
                 CommunityParam = CommunityParam + Disparam;
+
+            }
+            if (F.block_type != "")
+            {
+                string Disparam = "";
+                string Disparams = "";
+
+                if (F.block_type.Contains(","))
+                {
+                    int i = 0;
+                    string[] blocktypeValue = F.block_type.Split(",");
+
+                    foreach (var v in blocktypeValue)
+                    {
+                        if (i == (blocktypeValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(abm.block_type = ''" + v + "'')";
+                            Disparams = Disparams + " INNER JOIN address_block_master as abm ON fm.block_id = abm.block_id";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(abm.block_type = ''" + v + "'') or ";
+                            Disparams = Disparams + " INNER JOIN address_block_master as abm ON fm.block_id = abm.block_id";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (abm.block_type = ''" + F.block_type + "'')";
+                    Disparams = " INNER JOIN address_block_master as abm ON fm.block_id = abm.block_id";
+                }
+
+                CommunityParam = CommunityParam + Disparam;
+                InstitutionParam = InstitutionParam + Disparams;
 
             }
             if (F.facility_id != "")
@@ -190,11 +229,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (FacilityValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fm.facility_id = '" + v + "')";
+                            Disparam = Disparam + "(fm.facility_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fm.facility_id = '" + v + "') or";
+                            Disparam = Disparam + "(fm.facility_id = ''" + v + "'') or";
                         }
 
                         i++;
@@ -205,7 +244,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fm.facility_id = '" + F.facility_id + "')";
+                    Disparam = "and (fm.facility_id = ''" + F.facility_id + "'')";
                 }
 
 
@@ -3571,16 +3610,41 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("Getpopulationkpidashboard")]
-        public async Task<VMPopulationKPIModel> GetPopulationKPI()
+        public async Task<VMPopulationKPIModel> GetPopulationKPI([FromQuery] FilterpayloadModel F)
         {
 
 
             VMPopulationKPIModel VM = new VMPopulationKPIModel();
 
+            Filterforall(F);
+
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_totPop() ";
+
+                string para = "";
+
+                if (CommunityParam.StartsWith("and"))
+                {
+                    para = Regex.Replace(CommunityParam, @"^and", "Where", RegexOptions.IgnoreCase);
+                }
+                else
+                {
+                    para = CommunityParam;
+                }
+
+                string query = "select * from public.Getpopulationkpidashboard_totPop('" + InstitutionParam + "','" + para + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.total_population = result;
 
             }
@@ -3588,48 +3652,61 @@ namespace PHRLockerAPI.Controllers
 
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_VerPop() ";
+
+                string query = "select * from public.Getpopulationkpidashboard_VerPop('" + InstitutionParam + "','" + CommunityParam + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.verified_population = result;
 
             }
 
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_UnVerPop() ";
+                string query = "select * from public.Getpopulationkpidashboard_UnVerPop('" + InstitutionParam + "','" + CommunityParam + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.unverified_population = result;
 
             }
 
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_MigrPop() ";
+                string query = "select * from public.Getpopulationkpidashboard_MigrPop('" + InstitutionParam + "','" + CommunityParam + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.migrated_population = result;
 
             }
 
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_NonTrc() ";
+                string query = "select * from public.Getpopulationkpidashboard_NonTrc('" + InstitutionParam + "','" + CommunityParam + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.nontraceable = result;
 
             }
 
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_Dupl() ";
+                string query = "select * from public.Getpopulationkpidashboard_Dupl('" + InstitutionParam + "','" + CommunityParam + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.duplicate = result;
 
             }
 
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_Death() ";
+                string query = "select * from public.Getpopulationkpidashboard_Death('" + InstitutionParam + "','" + CommunityParam + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.death = result;
 
             }
@@ -3637,15 +3714,13 @@ namespace PHRLockerAPI.Controllers
 
             using (var connection = _context.CreateConnection())
             {
-                string query = "select * from public.Getpopulationkpidashboard_resdPop() ";
+                string query = "select * from public.Getpopulationkpidashboard_resdPop('" + InstitutionParam + "','" + CommunityParam + "') ";
+
                 var result = await connection.QueryFirstOrDefaultAsync<string>(query);
+
                 VM.resident_population = result;
 
             }
-
-
-
-
 
             return VM;
         }
@@ -3654,15 +3729,28 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetKPIDistrictWise")]
-        public async Task<List<GetKPIDistrictWise>> GetPopulationKPIDistrictWise()
+        public async Task<List<GetKPIDistrictWise>> GetPopulationKPIDistrictWise([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             GetKPIDistrictWise VM = new GetKPIDistrictWise();
 
+            Filterforall(F);
+
             string query = "select * from public.GetKPIDistrictWise()";
+
+            if (CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON P.family_id = fm.family_id " + InstitutionParam + "";
+
+            InstitutionParam = InstitutionPara;
+
+            }
+
 
 
             List<GetKPIDistrictWise> RList = new List<GetKPIDistrictWise>();
+
             using (var connection = _context.CreateConnection())
             {
                 var results = await connection.QueryAsync<GetKPIDistrictWise>(query);
@@ -3676,11 +3764,21 @@ namespace PHRLockerAPI.Controllers
             if (RList.Count > 0)
             {
 
+                string para = "";
+
+                if (CommunityParam.StartsWith("and"))
+                {
+                    para = Regex.Replace(CommunityParam, @"^and", "Where", RegexOptions.IgnoreCase);
+                }
+                else
+                {
+                    para = CommunityParam;
+                }
 
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_TotPopl()";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_TotPopl('" + InstitutionParam + "','" + para + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3715,7 +3813,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_VerPopl() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_VerPopl('" + InstitutionParam + "','" + CommunityParam + "') ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3752,7 +3850,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_UnVerPopl() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_UnVerPopl('" + InstitutionParam + "','" + CommunityParam + "') ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3789,7 +3887,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_ResdPopl() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_ResdPopl('" + InstitutionParam + "','" + CommunityParam + "') ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3826,7 +3924,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_MigrPopl() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_MigrPopl('" + InstitutionParam + "','" + CommunityParam + "') ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3864,7 +3962,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_NonTrac()";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_NonTrac('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3901,7 +3999,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Duplicate() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Duplicate('" + InstitutionParam + "','" + CommunityParam + "') ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3938,7 +4036,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Death() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Death('" + InstitutionParam + "','" + CommunityParam + "') ";
+
+
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -3975,7 +4075,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Consent() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_Consent('" + InstitutionParam + "','" + CommunityParam + "') ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4012,7 +4112,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_AllocStreet() ";
+                cmdInner.CommandText = "select * from public.GetKPIDistrictWise_AllocStreet('" + InstitutionParam + "','" + CommunityParam + "') ";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4050,12 +4150,23 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetKPIHUDWise")]
-        public async Task<List<GetKPIHUDWise>> GetPopulationKPIHUDWise()
+        public async Task<List<GetKPIHUDWise>> GetPopulationKPIHUDWise([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             GetKPIHUDWise VM = new GetKPIHUDWise();
 
+            Filterforall(F);
+
             string query = "select * from public.GetKPIHUDWise()";
+
+            if (CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON P.family_id = fm.family_id " + InstitutionParam + "";
+
+            InstitutionParam = InstitutionPara;
+
+            }
 
 
             List<GetKPIHUDWise> RList = new List<GetKPIHUDWise>();
@@ -4077,7 +4188,18 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_2()";
+                string para = "";
+
+                if (CommunityParam.StartsWith("and"))
+                {
+                    para = Regex.Replace(CommunityParam, @"^and", "Where", RegexOptions.IgnoreCase);
+                }
+                else
+                {
+                    para = CommunityParam;
+                }
+
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_2('" + InstitutionParam + "','" + para + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id group by D.hud_id";
 
@@ -4117,7 +4239,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_3()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_3('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Verified' group by D.hud_id";
 
@@ -4157,7 +4279,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_4()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_4('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'resident_details'='Unverified' group by D.hud_id";
 
@@ -4196,7 +4318,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_5()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_5('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -4234,7 +4356,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_6()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_6('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Migrant'  or resident_status_details->>'status'='Migrated out'  group by D.hud_id ";
 
@@ -4275,7 +4397,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_7()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_7('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Non traceable'  or resident_status_details->>'status'='Non-traceable' group by D.hud_id";
 
@@ -4315,7 +4437,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_8()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_8('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'='Duplicate' group by D.hud_id";
 
@@ -4355,7 +4477,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_9()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_9('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id  from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death' group by D.hud_id ";
 
@@ -4395,7 +4517,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_10()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_10('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where consent_status='RECEIVED' group by D.hud_id";
 
@@ -4436,7 +4558,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
 
 
-                cmdInner.CommandText = "SELECT * from public.getkpihudwise_11()";
+                cmdInner.CommandText = "SELECT * from public.getkpihudwise_11('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(member_id),D.hud_id from family_member_master P inner join address_hud_master D on D.district_id=P.district_id where street_id is not null group by D.hud_id";
 
@@ -6615,13 +6737,12 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetFamiliesstreetunallocated")]
-
         public async Task<IEnumerable<DataQuality>> Familiesstreetunallocated([FromQuery] FilterpayloadModel F)
         {
 
             Filterforall(F);
 
-            var query = "SELECT * from public.GetFamiliesstreetunallocated()";
+            var query = "SELECT * from public.GetFamiliesstreetunallocated('" + InstitutionParam + "','"+ CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6667,7 +6788,7 @@ namespace PHRLockerAPI.Controllers
 
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            var query = "SELECT * from public.GetFamiliesfacilityunallocated()";
+            var query = "SELECT * from public.GetFamiliesfacilityunallocated('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6713,7 +6834,7 @@ namespace PHRLockerAPI.Controllers
 
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            var query = "SELECT * from public.GetFamilieswithnull()";
+            var query = "SELECT * from public.GetFamilieswithnull('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6759,7 +6880,7 @@ namespace PHRLockerAPI.Controllers
 
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            var query = "SELECT * from public.GetFamilieswithmore()";
+            var query = "SELECT * from public.GetFamilieswithmore('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6806,8 +6927,16 @@ namespace PHRLockerAPI.Controllers
             Filterforall(F);
 
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+            if(CommunityParam != "")
+            {
 
-            var query = "SELECT * from public.Getmemberswithstreetsunallocated()";
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+            var query = "SELECT * from public.Getmemberswithstreetsunallocated('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6850,10 +6979,17 @@ namespace PHRLockerAPI.Controllers
         {
 
             Filterforall(F);
-
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+            if(CommunityParam != "")
+            {
 
-            var query = "SELECT * from public.Getmemberswithfacilityunallocated()";
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+            var query = "SELECT * from public.Getmemberswithfacilityunallocated('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6898,9 +7034,17 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            var query = "SELECT * from public.Getmemberswithaadhaar_number()";
+            var query = "SELECT * from public.Getmemberswithaadhaar_number('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6943,9 +7087,18 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
 
-            var query = "SELECT * from public.Getverifiedmembers()";
+            var query = "SELECT * from public.Getverifiedmembers('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6989,7 +7142,16 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.Getstreetswithfacilityunallocated()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON asm.street_id = fm.street_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+            var query = "SELECT * from public.Getstreetswithfacilityunallocated('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7035,7 +7197,16 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.Getshopswithnomappinfstreets()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON asm.shop_id = fm.shop_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }    
+
+
+            var query = "SELECT * from public.Getshopswithnomappinfstreets('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7079,7 +7250,16 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.Getmembersinhistorynothavingscreening()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON h.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+            var query = "SELECT * from public.Getmembersinhistorynothavingscreening('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7122,7 +7302,17 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.Getmembershavingscreeningnothavinghistory()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON h.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+
+            var query = "SELECT * from public.Getmembershavingscreeningnothavinghistory('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7165,11 +7355,22 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.Getmobilenumbermorethan()";
+            if (CommunityParam != "")
+            {
+
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
+
+            }
+
+
+
+            var query = "SELECT * from public.Getmobilenumbermorethan('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
                 var OBJ = await connection.QueryAsync<DataQuality>(query);
+
                 return OBJ.ToList();
             }
         }
@@ -7210,7 +7411,17 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.Getmemberswithmobilenumber()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+
+            var query = "SELECT * from public.Getmemberswithmobilenumber('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7253,7 +7464,17 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.Getpopulationmappedwithstreet()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+
+            var query = "SELECT * from public.Getpopulationmappedwithstreet('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7298,7 +7519,17 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.GetMembersmappedtoUnallocatedfacility()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+
+            var query = "SELECT * from public.GetMembersmappedtoUnallocatedfacility('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7343,7 +7574,17 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.GetMemberswithstreetasUnAllocated()";
+            if(CommunityParam != "")
+            {
+
+            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+            InstitutionParam = InstitutionPara;
+
+            }
+
+
+
+            var query = "SELECT * from public.GetMemberswithstreetasUnAllocated('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
