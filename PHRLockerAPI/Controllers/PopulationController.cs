@@ -16,6 +16,7 @@ using PHRLockerAPI.Models.popDashboardkpi;
 using PHRLockerAPI.ViewModel;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using System.Reflection;
 using System.Runtime.Intrinsics.Arm;
 using System.Text.RegularExpressions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -357,6 +358,29 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
         //[ResponseCache(Duration = 30 * 60)]
         //[OutputCache(Duration = 30 * 60)]
+        [Route("GetPopulationNoofIndividualswithUDID")]
+
+        public async Task<IEnumerable<Object>> GetPopulationNoofIndividualswithUDID()
+        {
+
+            //Filterforall(F);
+
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+
+            var query = "select count(medical_history_id) from health_history H where disability_details->>'udid' is not null ";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<Object>(query);
+                return OBJ.ToList();
+            }
+        }
+
+        
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
         [Route("GetPopulationCMCHISBeneficiaries")]
 
         public async Task<IEnumerable<Object>> GetPopulationCMCHISBeneficiaries()
@@ -417,6 +441,29 @@ namespace PHRLockerAPI.Controllers
             }
         }
 
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("GetPopulationresidentstatusnull")]
+
+        public async Task<IEnumerable<GenderWise>> GetPopulationresidentstatusnull()
+        {
+
+            //Filterforall(F);
+
+            //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
+
+            var query = "select count(member_id),gender from family_member_master where resident_status is null group by gender limit 3";
+
+            using (var connection = context.CreateConnection())
+            {
+                var OBJ = await connection.QueryAsync<GenderWise>(query);
+                return OBJ.ToList();
+            }
+        }
+
+        
 
         [HttpGet]
         //[ResponseCache(Duration = 30 * 60)]
@@ -1105,6 +1152,693 @@ namespace PHRLockerAPI.Controllers
             return RList;
         }
 
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("GetPopulationblockWise")]
+        public async Task<List<PopulationdashboardBlockModel>> GetPopulationblockWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            PopulationdashboardBlockModel VM = new PopulationdashboardBlockModel();
+
+            string query = "select D.district_id,D.district_gid,D.district_name,H.hud_id,H.hud_name,B.block_id,B.block_gid,B.block_name from address_district_master D inner join address_hud_master H on H.district_id=D.district_id inner join address_block_master B on B.district_id=D.district_id";
+
+
+            List<PopulationdashboardBlockModel> RList = new List<PopulationdashboardBlockModel>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<PopulationdashboardBlockModel>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select gender,count(member_id),block_id from family_member_master where gender='Male' and block_id is not null group by gender,block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].male_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select gender,count(member_id),block_id from family_member_master where gender='Female' and block_id is not null group by gender,block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].female_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select gender,count(member_id),block_id from family_member_master where gender='Other' and block_id is not null group by gender,block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].other_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(member_id),block_id from family_member_master where resident_status_details->>'resident_details'='Verified' and block_id is not null group by block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].verified_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(member_id),block_id from family_member_master where aadhaar_number is not null and block_id is not null group by block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].aadharlinkedmembers = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(medical_history_id),FM.block_id from health_history H inner join family_master FM on FM.family_id=H.family_id where disability_details->>'udid' is not null and FM.block_id is not null group by FM.block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].citizenwithudid = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(medical_history_id),FM.block_id from health_history H inner join family_master FM on FM.family_id=H.family_id where disability=true and FM.block_id is not null group by FM.block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].total_disability = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(family_id),block_id from family_master where family_insurances is null and block_id is not null group by block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].cmchis = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(family_id),block_id from family_master where block_id is not null group by block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].total_families = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(member_id),block_id from family_member_master where block_id is not null group by block_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].block_id == Guid.Parse(drInner["block_id"].ToString()))
+                        {
+                            RList[i].membersadded = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+            return RList;
+        }
+
+
+        [HttpGet]
+        //[ResponseCache(Duration = 30 * 60)]
+        //[OutputCache(Duration = 30 * 60)]
+        [Route("GetPopulationvillageWise")]
+        public async Task<List<PopulationdashboardVillageModel>> GetPopulationvillageWise()
+        {
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            PopulationdashboardVillageModel VM = new PopulationdashboardVillageModel();
+
+            string query = "GetPopulationvillageWise";
+
+
+            List<PopulationdashboardVillageModel> RList = new List<PopulationdashboardVillageModel>();
+            using (var connection = _context.CreateConnection())
+            {
+                var results = await connection.QueryAsync<PopulationdashboardVillageModel>(query);
+                foreach (var result in results)
+                {
+                    RList.Add(result);
+                }
+            }
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select gender,count(member_id),village_id from family_member_master where gender='Male' and village_id is not null group by gender,village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].male_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select gender,count(member_id),village_id from family_member_master where gender='Female' and village_id is not null group by gender,village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].female_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select gender,count(member_id),village_id from family_member_master where gender='Other' and village_id is not null group by gender,village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].other_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(member_id),village_id from family_member_master where resident_status_details->>'resident_details'='Verified' and village_id is not null group by village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].verified_population = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(member_id),village_id from family_member_master where aadhaar_number is not null and village_id is not null group by village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].aadharlinkedmembers = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(medical_history_id),FM.village_id from health_history H inner join family_master FM on FM.family_id=H.family_id where disability_details->>'udid' is not null and FM.village_id is not null group by FM.village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].citizenwithudid = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(medical_history_id),FM.village_id from health_history H inner join family_master FM on FM.family_id=H.family_id where disability=true and FM.village_id is not null group by FM.village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].total_disability = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(family_id),village_id from family_master where family_insurances is null and village_id is not null group by village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].cmchis = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(family_id),village_id from family_master where village_id is not null group by village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].total_families = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+            con.Open();
+
+            if (RList.Count > 0)
+            {
+
+
+                NpgsqlCommand cmdInner = new NpgsqlCommand();
+                cmdInner.Connection = con;
+                cmdInner.CommandType = CommandType.Text;
+
+                cmdInner.CommandText = "select count(member_id),village_id from family_member_master where village_id is not null group by village_id";
+
+                NpgsqlDataReader drInner = cmdInner.ExecuteReader();
+                while (drInner.Read())
+                {
+                    for (int i = 0; i < RList.Count; i++)
+                    {
+
+                        if (RList[i].village_id == Guid.Parse(drInner["village_id"].ToString()))
+                        {
+                            RList[i].membersadded = drInner["count"].ToString();
+                        }
+
+                    }
+                }
+
+            }
+
+
+            con.Close();
+
+
+
+            return RList;
+        }
 
         [HttpGet]
         [Route("FilterAll")]

@@ -1,10 +1,14 @@
-﻿using Npgsql.Replication.PgOutput;
-
-namespace PHRLockerAPI.Models
+﻿namespace PHRLockerAPI.Models
 {
-    public class PopulationdistrictModel
+    public class PopulationdashboardVillageModel
     {
-        public Guid district_id { get; set; }
+        public Guid village_id { get; set; }
+
+        public string village_name { get; set; }
+
+        public string block_name { get; set; }
+
+        public string hud_name { get; set; }
 
         public string district_gid { get; set; }
 

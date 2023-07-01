@@ -2,7 +2,9 @@
 {
     public class PopulationdashboardBlockModel
     {
-        public Guid hud_id { get; set; }
+        public Guid block_id { get; set; }
+
+        public string block_name { get; set; }
 
         public string hud_name { get; set; }
 

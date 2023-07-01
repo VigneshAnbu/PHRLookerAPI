@@ -24,14 +24,378 @@ namespace PHRLockerAPI.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly DapperContext _context;
+
+        string CommunityParam = "";
+        string InstitutionParam = "";
+
         public WebAPI3Controller(IConfiguration configuration, DapperContext context)
         {
             _configuration = configuration;
             _context = context;
         }
 
+
+
+        [HttpGet]
+        [Route("FilterAll")]
+        public void Filterforall(FilterpayloadModel F)
+        {
+            if (F.district_id != "")
+            {
+                string Disparam = "";
+
+                if (F.district_id.Contains(","))
+                {
+                    string[] DistrictValue = F.district_id.Split(",");
+
+                    int i = 0;
+
+                    foreach (var v in DistrictValue)
+                    {
+                        if (i == (DistrictValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.district_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.district_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.district_id = '" + F.district_id + "')";
+                }
+
+
+                CommunityParam = Disparam;
+
+            }
+            if (F.hud_id != "")
+            {
+
+
+                string Disparam = "";
+
+                if (F.hud_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] HudValue = F.hud_id.Split(",");
+
+                    foreach (var v in HudValue)
+                    {
+                        if (i == (HudValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.hud_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.hud_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.hud_id = '" + F.hud_id + "')";
+                }
+
+
+                CommunityParam = CommunityParam + Disparam;
+            }
+            if (F.block_id != "")
+            {
+                string Disparam = "";
+
+                if (F.block_id.Contains(","))
+                {
+                    int i = 0;
+                    string[] BlockValue = F.block_id.Split(",");
+
+                    foreach (var v in BlockValue)
+                    {
+                        if (i == (BlockValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.block_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.block_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.block_id = '" + F.block_id + "')";
+                }
+
+                CommunityParam = CommunityParam + Disparam;
+
+            }
+            if (F.facility_id != "")
+            {
+                string Disparam = "";
+
+                if (F.facility_id.Contains(","))
+                {
+
+                    int i = 0;
+
+                    string[] FacilityValue = F.facility_id.Split(",");
+
+                    foreach (var v in FacilityValue)
+                    {
+                        if (i == (FacilityValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.facility_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.facility_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (fm.facility_id = '" + F.facility_id + "')";
+                }
+
+
+
+                CommunityParam = CommunityParam + Disparam;
+            }
+            if (F.indistrict_id != "")
+            {
+                string Disparam = "";
+
+                if (F.indistrict_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] indistrictValue = F.indistrict_id.Split(",");
+
+                    foreach (var v in indistrictValue)
+                    {
+                        if (i == (indistrictValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.district_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.district_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.district_id = '" + F.indistrict_id + "')";
+                }
+
+                InstitutionParam = Disparam;
+
+            }
+            if (F.inhud_id != "")
+            {
+
+                string Disparam = "";
+
+                if (F.inhud_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] inhudValue = F.inhud_id.Split(",");
+
+                    foreach (var v in inhudValue)
+                    {
+                        if (i == (inhudValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.hud_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.hud_id = '" + v + "') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.hud_id = '" + F.inhud_id + "')";
+                }
+
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.inblock_id != "")
+            {
+                string Disparam = "";
+
+                if (F.inblock_id.Contains(","))
+                {
+
+                    int i = 0;
+
+                    string[] inblockValue = F.inblock_id.Split(",");
+
+                    foreach (var v in inblockValue)
+                    {
+                        if (i == (inblockValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.block_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.block_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.block_id = '" + F.inblock_id + "')";
+                }
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.infacility_id != "")
+            {
+                string Disparam = "";
+
+                if (F.infacility_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] infacilityValue = F.infacility_id.Split(",");
+
+                    foreach (var v in infacilityValue)
+                    {
+                        if (i == (infacilityValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.facility_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.facility_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.facility_id = '" + F.infacility_id + "')";
+                }
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.directorate_id != "")
+            {
+                string Disparam = "";
+
+                if (F.directorate_id.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] indirectorateValue = F.directorate_id.Split(",");
+
+                    foreach (var v in indirectorateValue)
+                    {
+                        if (i == (indirectorateValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(FR.directorate_id = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(FR.directorate_id = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (FR.directorate_id = '" + F.directorate_id + "')";
+                }
+
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+            if (F.role != "")
+            {
+
+                string Disparam = "";
+
+                if (F.role.Contains(","))
+                {
+                    int i = 0;
+
+                    string[] inroleValue = F.role.Split(",");
+
+                    foreach (var v in inroleValue)
+                    {
+                        if (i == (inroleValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(UM.role = '" + v + "')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(UM.role = '" + v + "') or";
+                        }
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = "and (UM.role = '" + F.role + "')";
+                }
+
+                InstitutionParam = InstitutionParam + Disparam;
+            }
+        }
+
         string fdate = "2000-01-01";
         string tdate = "2040-12-31";
+
+
+
 
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
@@ -1329,8 +1693,10 @@ namespace PHRLockerAPI.Controllers
         [OutputCache(Duration = 30 * 60)]
         [Route("diagnosisreport")]
         
-        public List<DiagnosisReport> diagnosisreport()
+        public List<DiagnosisReport> diagnosisreport([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
+
             List<DiagnosisReport> dlista = new List<DiagnosisReport>();
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             //VMCommunityTriage VM = new VMCommunityTriage();
@@ -1341,7 +1707,7 @@ namespace PHRLockerAPI.Controllers
             cmdHud.CommandType = CommandType.Text;
             //cmdHud.CommandText = "SELECT jsonb_array_elements(cast(jsonb_array_elements(b.diseases)->>'disease_list' as jsonb))->>'diagnosis' AS diagnosis,count(screening_id) totalcount FROM public.health_screening b WHERE  jsonb_typeof(b.diseases) = 'array' group by diagnosis order by totalcount desc";
 
-            cmdHud.CommandText = "SELECT * from public.diagnosisreport()";
+            cmdHud.CommandText = "SELECT * from public.diagnosisreport('" + CommunityParam + "')";
 
             NpgsqlDataReader drHud = cmdHud.ExecuteReader();
             List<BlockModel> RListHud = new List<BlockModel>();
@@ -1361,7 +1727,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "select Drugarray,CASE WHEN age between 0 and 17 THEN 'child' WHEN age >18 THEN 'Adult' END age2,gender,sum(TotalScreened) totc from ( select Drugarray,date_part('year',age(birth_date)) age,gender,sum(TotalScreening) TotalScreened from  (SELECT jsonb_array_elements(cast(jsonb_array_elements(b.diseases)->>'disease_list' as jsonb))->>'diagnosis' AS Drugarray ,member_id,count(screening_id) TotalScreening FROM public.health_screening b WHERE  jsonb_typeof(b.diseases) = 'array' group by Drugarray,member_id) tbl inner join family_member_master fm on tbl.member_id=fm.member_id group by Drugarray,age,gender) tbl group by drugarray,age2,gender";
-                cmdInner.CommandText = "SELECT * from public.diagnosisreport_2()";
+                cmdInner.CommandText = "SELECT * from public.diagnosisreport_2('" + CommunityParam + "')";
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
                 CommunityTriageModel SList = new CommunityTriageModel();
                 while (drInner.Read())

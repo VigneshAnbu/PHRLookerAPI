@@ -1785,10 +1785,12 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
-        [Authorize]
+        //[Authorize]
         [Route("GetOPDashboard")]
-        public List<VMOPDashboardFacility> GetOPdasdhboard()
+        public List<VMOPDashboardFacility> GetOPdasdhboard([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
+
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMOPDashboardFacility VM = new VMOPDashboardFacility();
 
@@ -1837,7 +1839,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "select facility_id,CASE \r\nWHEN age between 0 and 17 THEN 'child' \r\nWHEN age >18 THEN 'Adult'  \r\nEND age2,tbl.gender,sum(sccoun) totc from \r\n    (SELECT jsonb_array_elements(b.update_register)->>'user_id' AS Drugarray,\r\n     date_part('year',age(birth_date)) age,gender,count(screening_id) sccoun\r\nFROM   public.health_screening b \r\n    inner join family_member_master fm on b.member_id=fm.member_id\r\n    group by Drugarray,gender,age) tbl\r\n    inner join user_master um on tbl.Drugarray=cast(um.user_id as text)\r\n    group by um.facility_id,age2,tbl.gender";
 
-                cmdInner.CommandText = "SELECT * from public.getopdashboard_2()";
+                cmdInner.CommandText = "SELECT * from public.getopdashboard_2('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
