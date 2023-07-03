@@ -609,11 +609,13 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("GetList")]
-        public VMCommunityTriage Get()
+        public VMCommunityTriage Get([FromQuery] FilterpayloadModel F)
         {
 
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMCommunityTriage VM = new VMCommunityTriage();
+
+            Filterforall(F);
 
             con.Open();
             NpgsqlCommand cmd = new NpgsqlCommand();
@@ -653,7 +655,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, MS.district_name,MS.district_gid from public.health_screening as S inner join public.family_member_master as M on M.member_id=S.member_id inner join public.address_district_master as MS on MS.district_id=M.district_id where screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0 and (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6) group by screening_values ->>'dm_risk_score',MS.district_name,MS.district_gid order by MS.district_name limit 100";
 
-                cmdInner.CommandText = "SELECT * from public.getlist_2()";
+                cmdInner.CommandText = "SELECT * from public.getlist_2('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -733,7 +735,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.hud_name,MS.hud_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_hud_master as MS on MS.hud_id = M.hud_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.hud_name,MS.hud_gid\r\norder by MS.hud_name)";
 
-                cmdInner.CommandText = "SELECT * from public.getlist_4()";
+                cmdInner.CommandText = "SELECT * from public.getlist_4('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -810,7 +812,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.block_name,MS.block_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_block_master as MS on MS.block_id = M.block_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.block_name,MS.block_gid\r\norder by MS.block_name)";
 
-                cmdInner.CommandText = "SELECT * from public.getlist_6()";
+                cmdInner.CommandText = "SELECT * from public.getlist_6('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -887,7 +889,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues, \r\nMS.village_name,MS.village_gid from public.health_screening as S\r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_village_master as MS on MS.village_id = M.village_id\r\nwhere screening_values ->>'dm_risk_score' is not null  and (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6)\r\ngroup by screening_values ->>'dm_risk_score',MS.village_name,MS.village_gid\r\norder by MS.village_name limit 50)";
 
-                cmdInner.CommandText = "SELECT * from public.getlist_8()";
+                cmdInner.CommandText = "SELECT * from public.getlist_8('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -935,7 +937,7 @@ namespace PHRLockerAPI.Controllers
             cmdAll.CommandType = CommandType.Text;
             //cmdAll.CommandText = "(select SUM (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) as RiskScore,screening_values ->>'dm_risk_score' as ScreeningValues from public.health_screening as S\r\nwhere screening_values ->>'dm_risk_score' is not null  \r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER))!=0\r\nand (CAST (screening_values ->>'dm_risk_score' AS INTEGER)) not in (5,6,7,8)\r\ngroup by screening_values ->>'dm_risk_score')";
 
-            cmdAll.CommandText = "SELECT * from public.getlist_9()";
+            cmdAll.CommandText = "SELECT * from public.getlist_9('" + CommunityParam + "')";
 
             NpgsqlDataReader drAll = cmdAll.ExecuteReader();
 
@@ -2008,18 +2010,19 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
-
         [Route("GetFacilityScreening")]
-        public List<FacilitynamecountModel> GetFacilityWiseScreening()
+        public List<FacilitynamecountModel> GetFacilityWiseScreening([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+
+            Filterforall(F);
 
             con.Open();
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
 
-            cmd.CommandText = "select * from public.getfacilityscreening()";
+            cmd.CommandText = "select * from public.getfacilityscreening('" + CommunityParam + "')";
 
 
 
@@ -2518,9 +2521,11 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("getuserperdistrictwise")]
-        public VMUserPerformance GetUserPerformance()
+        public VMUserPerformance GetUserPerformance([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            Filterforall(F);
+
             VMUserPerformance VM = new VMUserPerformance();
 
             int IN24 = 0;
@@ -2574,7 +2579,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_1()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_1('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
 
@@ -2617,7 +2622,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_2()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_2('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-48 hours' < S.last_update_date group by M.district_id";
 
@@ -2660,7 +2665,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_3()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_3('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date group by M.district_id";
 
@@ -2707,7 +2712,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_4()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_4('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
 
@@ -2749,7 +2754,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_5()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_5('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
 
@@ -2791,7 +2796,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_6()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_6('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
@@ -2835,7 +2840,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_7()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_7('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
@@ -2880,7 +2885,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_8()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_8('" + CommunityParam + "')";
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date\r\ngroup by M.district_id";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
@@ -2921,7 +2926,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_9()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_9('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date\r\ngroup by M.district_id";
 
@@ -2964,7 +2969,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_10()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_10('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(S.screening_id)as Count,D.district_name,D.district_id from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\nwhere S.drugs !='null'\r\ngroup by D.district_name,D.district_id";
 
@@ -3004,7 +3009,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperdistrictwise_11()";
+                cmdInner.CommandText = "select * from public.getuserperdistrictwise_11('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(S.medical_history_id)as Count,D.district_name,D.district_id from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by D.district_name,D.district_id";
 
@@ -3130,7 +3135,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
 
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_2()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_2('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
 
@@ -3173,7 +3178,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_3()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_3('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-48 hours' < S.last_update_date group by M.district_id";
 
@@ -3217,7 +3222,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
 
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_4()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_4('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date group by M.district_id";
 
@@ -3262,7 +3267,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_5()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_5('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
 
@@ -3306,7 +3311,7 @@ namespace PHRLockerAPI.Controllers
 
 
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_6()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_6('" + CommunityParam + "')";
 
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.member_id,M.district_id";
@@ -3349,7 +3354,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
 
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_7()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_7('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-24 hours' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
@@ -3391,7 +3396,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_8()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_8('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere now()+ interval '-30 day' < S.last_update_date\r\ngroup by S.family_id,M.district_id";
 
@@ -3436,7 +3441,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_9()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_9('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date\r\ngroup by M.district_id";
 
@@ -3480,7 +3485,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
 
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_10()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_10('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id\r\nwhere S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date\r\ngroup by M.district_id";
 
@@ -3525,7 +3530,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_11()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_11('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(S.screening_id)as Count,BL.block_gid,BL.block_name from public.health_screening as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\ninner join public.address_block_master BL on BL.district_id = D.district_id\r\nwhere S.drugs !='null'\r\ngroup by BL.block_gid,BL.block_name";
 
@@ -3566,7 +3571,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
 
 
-                cmdInner.CommandText = "select * from public.getuserperblockwise_12()";
+                cmdInner.CommandText = "select * from public.getuserperblockwise_12('" + CommunityParam + "')";
 
                 //cmdInner.CommandText = "select count(S.medical_history_id)as Count,BM.block_name,BM.block_gid from public.health_history as S \r\ninner join public.family_member_master as M on M.member_id=S.member_id\r\ninner join public.address_district_master as D on D.district_id = M.district_id\r\ninner join public.address_block_master as BM on BM.district_id = D.district_id\r\nwhere S.mtm_beneficiary is not null\r\ngroup by BM.block_name,BM.block_gid";
 
@@ -7669,10 +7674,11 @@ namespace PHRLockerAPI.Controllers
         /*Service Monitoring Start*/
         [HttpGet]
         [Route("getDrugQuantity")]
-        public async Task<IEnumerable<ServiceMonitoringModelcs>> getDrugQuantity()
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getDrugQuantity([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
 
-            var query = "SELECT * from public.ServiceMon_DrugQuantity()";
+            var query = "SELECT * from public.ServiceMon_DrugQuantity('" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7684,10 +7690,12 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getLabTestsinlast")]
-        public async Task<IEnumerable<ServiceMonitoringModelcs>> getLabTestsinlast()
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getLabTestsinlast([FromQuery] FilterpayloadModel F)
         {
 
-            var query = "SELECT * from public.ServiceMon_LabTest()";
+            Filterforall(F);
+
+            var query = "SELECT * from public.ServiceMon_LabTest('" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7699,10 +7707,11 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getStreetswithundelivered")]
-        public async Task<IEnumerable<ServiceMonitoringModelcs>> getStreetswithundelivered()
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getStreetswithundelivered([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
 
-            var query = "SELECT * from public.ServiceMon_Streetswithundelivered()";
+            var query = "SELECT * from public.ServiceMon_Streetswithundelivered('" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7713,10 +7722,11 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getServiceMon_Noofstreetswithservicesdelivered")]
-        public async Task<IEnumerable<ServiceMonitoringModelcs>> getServiceMon_Noofstreetswithservicesdelivered()
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getServiceMon_Noofstreetswithservicesdelivered([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
 
-            var query = "SELECT * from public.ServiceMon_Noofstreetswithservicesdelivered()";
+            var query = "SELECT * from public.ServiceMon_Noofstreetswithservicesdelivered('" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7727,10 +7737,11 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getservicemon_streetswithundelivered90")]
-        public async Task<IEnumerable<ServiceMonitoringModelcs>> getservicemon_streetswithundelivered90()
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getservicemon_streetswithundelivered90([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
 
-            var query = "SELECT * from public.servicemon_streetswithundelivered90()";
+            var query = "SELECT * from public.servicemon_streetswithundelivered90('" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7741,10 +7752,11 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getServiceMon_ScreeningPeruser")]
-        public async Task<IEnumerable<ServiceMonitoringModelcs>> getServiceMon_ScreeningPeruser()
+        public async Task<IEnumerable<ServiceMonitoringModelcs>> getServiceMon_ScreeningPeruser([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
 
-            var query = "SELECT * from public.ServiceMon_ScreeningPeruser()";
+            var query = "SELECT * from public.ServiceMon_ScreeningPeruser('" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7755,10 +7767,11 @@ namespace PHRLockerAPI.Controllers
 
         [HttpGet]
         [Route("getServiceMon_StreetwithScreeningcount")]
-        public async Task<IEnumerable<StreetsScreeningCountModel>> getServiceMon_StreetwithScreeningcount()
+        public async Task<IEnumerable<StreetsScreeningCountModel>> getServiceMon_StreetwithScreeningcount([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
 
-            var query = "SELECT * from public.ServiceMon_StreetwithScreeningcount()";
+            var query = "SELECT * from public.ServiceMon_StreetwithScreeningcount('" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -7774,8 +7787,10 @@ namespace PHRLockerAPI.Controllers
         //[ResponseCache(Duration = 30 * 60)]
         //[OutputCache(Duration = 30 * 60)]
         [Route("GetServicesMonitoringDistrictWise")]
-        public async Task<List<VMServiceMonitoringDistrict>> GetServicesMonitoringDistrictWise()
+        public async Task<List<VMServiceMonitoringDistrict>> GetServicesMonitoringDistrictWise([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
+
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMServiceMonitoringDistrict VM = new VMServiceMonitoringDistrict();
 
@@ -7800,7 +7815,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_totalscreening_D()";
+                cmdInner.CommandText = "select * from public.servicemon_totalscreening_D('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -7832,7 +7847,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_totallab_D()";
+                cmdInner.CommandText = "select * from public.servicemon_totallab_D('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -7864,7 +7879,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_labtest_d()";
+                cmdInner.CommandText = "select * from public.servicemon_labtest_d('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -7896,7 +7911,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_d()";
+                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_d('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -7928,7 +7943,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_d()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_d('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -7960,7 +7975,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_d()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_d('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -7992,7 +8007,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_d()";
+                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_d('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8024,7 +8039,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_d()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_d('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8060,8 +8075,10 @@ namespace PHRLockerAPI.Controllers
         //[ResponseCache(Duration = 30 * 60)]
         //[OutputCache(Duration = 30 * 60)]
         [Route("GetServicesMonitoringHUDWise")]
-        public async Task<List<VMServiceMonitoringHUD>> GetServicesMonitoringHUDWise()
+        public async Task<List<VMServiceMonitoringHUD>> GetServicesMonitoringHUDWise([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
+
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMServiceMonitoringHUD VM = new VMServiceMonitoringHUD();
 
@@ -8086,7 +8103,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_totalscreening_h()";
+                cmdInner.CommandText = "select * from public.servicemon_totalscreening_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8118,7 +8135,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_totallab_h()";
+                cmdInner.CommandText = "select * from public.servicemon_totallab_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8150,7 +8167,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_labtest_h()";
+                cmdInner.CommandText = "select * from public.servicemon_labtest_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8182,7 +8199,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_h()";
+                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8214,7 +8231,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_h()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8246,7 +8263,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_h()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8278,7 +8295,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_h()";
+                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8310,7 +8327,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_h()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_h('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8344,8 +8361,10 @@ namespace PHRLockerAPI.Controllers
         //[ResponseCache(Duration = 30 * 60)]
         //[OutputCache(Duration = 30 * 60)]
         [Route("GetServicesMonitoringBlockWise")]
-        public async Task<List<VMServiceMonitoringBlock>> GetServicesMonitoringBlockWise()
+        public async Task<List<VMServiceMonitoringBlock>> GetServicesMonitoringBlockWise([FromQuery] FilterpayloadModel F)
         {
+            Filterforall(F);
+
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMServiceMonitoringBlock VM = new VMServiceMonitoringBlock();
 
@@ -8370,7 +8389,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_totalscreening_b()";
+                cmdInner.CommandText = "select * from public.servicemon_totalscreening_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8402,7 +8421,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_totallab_b()";
+                cmdInner.CommandText = "select * from public.servicemon_totallab_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8434,7 +8453,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_labtest_b()";
+                cmdInner.CommandText = "select * from public.servicemon_labtest_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8466,7 +8485,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_b()";
+                cmdInner.CommandText = "select * from public.servicemon_screeningperuser_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8498,7 +8517,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_b()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8530,7 +8549,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_b()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithundelivered90_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8562,7 +8581,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_b()";
+                cmdInner.CommandText = "select * from public.servicemon_noofstreetswithservicesdelivered_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -8594,7 +8613,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_b()";
+                cmdInner.CommandText = "select * from public.servicemon_streetswithdelivered_b('" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
