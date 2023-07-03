@@ -146,6 +146,40 @@ namespace PHRLockerAPI.Controllers
                 CommunityParam = CommunityParam + Disparam;
 
             }
+            if (F.village_id != "")
+            {
+                string Disparam = "";
+
+                if (F.village_id.Contains(","))
+                {
+                    int i = 0;
+                    string[] VillageValue = F.village_id.Split(",");
+
+                    foreach (var v in VillageValue)
+                    {
+                        if (i == (VillageValue.Length - 1))
+                        {
+                            Disparam = Disparam + "(fm.village_id = ''" + v + "'')";
+                        }
+                        else
+                        {
+                            Disparam = Disparam + "(fm.village_id = ''" + v + "'') or";
+                        }
+
+                        i++;
+                    }
+
+                    Disparam = "and " + Disparam;
+
+                }
+                else
+                {
+                    Disparam = " and (fm.village_id = ''" + F.block_id + "'')";
+                }
+
+                CommunityParam = CommunityParam + Disparam;
+
+            }
             if (F.facility_id != "")
             {
                 string Disparam = "";
@@ -1008,10 +1042,12 @@ namespace PHRLockerAPI.Controllers
         [ResponseCache(Duration = 30 * 60)]
         [OutputCache(Duration = 30 * 60)]
         [Route("getuserperstate")]
-        public VMGetuserperstate GetUserPerformance()
+        public VMGetuserperstate GetUserPerformance([FromQuery] FilterpayloadModel F)
         {
             NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             VMGetuserperstate VM = new VMGetuserperstate();
+
+            Filterforall(F);
 
             int IN24 = 0;
             int IN30 = 0;
@@ -1050,7 +1086,12 @@ namespace PHRLockerAPI.Controllers
 
             con.Close();
 
+            if (CommunityParam != "")
+            {
 
+                 InstitutionParam = "INNER JOIN family_master fm ON S.family_id = fm.family_id";
+
+            }
 
             con.Open();
 
@@ -1063,7 +1104,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1105,7 +1146,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where now()+ interval '-48 hours' < S.last_update_date group by M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_1()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_1('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1147,7 +1188,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where now()+ interval '-30 day' < S.last_update_date group by M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_2()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_2('" + InstitutionParam + "','" + CommunityParam + "')";
 
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
@@ -1192,7 +1233,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where now()+ interval '-24 hours' < S.last_update_date group by S.member_id,M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_3()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_3('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1233,7 +1274,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.member_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where  now()+ interval '-30 day' < S.last_update_date group by S.member_id,M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_4()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_4('" + InstitutionParam + "','" + CommunityParam + "')";
 
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
@@ -1273,7 +1314,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where now()+ interval '-24 hours' < S.last_update_date group by S.family_id,M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_5()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_5('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1314,7 +1355,7 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.CommandType = CommandType.Text;
                 //cmdInner.CommandText = "SELECT  count(screening_id),S.family_id,M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where now()+ interval '-30 day' < S.last_update_date group by S.family_id,M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_6()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_6('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1353,9 +1394,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where  S.drugs!='null' and now()+ interval '-24 hours' < S.last_update_date group by M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_6()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_7('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -1395,9 +1436,9 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-                cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date group by M.district_id";
+                //cmdInner.CommandText = "SELECT  count(screening_id),M.district_id from health_screening S inner join family_member_master M on M.member_id = S.member_id where S.drugs!='null' and now()+ interval '-30 day' < S.last_update_date group by M.district_id";
 
-                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_7()";
+                cmdInner.CommandText = "SELECT * FROM public.getuserperstate_8('" + InstitutionParam + "','" + CommunityParam + "')";
 
                 NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
