@@ -77,11 +77,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (DistrictValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fmm.district_id = '" + v + "')";
+                            Disparam = Disparam + "(fmm.district_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fmm.district_id = '" + v + "') or ";
+                            Disparam = Disparam + "(fmm.district_id = ''" + v + "'') or ";
                         }
                         i++;
                     }
@@ -91,7 +91,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fmm.district_id = '" + F.district_id + "')";
+                    Disparam = "and (fmm.district_id = ''" + F.district_id + "'')";
                 }
 
 
@@ -112,11 +112,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (HudValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fmm.hud_id = '" + v + "')";
+                            Disparam = Disparam + "(fmm.hud_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fmm.hud_id = '" + v + "') or ";
+                            Disparam = Disparam + "(fmm.hud_id = ''" + v + "'') or ";
                         }
 
                         i++;
@@ -127,7 +127,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fmm.hud_id = '" + F.hud_id + "')";
+                    Disparam = "and (fmm.hud_id = ''" + F.hud_id + "'')";
                 }
 
 
@@ -146,11 +146,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (BlockValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fmm.block_id = '" + v + "')";
+                            Disparam = Disparam + "(fmm.block_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fmm.block_id = '" + v + "') or ";
+                            Disparam = Disparam + "(fmm.block_id = ''" + v + "'') or ";
                         }
 
                         i++;
@@ -161,7 +161,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fmm.block_id = '" + F.block_id + "')";
+                    Disparam = "and (fmm.block_id = ''" + F.block_id + "'')";
                 }
 
                 CommunityParam = CommunityParam + Disparam;
@@ -180,11 +180,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (villageValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fmm.village_id = '" + v + "')";
+                            Disparam = Disparam + "(fmm.village_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fmm.village_id = '" + v + "') or ";
+                            Disparam = Disparam + "(fmm.village_id = ''" + v + "'') or ";
                         }
 
                         i++;
@@ -195,7 +195,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fmm.village_id = '" + F.village_id + "')";
+                    Disparam = "and (fmm.village_id = ''" + F.village_id + "'')";
                 }
 
                 CommunityParam = CommunityParam + Disparam;
