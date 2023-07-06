@@ -77,11 +77,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (DistrictValue.Length - 1))
                         {
-                            Disparam = Disparam + "fmm.district_id = '" + v + "'";
+                            Disparam = Disparam + "(fmm.district_id = '" + v + "')";
                         }
                         else
                         {
-                            Disparam = Disparam + "fmm.district_id = '" + v + "' or ";
+                            Disparam = Disparam + "(fmm.district_id = '" + v + "') or ";
                         }
                         i++;
                     }
@@ -91,7 +91,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and fmm.district_id = '" + F.district_id + "'";
+                    Disparam = "and (fmm.district_id = '" + F.district_id + "')";
                 }
 
 
@@ -112,11 +112,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (HudValue.Length - 1))
                         {
-                            Disparam = Disparam + "fmm.hud_id = '" + v + "'";
+                            Disparam = Disparam + "(fmm.hud_id = '" + v + "')";
                         }
                         else
                         {
-                            Disparam = Disparam + "fmm.hud_id = '" + v + "' or ";
+                            Disparam = Disparam + "(fmm.hud_id = '" + v + "') or ";
                         }
 
                         i++;
@@ -127,7 +127,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and fmm.hud_id = '" + F.hud_id + "'";
+                    Disparam = "and (fmm.hud_id = '" + F.hud_id + "')";
                 }
 
 
@@ -146,11 +146,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (BlockValue.Length - 1))
                         {
-                            Disparam = Disparam + "fmm.block_id = '" + v + "'";
+                            Disparam = Disparam + "(fmm.block_id = '" + v + "')";
                         }
                         else
                         {
-                            Disparam = Disparam + "fmm.block_id = '" + v + "' or ";
+                            Disparam = Disparam + "(fmm.block_id = '" + v + "') or ";
                         }
 
                         i++;
@@ -161,7 +161,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and fmm.block_id = '" + F.block_id + "'";
+                    Disparam = "and (fmm.block_id = '" + F.block_id + "')";
                 }
 
                 CommunityParam = CommunityParam + Disparam;
@@ -180,11 +180,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (villageValue.Length - 1))
                         {
-                            Disparam = Disparam + "fmm.village_id = '" + v + "'";
+                            Disparam = Disparam + "(fmm.village_id = '" + v + "')";
                         }
                         else
                         {
-                            Disparam = Disparam + "fmm.village_id = '" + v + "' or ";
+                            Disparam = Disparam + "(fmm.village_id = '" + v + "') or ";
                         }
 
                         i++;
@@ -195,7 +195,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and fmm.village_id = '" + F.village_id + "'";
+                    Disparam = "and (fmm.village_id = '" + F.village_id + "')";
                 }
 
                 CommunityParam = CommunityParam + Disparam;
@@ -222,7 +222,8 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(member_id) FROM family_member_master AS fmm WHERE date_part('year',age(birth_date)) >= 18 "+CommunityParam+"";
+            //cmdInner.CommandText = "SELECT COUNT(member_id) FROM family_member_master AS fmm WHERE date_part('year',age(birth_date)) >= 18 "+CommunityParam+"";
+            cmdInner.CommandText = "SELECT * FROM public.getpopulationcount_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -254,7 +255,8 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT COUNT(*)\r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\nwhere date_part('year',age(birth_date))> 18\r\n " + CommunityParam + "";
+            //cmdInner.CommandText = "SELECT COUNT(*)\r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\nwhere date_part('year',age(birth_date))> 18\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT * FROM public.gettotalscreeningcount_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -299,13 +301,14 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT \r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') + \r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') +\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') as Confirmed\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id " + CommunityParam + "";
-           
+            //cmdInner.CommandText = "SELECT \r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') + \r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') +\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') as Confirmed\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT * FROM public.getconfirmedcasescount_dph(' " + CommunityParam + " ')";
+
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
             while (drInner.Read())
             {
-                VM.total_Confirmed_caeses = drInner["Confirmed"].ToString();
+                VM.total_Confirmed_caeses = drInner["confirmed"].ToString();
 
             }
 
@@ -331,7 +334,8 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') +\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') +\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS hypertension,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'rbs' < '140' \r\nAND hs.screening_values->>'dm_screening' = 'Known DM' AND hs.screening_values->>'ht_screening' = 'Known HT' \r\n and ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS Both\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            //cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') +\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') +\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS hypertension,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'rbs' < '140' \r\nAND hs.screening_values->>'dm_screening' = 'Known DM' AND hs.screening_values->>'ht_screening' = 'Known HT' \r\n and ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS Both\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT * FROM public.getdiahyperboth_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -339,7 +343,7 @@ namespace PHRLockerAPI.Controllers
             {
                 VM.Diabetes_Mellitus = drInner["Diabetes_Mellitus"].ToString();
                 VM.Hypertension = drInner["Hypertension"].ToString();
-                VM.Both = drInner["Both"].ToString();
+                VM.Both = drInner["dhboth"].ToString();
 
             }
 
@@ -365,7 +369,8 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Suspected DM') AS uncontrolled_diabetes\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            //cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Suspected DM') AS uncontrolled_diabetes\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT * FROM public.getconfcontrouncontrodia_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -399,7 +404,8 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Suspected HT') AS uncontrolled_hypertension\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            //cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Suspected HT') AS uncontrolled_hypertension\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT * FROM public.getconfcontrouncontrohyper_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -433,7 +439,8 @@ namespace PHRLockerAPI.Controllers
             cmdInner.Connection = con;
             cmdInner.CommandType = CommandType.Text;
 
-            cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Suspected DM' and  hs.screening_values->>'ht_screening' = 'Suspected HT') AS \r\nuncontrolled_both\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            //cmdInner.CommandText = "SELECT\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Suspected DM' and  hs.screening_values->>'ht_screening' = 'Suspected HT') AS \r\nuncontrolled_both\r\nFROM family_member_master AS fmm\r\nINNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + "";
+            cmdInner.CommandText = "SELECT * FROM public.getconfcontrouncontroboth_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmdInner.ExecuteReader();
 
@@ -467,7 +474,8 @@ namespace PHRLockerAPI.Controllers
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
 
-            cmd.CommandText = "SELECT adm.district_name,adm.district_gid, COUNT(fmm.member_id) \r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid";
+            //cmd.CommandText = "SELECT adm.district_name,adm.district_gid, COUNT(fmm.member_id) \r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid";
+            cmd.CommandText = "SELECT * FROM public.getdiswise_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmd.ExecuteReader();
             List<VMGetDistrictWiseModel> RList = new List<VMGetDistrictWiseModel>();
@@ -495,7 +503,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,COUNT(*) \r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,COUNT(*) \r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid";
+                cmdInner.CommandText = "SELECT * FROM public.getdiswise1_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -528,7 +537,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,COUNT(hs.screening_id) \r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,COUNT(hs.screening_id) \r\nFROM address_district_master as adm\r\nINNER JOIN family_member_master as fmm ON adm.district_id = fmm.district_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid";
+                cmdInner.CommandText = "SELECT * FROM public.getdiswise2_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -561,7 +571,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,\r\n  count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\n  count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\n  COALESCE(\r\n    count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') /\r\n    NULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,\r\n    0\r\n  ) AS diabetes_percentage\r\nFROM\r\n  address_district_master AS adm\r\n  INNER JOIN family_member_master AS fmm ON adm.district_id = fmm.district_id\r\n  INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam +" GROUP BY adm.district_name,adm.district_gid\r\n ";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,\r\n  count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\n  count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\n  COALESCE(\r\n    count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') /\r\n    NULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,\r\n    0\r\n  ) AS diabetes_percentage\r\nFROM\r\n  address_district_master AS adm\r\n  INNER JOIN family_member_master AS fmm ON adm.district_id = fmm.district_id\r\n  INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam +" GROUP BY adm.district_name,adm.district_gid\r\n ";
+                cmdInner.CommandText = "SELECT * FROM public.getdiswise3_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -597,7 +608,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,\r\n  count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\n  count(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140)\r\n    AND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\n  COALESCE(\r\n    count(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140)\r\n      AND hs.screening_values->>'ht_screening' = 'Known HT') /\r\n    NULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,\r\n    0\r\n  ) AS hypertension_percentage\r\nFROM\r\n  address_district_master AS adm\r\n  INNER JOIN family_member_master AS fmm ON adm.district_id = fmm.district_id\r\n  INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam +" GROUP BY adm.district_name,adm.district_gid\r\n ";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,\r\n  count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\n  count(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140)\r\n    AND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\n  COALESCE(\r\n    count(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140)\r\n      AND hs.screening_values->>'ht_screening' = 'Known HT') /\r\n    NULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,\r\n    0\r\n  ) AS hypertension_percentage\r\nFROM\r\n  address_district_master AS adm\r\n  INNER JOIN family_member_master AS fmm ON adm.district_id = fmm.district_id\r\n  INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam +" GROUP BY adm.district_name,adm.district_gid\r\n ";
+                cmdInner.CommandText = "SELECT * FROM public.getdiswise4_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -633,7 +645,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,\r\n  count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' AND hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\n  count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' AND\r\n    ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) AND\r\n    hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\n  COALESCE(\r\n    count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' AND\r\n      ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) AND\r\n      hs.screening_values->>'ht_screening' = 'Known HT') /\r\n    NULLIF(\r\n      count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' AND hs.screening_values->>'ht_screening' = 'Known HT'),\r\n      0\r\n    ) * 100,\r\n    0\r\n  ) AS both_percentage\r\nFROM\r\n  address_district_master AS adm\r\n  INNER JOIN family_member_master AS fmm ON adm.district_id = fmm.district_id\r\n  INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid\r\n ";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,\r\n  count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' AND hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\n  count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' AND\r\n    ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) AND\r\n    hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\n  COALESCE(\r\n    count(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' AND\r\n      ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) AND\r\n      hs.screening_values->>'ht_screening' = 'Known HT') /\r\n    NULLIF(\r\n      count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' AND hs.screening_values->>'ht_screening' = 'Known HT'),\r\n      0\r\n    ) * 100,\r\n    0\r\n  ) AS both_percentage\r\nFROM\r\n  address_district_master AS adm\r\n  INNER JOIN family_member_master AS fmm ON adm.district_id = fmm.district_id\r\n  INNER JOIN health_screening AS hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid\r\n ";
+                cmdInner.CommandText = "SELECT * FROM public.getdiswise5_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -682,7 +695,8 @@ namespace PHRLockerAPI.Controllers
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
 
-            cmd.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid, COUNT(fmm.member_id) \r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid";
+            //cmd.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid, COUNT(fmm.member_id) \r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid";
+            cmd.CommandText = "SELECT * FROM public.gethudwise_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmd.ExecuteReader();
             List<VMGetHudWiseModel> RList = new List<VMGetHudWiseModel>();
@@ -712,7 +726,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,COUNT(*) \r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,COUNT(*) \r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid";
+                cmdInner.CommandText = "SELECT * FROM public.gethudwise1_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -745,7 +760,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,COUNT(*) \r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,COUNT(*) \r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid";
+                cmdInner.CommandText = "SELECT * FROM public.gethudwise2_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -778,7 +794,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,0) AS diabetes_percentage\r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n  " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,0) AS diabetes_percentage\r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n  " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.gethudwise3_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -814,7 +831,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) AS hypertension_percentage\r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) AS hypertension_percentage\r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.gethudwise4_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -850,7 +868,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) \r\nAS both_percentage\r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) \r\nAS both_percentage\r\nFROM address_hud_master as ahm\r\nINNER JOIN address_district_master as adm ON ahm.district_id = adm.district_id\r\nINNER JOIN family_member_master as fmm ON ahm.hud_id = fmm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " Group By adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.gethudwise5_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -898,7 +917,8 @@ namespace PHRLockerAPI.Controllers
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
 
-            cmd.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid, COUNT(fmm.member_id) \r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid";
+            //cmd.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid, COUNT(fmm.member_id) \r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid";
+            cmd.CommandText = "SELECT * FROM public.getblockwise_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmd.ExecuteReader();
             List<VMGetBlockWiseModel> RList = new List<VMGetBlockWiseModel>();
@@ -930,7 +950,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid, COUNT(*) \r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid, COUNT(*) \r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid";
+                cmdInner.CommandText = "SELECT * FROM public.getblockwise1_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -963,7 +984,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid, COUNT(*) \r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid, COUNT(*) \r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid";
+                cmdInner.CommandText = "SELECT * FROM public.getblockwise2_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -996,7 +1018,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,0) AS diabetes_percentage\r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,0) AS diabetes_percentage\r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.getblockwise3_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -1032,7 +1055,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) AS hypertension_percentage\r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) AS hypertension_percentage\r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.getblockwise4_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -1068,7 +1092,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) \r\nAS both_percentage\r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) \r\nAS both_percentage\r\nFROM address_block_master as abm\r\nINNER JOIN family_member_master as fmm ON abm.block_id = fmm.block_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.getblockwise5_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -1117,7 +1142,8 @@ namespace PHRLockerAPI.Controllers
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
 
-            cmd.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid, COUNT(fmm.member_id) \r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid";
+            //cmd.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid, COUNT(fmm.member_id) \r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid";
+            cmd.CommandText = "SELECT * FROM public.getvillagewise_dph(' " + CommunityParam + " ')";
 
             NpgsqlDataReader drInner = cmd.ExecuteReader();
             List<VMGetVillageWiseModel> RList = new List<VMGetVillageWiseModel>();
@@ -1151,7 +1177,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid, COUNT(*) \r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid, COUNT(*) \r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nwhere date_part('year',age(fmm.birth_date))>='18'\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid";
+                cmdInner.CommandText = "SELECT * FROM public.getvillagewise1_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -1184,7 +1211,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid, COUNT(*) \r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid, COUNT(*) \r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid";
+                cmdInner.CommandText = "SELECT * FROM public.getvillagewise2_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -1217,7 +1245,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,0) AS diabetes_percentage\r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM') AS confirmed_diabetes_mellitus,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') AS controlled_diabetes_mellitus,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM'), 0) * 100,0) AS diabetes_percentage\r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.getvillagewise3_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -1253,7 +1282,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) AS hypertension_percentage\r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_hypertension,\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_hypertension,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE ((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0) AS hypertension_percentage\r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.getvillagewise4_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
@@ -1289,7 +1319,8 @@ namespace PHRLockerAPI.Controllers
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
 
-                cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0)\r\nAS both_percentage\r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid\r\n";
+                //cmdInner.CommandText = "SELECT adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid,\r\ncount(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT') AS confirmed_both,\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') AS controlled_both,\r\nCOALESCE(\r\ncount(*) FILTER (WHERE hs.screening_values->>'rbs' < '140' AND hs.screening_values->>'dm_screening' = 'Known DM' and \r\n((screening_values->>'dia_bp')::numeric < 90 OR (screening_values->>'sys_bp')::numeric < 140) \r\nAND hs.screening_values->>'ht_screening' = 'Known HT') / \r\nNULLIF(count(*) FILTER (WHERE hs.screening_values->>'dm_screening' = 'Known DM' and hs.screening_values->>'ht_screening' = 'Known HT'), 0) * 100,0)\r\nAS both_percentage\r\nFROM address_village_master as avm\r\nINNER JOIN family_member_master as fmm ON avm.village_id = fmm.village_id\r\nINNER JOIN address_district_master as adm ON fmm.district_id = adm.district_id\r\nINNER JOIN address_hud_master as ahm ON fmm.hud_id = ahm.hud_id\r\nINNER JOIN address_block_master as abm ON fmm.block_id = abm.block_id\r\nINNER JOIN health_screening as hs ON fmm.member_id = hs.member_id\r\n " + CommunityParam + " GROUP BY adm.district_name,adm.district_gid,ahm.hud_name,ahm.hud_gid,abm.block_name,abm.block_gid,avm.village_name,avm.village_gid\r\n";
+                cmdInner.CommandText = "SELECT * FROM public.getvillagewise5_dph(' " + CommunityParam + " ')";
 
                 NpgsqlDataReader drInner1 = cmdInner.ExecuteReader();
 
