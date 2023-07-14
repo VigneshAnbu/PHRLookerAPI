@@ -13,4 +13,9 @@ namespace PHRLockerAPI.Models
 
 
     }
+
+    public class tokenModel
+    {
+        public string ResponseMessage { get; set; }
+    }
 }
