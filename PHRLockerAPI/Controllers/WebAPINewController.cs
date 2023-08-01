@@ -3625,11 +3625,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -3748,9 +3748,9 @@ namespace PHRLockerAPI.Controllers
             if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON P.family_id = fm.family_id " + InstitutionParam + "";
+                string InstitutionPara = "INNER JOIN family_master fm ON P.family_id = fm.family_id " + InstitutionParam + "";
 
-            InstitutionParam = InstitutionPara;
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -4169,9 +4169,9 @@ namespace PHRLockerAPI.Controllers
             if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON P.family_id = fm.family_id " + InstitutionParam + "";
+                string InstitutionPara = "INNER JOIN family_master fm ON P.family_id = fm.family_id " + InstitutionParam + "";
 
-            InstitutionParam = InstitutionPara;
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -4713,8 +4713,8 @@ namespace PHRLockerAPI.Controllers
                 VM.VerifiedPopulation = drVerified["count"].ToString();
             }
             con.Close();
-                return VM;
-            }
+            return VM;
+        }
 
 
 
@@ -5511,7 +5511,7 @@ namespace PHRLockerAPI.Controllers
                 NpgsqlCommand cmdInner = new NpgsqlCommand();
                 cmdInner.Connection = con;
                 cmdInner.CommandType = CommandType.Text;
-               // cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.hud_id ";
+                // cmdInner.CommandText = "select count(member_id),fm.hud_id  from family_member_master fm where resident_status_details->>'status'= 'Dead'  or resident_status_details->>'status'='Death'  " + CommunityParam + " group by fm.hud_id ";
 
                 cmdInner.CommandText = "SELECT * FROM public.getfieldverificationhudwise_7(@CommunityParam)";
                 cmdInner.Parameters.AddWithValue("CommunityParam", CommunityParam);
@@ -6653,19 +6653,38 @@ namespace PHRLockerAPI.Controllers
         }
 
         [HttpGet]
-        [ResponseCache(Duration = 30 * 60)]
-        [OutputCache(Duration = 30 * 60)]
+        // [ResponseCache(Duration = 30 * 60)]
+        // [OutputCache(Duration = 30 * 60)]
         [Route("getvillagemasterlooker")]
-        public List<VillageMasterModel> getvillagemaster(string village_name)
+
+        public List<VillageMasterModel> getvillagemaster(string block_id)
         {
 
-            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
+            var blockIds = block_id.Split(',');
 
+            NpgsqlConnection con = new NpgsqlConnection(_configuration.GetConnectionString("Constring"));
             con.Open();
             NpgsqlCommand cmd = new NpgsqlCommand();
             cmd.Connection = con;
             cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "select village_name,village_id from address_village_master where village_name like '%" + village_name + "%' limit 100";
+
+            cmd.CommandText = "SELECT block_id, village_name, village_id FROM address_village_master WHERE block_id::uuid IN (";
+
+            for (int i = 0; i < blockIds.Length; i++)
+            {
+                cmd.CommandText += $"@block_id{i}";
+
+                if (i != blockIds.Length - 1)
+                    cmd.CommandText += ",";
+            }
+
+            cmd.CommandText += ")";
+
+            // Add parameters for each block_id value
+            for (int i = 0; i < blockIds.Length; i++)
+            {
+                cmd.Parameters.AddWithValue($"@block_id{i}", Guid.Parse(blockIds[i]));
+            }
 
             NpgsqlDataReader dr = cmd.ExecuteReader();
             List<VillageMasterModel> RList = new List<VillageMasterModel>();
@@ -6677,7 +6696,7 @@ namespace PHRLockerAPI.Controllers
 
                 SList.village_id = dr["village_id"].ToString();
                 SList.village_name = dr["village_name"].ToString();
-
+                SList.block_id = dr["block_id"].ToString();
 
                 RList.Add(SList);
             }
@@ -6698,7 +6717,7 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            var query = "SELECT * from public.GetFamiliesstreetunallocated('" + InstitutionParam + "','"+ CommunityParam + "')";
+            var query = "SELECT * from public.GetFamiliesstreetunallocated('" + InstitutionParam + "','" + CommunityParam + "')";
 
             using (var connection = context.CreateConnection())
             {
@@ -6883,11 +6902,11 @@ namespace PHRLockerAPI.Controllers
             Filterforall(F);
 
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -6936,11 +6955,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
             //var query = "SELECT public.getdrugdistrict('" + CommunityParam + "','" + InstitutionParam + "')";
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -6990,11 +7009,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7043,11 +7062,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7098,11 +7117,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON asm.street_id = fm.street_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON asm.street_id = fm.street_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7153,13 +7172,13 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON asm.shop_id = fm.shop_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON asm.shop_id = fm.shop_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
-            }    
+            }
 
 
             var query = "SELECT * from public.Getshopswithnomappinfstreets('" + InstitutionParam + "','" + CommunityParam + "')";
@@ -7206,11 +7225,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON h.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON h.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7258,11 +7277,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON h.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON h.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7367,11 +7386,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7420,11 +7439,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7475,11 +7494,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7530,11 +7549,11 @@ namespace PHRLockerAPI.Controllers
 
             Filterforall(F);
 
-            if(CommunityParam != "")
+            if (CommunityParam != "")
             {
 
-            string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
-            InstitutionParam = InstitutionPara;
+                string InstitutionPara = "INNER JOIN family_master fm ON fmm.family_id = fm.family_id " + InstitutionParam + "";
+                InstitutionParam = InstitutionPara;
 
             }
 
@@ -7578,11 +7597,11 @@ namespace PHRLockerAPI.Controllers
         [HttpGet]
 
         [Route("LoginForm")]
-        public async Task<string> LoginFlow([FromQuery] loginmodel L)
+        public async Task<tokenModel> LoginFlow([FromQuery] loginmodel L)
         {
-            var query = "select * from public.lookeruser where mobile='" + L.mobile + "' and password='" + L.password + "'";
+            var reponse = new tokenModel();
 
-            string ResponseMessage = "";
+            var query = "select * from public.lookeruser where mobile='" + L.mobile + "' and password='" + L.password + "'";
 
             using (var connection = context.CreateConnection())
             {
@@ -7592,10 +7611,6 @@ namespace PHRLockerAPI.Controllers
 
                 if (res.Count > 0)
                 {
-                    ResponseMessage = "Valid";
-
-
-
                     var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secretkey for oyasys phr to hims integration"));
                     var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha512Signature);
                     var tokeOptions = new JwtSecurityToken(
@@ -7606,16 +7621,16 @@ namespace PHRLockerAPI.Controllers
                         signingCredentials: signinCredentials
                     );
                     var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-                    return tokenString;
+                    reponse.ResponseMessage = tokenString;
+                    return reponse;
 
                 }
                 else
                 {
-                    ResponseMessage = "Invalid";
+                    reponse.ResponseMessage = "Invalid";
+                    return reponse;
                 }
             }
-
-            return ResponseMessage;
         }
 
 

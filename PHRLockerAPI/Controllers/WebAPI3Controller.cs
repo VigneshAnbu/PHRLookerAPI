@@ -54,11 +54,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (DistrictValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fm.district_id = '" + v + "')";
+                            Disparam = Disparam + "(fm.district_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fm.district_id = '" + v + "') or";
+                            Disparam = Disparam + "(fm.district_id = ''" + v + "'') or";
                         }
                         i++;
                     }
@@ -68,7 +68,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fm.district_id = '" + F.district_id + "')";
+                    Disparam = "and (fm.district_id = ''" + F.district_id + "'')";
                 }
 
 
@@ -91,7 +91,7 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (HudValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fm.hud_id = '" + v + "')";
+                            Disparam = Disparam + "(fm.hud_id = ''" + v + "'')";
                         }
                         else
                         {
@@ -106,7 +106,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fm.hud_id = '" + F.hud_id + "')";
+                    Disparam = "and (fm.hud_id = ''" + F.hud_id + "'')";
                 }
 
 
@@ -125,11 +125,11 @@ namespace PHRLockerAPI.Controllers
                     {
                         if (i == (BlockValue.Length - 1))
                         {
-                            Disparam = Disparam + "(fm.block_id = '" + v + "')";
+                            Disparam = Disparam + "(fm.block_id = ''" + v + "'')";
                         }
                         else
                         {
-                            Disparam = Disparam + "(fm.block_id = '" + v + "') or";
+                            Disparam = Disparam + "(fm.block_id = ''" + v + "'') or";
                         }
 
                         i++;
@@ -140,7 +140,7 @@ namespace PHRLockerAPI.Controllers
                 }
                 else
                 {
-                    Disparam = "and (fm.block_id = '" + F.block_id + "')";
+                    Disparam = "and (fm.block_id = ''" + F.block_id + "'')";
                 }
 
                 CommunityParam = CommunityParam + Disparam;
